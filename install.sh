@@ -1,7 +1,7 @@
 #!/bin/sh
 sudo apt-get update
 sudo apt-get install -y python3-pip
-sudo pip3 install ../sigma-dsp/
+sudo pip3 install -i https://test.pypi.org/simple/ sigmadsp
 
 # The name of the sigmadsp-backend service
 SIGMADSP_BACKEND=sigmadsp-backend
