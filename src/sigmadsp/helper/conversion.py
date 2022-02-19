@@ -38,7 +38,7 @@ def frac_8_24_to_float(value: int) -> float:
     Returns:
         float: Output in float format
     """
-    return value / 2 ** 24
+    return value / 2**24
 
 
 def float_to_frac_8_24(value: float) -> int:
@@ -51,7 +51,7 @@ def float_to_frac_8_24(value: float) -> int:
     Returns:
         int: Output in DSP fractional format
     """
-    return int(value * 2 ** 24)
+    return int(value * 2**24)
 
 
 def db_to_linear(value_db: float) -> float:
