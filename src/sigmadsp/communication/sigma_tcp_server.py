@@ -75,6 +75,22 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
     COMMAND_READ = 0x0A
     COMMAND_READ_RESPONSE = 0x0B
 
+    def receive_amount(self, total_size: int) -> bytearray:
+        """Receives data from a request, until the desired size is reached.
+
+        Args:
+            total_size (int): The payload size in bytes to get.
+
+        Returns:
+            bytearray: The received data.
+        """
+        payload_data = bytearray()
+        while total_size > len(payload_data):
+            # Wait until the complete TCP payload was received.
+            payload_data.extend(self.request.recv(total_size - len(payload_data)))
+
+        return payload_data
+
     def handle_write_data(self, write_request: bytes):
         """Handles requests, where SigmaStudio wants to write to the DSP.
 
@@ -109,12 +125,7 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         # The address of the module whose data is being written to the DSP (uint16).
         address = bytes_to_int16(write_request, 12)
 
-        # The payload data to be written.
-        payload_data = bytearray()
-
-        while total_payload_size > len(payload_data):
-            # Wait until the complete TCP payload was received.
-            payload_data.extend(self.request.recv(total_payload_size - len(payload_data)))
+        payload_data = self.receive_amount(total_payload_size)
 
         self.server.queue.put(WriteRequest(address, payload_data))
 
@@ -178,21 +189,18 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
 
         It never stops, except if the connection is reset.
         """
-        missing_header_length = ThreadedSigmaTcpRequestHandler.HEADER_LENGTH
-        received_data = bytearray()
 
-        while missing_header_length:
-            # Wait until the complete TCP header was received.
-            received_data += self.request.recv(missing_header_length)
-            missing_header_length -= len(received_data)
+        # Receive the packet header.
+        payload_data = self.receive_amount(ThreadedSigmaTcpRequestHandler.HEADER_LENGTH)
 
-        command = received_data[0]
+        # The first byte of the header contains the command from SigmaStudio.
+        command = payload_data[0]
 
         if command == ThreadedSigmaTcpRequestHandler.COMMAND_WRITE:
-            self.handle_write_data(received_data)
+            self.handle_write_data(payload_data)
 
         elif command == ThreadedSigmaTcpRequestHandler.COMMAND_READ:
-            self.handle_read_request(received_data)
+            self.handle_read_request(payload_data)
 
         else:
             logging.info("Received unknown command: %d", command)
