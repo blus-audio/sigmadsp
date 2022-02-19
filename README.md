@@ -1,5 +1,4 @@
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
-
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit) [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/elagil/sigma-dsp/main.svg)](https://results.pre-commit.ci/latest/github/elagil/sigma-dsp/main)
 # Analog Devices Sigma DSP control software
 
 This software package is a Python application, which controls Analog Devices
