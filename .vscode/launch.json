@@ -8,7 +8,7 @@
             "name": "Python: Aktuelle Datei",
             "type": "python",
             "request": "launch",
-            "program": "sigma-dsp/application.py",
+            "program": "run.py",
             "console": "integratedTerminal",
             "subProcess": true
         }
