@@ -81,7 +81,7 @@ Configuration of `sigmadsp` is done via a `*.yaml` file, which is created during
 
 ## Usage
 
-For a list of commands that can be emitted by the frontend, simply type 
+For a list of commands that can be emitted by the frontend, simply type
 
 ```bash
 sigmadsp -h
