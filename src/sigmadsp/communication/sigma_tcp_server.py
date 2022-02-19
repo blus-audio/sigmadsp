@@ -178,25 +178,24 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
 
         It never stops, except if the connection is reset.
         """
-        while True:
-            missing_header_length = ThreadedSigmaTcpRequestHandler.HEADER_LENGTH
-            received_data = bytearray()
+        missing_header_length = ThreadedSigmaTcpRequestHandler.HEADER_LENGTH
+        received_data = bytearray()
 
-            while missing_header_length:
-                # Wait until the complete TCP header was received.
-                received_data += self.request.recv(missing_header_length)
-                missing_header_length -= len(received_data)
+        while missing_header_length:
+            # Wait until the complete TCP header was received.
+            received_data += self.request.recv(missing_header_length)
+            missing_header_length -= len(received_data)
 
-            command = received_data[0]
+        command = received_data[0]
 
-            if command == ThreadedSigmaTcpRequestHandler.COMMAND_WRITE:
-                self.handle_write_data(received_data)
+        if command == ThreadedSigmaTcpRequestHandler.COMMAND_WRITE:
+            self.handle_write_data(received_data)
 
-            elif command == ThreadedSigmaTcpRequestHandler.COMMAND_READ:
-                self.handle_read_request(received_data)
+        elif command == ThreadedSigmaTcpRequestHandler.COMMAND_READ:
+            self.handle_read_request(received_data)
 
-            else:
-                logging.info("Received unknown command: %d", command)
+        else:
+            logging.info("Received unknown command: %d", command)
 
 
 class SigmaTCPServer:
