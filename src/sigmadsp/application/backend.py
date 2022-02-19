@@ -3,42 +3,41 @@ Sigma Studio, and the SPI handler that controls the DSP.
 
 Commands from Sigma Studio are received, and translated to SPI read/write requests.
 """
-from sigmadsp.hardware.adau14xx import Adau14xx
-from sigmadsp.communication.sigma_tcp_server import (
-    SigmaTCPServer,
-    WriteRequest,
-    ReadRequest,
-    ReadResponse,
-)
-from sigmadsp.hardware.spi import SpiHandler
-from sigmadsp.helper.parser import Parser, Cell
-from rpyc.utils.server import ThreadedServer
+import argparse
+import json
+import logging
+import sys
+import threading
 from typing import Any, List
 
-import argparse
-import threading
-import logging
-import json
 import rpyc
-import sys
+from rpyc.utils.server import ThreadedServer
+
+from sigmadsp.communication.sigma_tcp_server import (
+    ReadRequest,
+    ReadResponse,
+    SigmaTCPServer,
+    WriteRequest,
+)
+from sigmadsp.hardware.adau14xx import Adau14xx
+from sigmadsp.hardware.spi import SpiHandler
+from sigmadsp.helper.parser import Cell, Parser
 
 
 class SigmadspSettings:
-    def __init__(self, settings_file_path: str = None):
+    def __init__(self, settings_file_path: str = "/var/lib/sigmadsp/sigmadsp.json"):
         """Loads a settings file in .json format from a specified path.
         If no file is provided, the default path is used for loading settings.
 
         Args:
-            settings_file_path (str): The input path
+            settings_file_path (str, optional): The input path.
+                Defaults to "/var/lib/sigmadsp/sigmadsp.json".
         """
-        if settings_file_path is None:
-            settings_file_path = "/var/lib/sigmadsp/sigmadsp.json"
-
         try:
             # Open settings file, in order to configure the application
-            with open(settings_file_path, "r") as settings_file:
+            with open(settings_file_path, "r", encoding="utf8") as settings_file:
                 self.settings = json.load(settings_file)
-                logging.info(f"Settings file {settings_file_path} was loaded.")
+                logging.info("Settings file %s was loaded.", settings_file_path)
 
         except FileNotFoundError:
             logging.info("Settings file not found. Using default values.")
@@ -47,7 +46,8 @@ class SigmadspSettings:
         self.parameter_parser = self.load_parameters()
 
     def load_parameters(self) -> List[Cell]:
-        """Loads parameter cells, accoring to the parameter file path that is defined in the settings object
+        """Loads parameter cells, according to the parameter file path
+        that is defined in the settings object.
 
         Returns:
             List[Cell]: The cells that were found in the parameter file
@@ -59,6 +59,11 @@ class SigmadspSettings:
         return parser
 
     def store_parameters(self, lines: List[str]):
+        """Stores parameters to the parameter file.
+
+        Args:
+            lines (List[str]): [description]
+        """
         with open(self.parameter_file_path, "w", encoding="UTF8") as parameter_file:
             parameter_file.writelines(lines)
 
@@ -103,9 +108,7 @@ class SigmadspSettings:
 
     @property
     def parameter_file_path(self) -> str:
-        return self.get_setting(
-            "parameter_file_path", "/var/lib/sigmadsp/current.params"
-        )
+        return self.get_setting("parameter_file_path", "/var/lib/sigmadsp/current.params")
 
 
 class ConfigurationBackendService(rpyc.Service):
@@ -123,30 +126,25 @@ class ConfigurationBackendService(rpyc.Service):
 
         self.settings = settings
 
-        # Load TCP server settings
-        HOST = settings.host
-        PORT = settings.port
-
         # Create an SPI handler, along with its thread
         self.spi_handler = SpiHandler()
 
         # Create a SigmaTCPServer, along with its various threads
-        self.sigma_tcp_server = SigmaTCPServer(HOST, PORT)
-        logging.info(f"Sigma TCP server started on [{HOST}]:{PORT}.")
+        self.sigma_tcp_server = SigmaTCPServer(settings.host, settings.port)
+        logging.info("Sigma TCP server started on [%s]:%d.", settings.host, settings.port)
 
         # Create the worker thread for the handler itself
         worker_thread = threading.Thread(target=self.worker, name="Worker thread")
         worker_thread.daemon = True
         worker_thread.start()
 
-        DSP_TYPE = settings.dsp_type
-        logging.info(f"Specified DSP type is '{DSP_TYPE}'.")
+        logging.info("Specified DSP type is '%s'.", settings.dsp_type)
 
-        if DSP_TYPE == "adau14xx":
+        if settings.dsp_type == "adau14xx":
             self.dsp = Adau14xx(self.spi_handler)
 
         else:
-            logging.error(f"DSP type '{DSP_TYPE}' is not known! Aborting.")
+            logging.error("DSP type '%s' is not known! Aborting.", settings.dsp_type)
             sys.exit(0)
 
     def worker(self):

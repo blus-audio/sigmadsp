@@ -1,5 +1,8 @@
-import rpyc
+"""Test script, for evaluating the Sigmadsp backend functionality.
+"""
 import logging
+
+import rpyc
 
 try:
     c = rpyc.connect("localhost", 18861)

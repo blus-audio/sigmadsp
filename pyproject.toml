@@ -3,4 +3,14 @@ requires = [
     "setuptools>=42",
     "wheel"
 ]
+
 build-backend = "setuptools.build_meta"
+
+[tool.isort]
+profile = "black"
+
+[tool.black]
+line-length = 119
+
+[tool.pylint.format]
+max-line-length = 119

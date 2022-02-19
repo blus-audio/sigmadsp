@@ -1,54 +1,46 @@
 """This module communicates with SigmaStudio.
 It can receive read/write requests and return with read response packets.
 """
+import multiprocessing
 import socketserver
 import threading
-import multiprocessing
-import logging
-
+from dataclasses import dataclass
 from typing import Union
-from sigmadsp.helper.conversion import bytes_to_int8, bytes_to_int16, bytes_to_int32
-from sigmadsp.helper.conversion import int8_to_bytes, int16_to_bytes, int32_to_bytes
+
+from sigmadsp.helper.conversion import (
+    bytes_to_int8,
+    bytes_to_int16,
+    bytes_to_int32,
+    int8_to_bytes,
+    int16_to_bytes,
+    int32_to_bytes,
+)
 
 
+@dataclass
 class WriteRequest:
-    """Helper class for defining a write request"""
+    """Helper class for defining a write request.
+    A write request consists of a target address and data."""
 
-    def __init__(self, address: int, data: bytes):
-        """A write request consists of a target address and data
-
-        Args:
-            address (int): The target address
-            data (bytes): The data to write
-        """
-        self.address = address
-        self.data = data
+    address: int
+    data: bytes
 
 
+@dataclass
 class ReadRequest:
-    """Helper class for defining a read request"""
+    """Helper class for defining a read request.
+    A read request consists of a read address, and a field length."""
 
-    def __init__(self, address: int, length: int):
-        """A read request consists of a read address, and a field length
-
-        Args:
-            address (int): Address to read from
-            length (int): Number of bytes to read
-        """
-        self.address = address
-        self.length = length
+    address: int
+    length: int
 
 
+@dataclass
 class ReadResponse:
-    """Helper class for defining a read response"""
+    """Helper class for defining a read response.
+    A read response only contains the data that was read from the read address."""
 
-    def __init__(self, data: bytes):
-        """A read response only contains the data that was read from the read address
-
-        Args:
-            data (bytes): The data that was read
-        """
-        self.data = data
+    data: bytes
 
 
 class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
@@ -64,7 +56,7 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
     def handle_write_data(self, data):
         """The WRITE command indicates that SigmaStudio intends to write a packet to the DSP.
 
-        block_safeload write    This field indicates whether the packet is going to be a block write or a safeload write
+        block_safeload write    This field indicates whether the packet is a block write or a safeload write
         channel_number          This indicates the channel number
         total_length	        This indicates the total length of the write packet (uint32)
         chip_address	        The address of the chip to which the data has to be written
@@ -128,14 +120,14 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         payload_data = read_response.data
 
         # Build the read response packet, starting with length calculations ...
-        total_transmit_length = (
-            ThreadedSigmaTcpRequestHandler.HEADER_LENGTH + data_length
-        )
+        total_transmit_length = ThreadedSigmaTcpRequestHandler.HEADER_LENGTH + data_length
         transmit_data = bytearray(total_transmit_length)
 
         # ... followed by populating the byte fields.
         int8_to_bytes(
-            ThreadedSigmaTcpRequestHandler.COMMAND_READ_RESPONSE, transmit_data, 0
+            ThreadedSigmaTcpRequestHandler.COMMAND_READ_RESPONSE,
+            transmit_data,
+            0,
         )
         int32_to_bytes(total_transmit_length, transmit_data, 1)
         int8_to_bytes(chip_address, transmit_data, 5)
@@ -197,9 +189,7 @@ class SigmaTCPServer:
         self.port = port
         self.queue = multiprocessing.JoinableQueue()
 
-        tcp_server_worker_thread = threading.Thread(
-            target=self.tcp_server_worker, name="TCP server worker thread"
-        )
+        tcp_server_worker_thread = threading.Thread(target=self.tcp_server_worker, name="TCP server worker thread")
         tcp_server_worker_thread.daemon = True
         tcp_server_worker_thread.start()
 
@@ -226,24 +216,20 @@ class SigmaTCPServer:
 
     def tcp_server_worker(self):
         """The main worker for the TCP server"""
-        self.tcp_server = ThreadedTCPServer(
-            (self.host, self.port), ThreadedSigmaTcpRequestHandler
-        )
-        self.tcp_server.queue = multiprocessing.JoinableQueue()
+        tcp_server = ThreadedTCPServer((self.host, self.port), ThreadedSigmaTcpRequestHandler)
+        tcp_server.queue = multiprocessing.JoinableQueue()
 
-        with self.tcp_server:
+        with tcp_server:
             # Base TCP server thread
             # This initial thread starts one more thread for each request.
-            tcp_server_thread = threading.Thread(
-                target=self.tcp_server.serve_forever, name="TCP server thread"
-            )
+            tcp_server_thread = threading.Thread(target=tcp_server.serve_forever, name="TCP server thread")
             tcp_server_thread.daemon = True
             tcp_server_thread.start()
 
             while True:
                 # Wait for a request from the TCP server
-                request = self.tcp_server.queue.get()
-                self.tcp_server.queue.task_done()
+                request = tcp_server.queue.get()
+                tcp_server.queue.task_done()
 
                 if isinstance(request, WriteRequest):
                     # Write request received, don't do anything else
@@ -259,5 +245,5 @@ class SigmaTCPServer:
                     self.queue.task_done()
 
                     # Send read response
-                    self.tcp_server.queue.put(read_response)
-                    self.tcp_server.queue.join()
+                    tcp_server.queue.put(read_response)
+                    tcp_server.queue.join()

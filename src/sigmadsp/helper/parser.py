@@ -1,7 +1,7 @@
 """A module that parses SigmaStudio project files and extracts adjustable cells
 """
 import logging
-from typing import List
+from typing import List, Union
 
 
 class Cell:
@@ -10,41 +10,26 @@ class Cell:
     adjustable_prefix = "adjustable_"
     volume_identifier = "volume"
 
-    @property
-    def parameter_value(self):
-        return self._parameter_value
+    def __init__(self, name: List[str]):
+        """Initializes a new cell.
 
-    @parameter_value.setter
-    def parameter_value(self, new_parameter_value: int):
-        self._parameter_value = new_parameter_value
+        Args:
+            name (List[str]): The name of the cell, as a list of string tokens.
+        """
+        self.name = name
 
-    @property
-    def parameter_address(self):
-        return self._parameter_address
+        # The value of the parameter that is stored in this cell
+        self.parameter_value: Union[int, float] = None
 
-    @parameter_address.setter
-    def parameter_address(self, new_parameter_address: int):
-        self._parameter_address = new_parameter_address
+        # The address of the parameter in the DSP's memory
+        self.parameter_address: int = None
 
-    @property
-    def parameter_name(self):
-        return self._parameter_name
-
-    @parameter_name.setter
-    def parameter_name(self, new_parameter_name: str):
-        self._parameter_name = new_parameter_name
-
-    @property
-    def name(self):
-        return self._name
-
-    @name.setter
-    def name(self, new_name: List[str]):
-        self._name = new_name
+        # The name of the parameter
+        self.parameter_name: str = None
 
     @property
     def is_adjustable_cell(self) -> bool:
-        """Determine, whether this is a user adjustable cell
+        """Determine, whether this is a user adjustable cell.
 
         Returns:
             bool: True, if adjustable, False otherwise.
@@ -53,75 +38,72 @@ class Cell:
 
     @property
     def is_adjustable_volume_cell(self):
-        """Determine, whether this is an adjustable volume cell
+        """Determine, whether this is an adjustable volume cell.
 
         Returns:
             bool: True, if an adjustable volume cell, False otherwise.
         """
-        try:
-            self.parameter_value
-
-        except AttributeError:
-            return False
-
-        else:
+        if self.parameter_value is not None:
             return self.is_adjustable_cell and (Cell.volume_identifier in self.name)
 
 
 class Parser:
-    def __init__(self):
-        self.cells = []
-        self.cell: Cell = None
+    """Parses a parameter input file from Sigma Studio and detects cells in it."""
 
-    def run(self, file_name: str):
+    def __init__(self):
+        # A list of cells, to be filled with inputs from a file.
+        self.cells: List[Cell] = []
+
+    def run(self, file_path: str):
         """Parse an input file that was exported from Sigma Studio
 
         Args:
-            file_name (str): [description]
+            file_path (str): The path to the input file
         """
         self.cells.clear()
-        self.cell = None
 
-        if not file_name.endswith(".params"):
+        if not file_path.endswith(".params"):
             logging.error("The parameter file is not a *.params file! Aborting.")
+            return
 
-        else:
-            try:
-                with open(file_name, "r", encoding="utf8") as file:
-                    logging.info("Using parameter file path %s.", file_name)
-                    lines = file.readlines()
+        # Proceed with opening the file
+        try:
+            with open(file_path, "r", encoding="utf8") as file:
+                logging.info("Using parameter file path %s.", file_path)
+                lines = file.readlines()
 
-                    for line in lines:
-                        split_line = line.split()
+                for line in lines:
+                    cell: Cell = None
 
-                        if split_line:
-                            if split_line[0] == "Cell" and split_line[1] == "Name":
-                                self.cell = Cell()
-                                self.cells.append(self.cell)
+                    split_line = line.split()
 
-                                self.cell.name = " ".join(split_line[3:])
+                    if split_line:
+                        if split_line[0] == "Cell" and split_line[1] == "Name":
+                            name = " ".join(split_line[3:])
+                            cell = Cell(name)
+                            self.cells.append(cell)
 
-                            elif split_line[0] == "Parameter":
+                        elif split_line[0] == "Parameter":
 
-                                if split_line[1] == "Name":
-                                    self.cell.parameter_name = " ".join(split_line[3:])
+                            if split_line[1] == "Name":
+                                cell.parameter_name = " ".join(split_line[3:])
 
-                                if split_line[1] == "Address":
-                                    self.cell.parameter_address = int(split_line[3])
+                            if split_line[1] == "Address":
+                                cell.parameter_address = int(split_line[3])
 
-                                if split_line[1] == "Value":
-                                    data = split_line[3]
+                            if split_line[1] == "Value":
+                                data = split_line[3]
 
-                                    try:
-                                        self.cell.parameter_value = int(data)
+                                try:
+                                    cell.parameter_value = int(data)
 
-                                    except ValueError:
-                                        self.cell.parameter_value = float(data)
+                                except ValueError:
+                                    cell.parameter_value = float(data)
 
-                    logging.info("Found a total number of %d cells.", len(self.cells))
+                logging.info("Found a total number of %d cells.", len(self.cells))
 
-            except FileNotFoundError:
-                logging.info("Parameter file %s not found.", file_name)
+        except FileNotFoundError:
+            logging.info("Parameter file %s not found.", file_path)
 
     @property
     def volume_cells(self) -> List[Cell]:

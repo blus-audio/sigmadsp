@@ -1,9 +1,10 @@
 """This module implements an SPI handler that talks to Sigma DSP devices
 """
-import spidev
-import threading
-import multiprocessing
 import logging
+import multiprocessing
+import threading
+
+import spidev
 
 
 class SpiHandler:
@@ -37,9 +38,7 @@ class SpiHandler:
         self.queue = multiprocessing.JoinableQueue()
 
         logging.info("Starting SPI handling thread.")
-        self.thread = threading.Thread(
-            target=self.serve_forever, name="SPIHandlerThread"
-        )
+        self.thread = threading.Thread(target=self.serve_forever, name="SPIHandlerThread")
         self.thread.daemon = True
         self.thread.start()
 
@@ -173,9 +172,7 @@ class SpiHandler:
                 # DSP register addresses are counted in words (32 bit per increment).
 
                 # Build the frame from a subset of the input data, and write it
-                frame = self._build_spi_frame(
-                    current_address, current_data[: SpiHandler.MAX_PAYLOAD_BYTES]
-                )
+                frame = self._build_spi_frame(current_address, current_data[: SpiHandler.MAX_PAYLOAD_BYTES])
                 self.spi.writebytes(frame)
 
                 # Update address, data counter, and the binary data buffer

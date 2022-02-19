@@ -8,6 +8,32 @@ This module includes many conversion functions that can be used for different pu
 import math
 
 
+def frac_8_24_to_float(value: int) -> float:
+    """Converts a value in the DSPs fractional representation to float.
+    32 bit values consist of 8 integer and 24 fractional bits. They are signed.
+
+    Args:
+        value (int): Fractional value to convert
+
+    Returns:
+        float: Output in float format
+    """
+    return value / 2 ** 24
+
+
+def float_to_frac_8_24(value: float) -> int:
+    """Converts a float value to the DSPs fractional representation.
+    32 bit values consist of 8 integer and 24 fractional bits. They are signed.
+
+    Args:
+        value (float): Float value to convert
+
+    Returns:
+        int: Output in DSP fractional format
+    """
+    return int(value * 2 ** 24)
+
+
 def db_to_linear(value_db: float) -> float:
     """Converts a dB-scale value (e.g. voltage) to a linear-scale value
 
@@ -86,9 +112,7 @@ def bytes_to_int32(data: bytes, offset: int = 0) -> int:
     return bytes_to_int(data, offset, length=4)
 
 
-def int_to_bytes(
-    value: int, buffer: bytearray = None, offset: int = 0, length: int = 1
-):
+def int_to_bytes(value: int, buffer: bytearray = None, offset: int = 0, length: int = 1):
     """Fill a buffer with values. If no buffer is provided, a new one is created.
 
     Args:
