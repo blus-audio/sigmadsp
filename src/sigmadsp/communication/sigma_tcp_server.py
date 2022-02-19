@@ -10,9 +10,10 @@ from typing import Union
 from sigmadsp.helper.conversion import bytes_to_int8, bytes_to_int16, bytes_to_int32
 from sigmadsp.helper.conversion import int8_to_bytes, int16_to_bytes, int32_to_bytes
 
-class WriteRequest():
-    """Helper class for defining a write request
-    """
+
+class WriteRequest:
+    """Helper class for defining a write request"""
+
     def __init__(self, address: int, data: bytes):
         """A write request consists of a target address and data
 
@@ -23,9 +24,10 @@ class WriteRequest():
         self.address = address
         self.data = data
 
-class ReadRequest():
-    """Helper class for defining a read request
-    """
+
+class ReadRequest:
+    """Helper class for defining a read request"""
+
     def __init__(self, address: int, length: int):
         """A read request consists of a read address, and a field length
 
@@ -36,9 +38,10 @@ class ReadRequest():
         self.address = address
         self.length = length
 
-class ReadResponse():
-    """Helper class for defining a read response
-    """
+
+class ReadResponse:
+    """Helper class for defining a read response"""
+
     def __init__(self, data: bytes):
         """A read response only contains the data that was read from the read address
 
@@ -47,14 +50,16 @@ class ReadResponse():
         """
         self.data = data
 
+
 class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
     """
     Handling class for the Sigma TCP server
     """
+
     HEADER_LENGTH = 14
     COMMAND_WRITE = 0x09
-    COMMAND_READ = 0x0a
-    COMMAND_READ_RESPONSE = 0x0b
+    COMMAND_READ = 0x0A
+    COMMAND_READ_RESPONSE = 0x0B
 
     def handle_write_data(self, data):
         """The WRITE command indicates that SigmaStudio intends to write a packet to the DSP.
@@ -121,13 +126,17 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         read_response = self.server.queue.get()
 
         payload_data = read_response.data
-        
+
         # Build the read response packet, starting with length calculations ...
-        total_transmit_length = ThreadedSigmaTcpRequestHandler.HEADER_LENGTH + data_length
+        total_transmit_length = (
+            ThreadedSigmaTcpRequestHandler.HEADER_LENGTH + data_length
+        )
         transmit_data = bytearray(total_transmit_length)
 
         # ... followed by populating the byte fields.
-        int8_to_bytes(ThreadedSigmaTcpRequestHandler.COMMAND_READ_RESPONSE, transmit_data, 0)
+        int8_to_bytes(
+            ThreadedSigmaTcpRequestHandler.COMMAND_READ_RESPONSE, transmit_data, 0
+        )
         int32_to_bytes(total_transmit_length, transmit_data, 1)
         int8_to_bytes(chip_address, transmit_data, 5)
         int32_to_bytes(data_length, transmit_data, 6)
@@ -139,7 +148,7 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         # Reserved zero byte at pos. 13
         int16_to_bytes(0, transmit_data, 13)
 
-        transmit_data[ThreadedSigmaTcpRequestHandler.HEADER_LENGTH:] = payload_data
+        transmit_data[ThreadedSigmaTcpRequestHandler.HEADER_LENGTH :] = payload_data
 
         self.request.sendall(transmit_data)
         self.server.queue.task_done()
@@ -156,7 +165,7 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
                 # Wait until the complete TCP header was received.
                 received_data += self.request.recv(missing_header_length)
                 missing_header_length -= len(received_data)
-            
+
             command = received_data[0]
 
             if command == ThreadedSigmaTcpRequestHandler.COMMAND_WRITE:
@@ -174,8 +183,8 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 
 class SigmaTCPServer:
-    """This is a helper class for easily filling the queue to the TCP server and reading from it.
-    """
+    """This is a helper class for easily filling the queue to the TCP server and reading from it."""
+
     def __init__(self, host: str, port: int):
         """Initialize the Sigma TCP server. Starts the main TCP worker and initializes a queue for communicating
         with other threads.
@@ -188,7 +197,9 @@ class SigmaTCPServer:
         self.port = port
         self.queue = multiprocessing.JoinableQueue()
 
-        tcp_server_worker_thread = threading.Thread(target=self.tcp_server_worker, name="TCP server worker thread")
+        tcp_server_worker_thread = threading.Thread(
+            target=self.tcp_server_worker, name="TCP server worker thread"
+        )
         tcp_server_worker_thread.daemon = True
         tcp_server_worker_thread.start()
 
@@ -200,7 +211,7 @@ class SigmaTCPServer:
         """
         request = self.queue.get()
         self.queue.task_done()
-        
+
         return request
 
     def put_request(self, request: ReadResponse):
@@ -214,15 +225,18 @@ class SigmaTCPServer:
         self.queue.join()
 
     def tcp_server_worker(self):
-        """The main worker for the TCP server
-        """
-        self.tcp_server = ThreadedTCPServer((self.host, self.port), ThreadedSigmaTcpRequestHandler)
+        """The main worker for the TCP server"""
+        self.tcp_server = ThreadedTCPServer(
+            (self.host, self.port), ThreadedSigmaTcpRequestHandler
+        )
         self.tcp_server.queue = multiprocessing.JoinableQueue()
 
         with self.tcp_server:
             # Base TCP server thread
             # This initial thread starts one more thread for each request.
-            tcp_server_thread = threading.Thread(target=self.tcp_server.serve_forever, name="TCP server thread")
+            tcp_server_thread = threading.Thread(
+                target=self.tcp_server.serve_forever, name="TCP server thread"
+            )
             tcp_server_thread.daemon = True
             tcp_server_thread.start()
 
@@ -230,7 +244,7 @@ class SigmaTCPServer:
                 # Wait for a request from the TCP server
                 request = self.tcp_server.queue.get()
                 self.tcp_server.queue.task_done()
-                
+
                 if isinstance(request, WriteRequest):
                     # Write request received, don't do anything else
                     self.queue.put(request)
@@ -247,4 +261,3 @@ class SigmaTCPServer:
                     # Send read response
                     self.tcp_server.queue.put(read_response)
                     self.tcp_server.queue.join()
-                    

@@ -4,7 +4,12 @@ Sigma Studio, and the SPI handler that controls the DSP.
 Commands from Sigma Studio are received, and translated to SPI read/write requests.
 """
 from sigmadsp.hardware.adau14xx import Adau14xx
-from sigmadsp.communication.sigma_tcp_server import SigmaTCPServer, WriteRequest, ReadRequest, ReadResponse
+from sigmadsp.communication.sigma_tcp_server import (
+    SigmaTCPServer,
+    WriteRequest,
+    ReadRequest,
+    ReadResponse,
+)
 from sigmadsp.hardware.spi import SpiHandler
 from sigmadsp.helper.parser import Parser, Cell
 from rpyc.utils.server import ThreadedServer
@@ -17,6 +22,7 @@ import json
 import rpyc
 import sys
 
+
 class SigmadspSettings:
     def __init__(self, settings_file_path: str = None):
         """Loads a settings file in .json format from a specified path.
@@ -24,7 +30,7 @@ class SigmadspSettings:
 
         Args:
             settings_file_path (str): The input path
-        """ 
+        """
         if settings_file_path is None:
             settings_file_path = "/var/lib/sigmadsp/sigmadsp.json"
 
@@ -33,7 +39,7 @@ class SigmadspSettings:
             with open(settings_file_path, "r") as settings_file:
                 self.settings = json.load(settings_file)
                 logging.info(f"Settings file {settings_file_path} was loaded.")
-        
+
         except FileNotFoundError:
             logging.info("Settings file not found. Using default values.")
             self.settings = None
@@ -57,7 +63,7 @@ class SigmadspSettings:
             parameter_file.writelines(lines)
 
         self.load_parameters()
-            
+
     def get_setting(self, key: str, default_setting: Any = None) -> Any:
         """Loads certain settings from the settings dictionary
 
@@ -78,7 +84,7 @@ class SigmadspSettings:
                 pass
 
         return setting
-             
+
     @property
     def host(self) -> str:
         return self.get_setting("host", "0.0.0.0")
@@ -86,7 +92,7 @@ class SigmadspSettings:
     @property
     def port(self) -> int:
         return self.get_setting("port", 8087)
-    
+
     @property
     def backend_port(self) -> int:
         return self.get_setting("backend_port", 18861)
@@ -97,13 +103,16 @@ class SigmadspSettings:
 
     @property
     def parameter_file_path(self) -> str:
-        return self.get_setting("parameter_file_path", "/var/lib/sigmadsp/current.params")
+        return self.get_setting(
+            "parameter_file_path", "/var/lib/sigmadsp/current.params"
+        )
 
 
 class ConfigurationBackendService(rpyc.Service):
     """The configuration backend service that handles the underlying TCP server and SPI handler.
     This service also reacts to rpyc remote procedure calls, for performing actions with the DSP over SPI.
     """
+
     def __init__(self, settings: SigmadspSettings = None):
         """Initialize service and start all relevant threads (TCP, SPI)
 
@@ -117,7 +126,7 @@ class ConfigurationBackendService(rpyc.Service):
         # Load TCP server settings
         HOST = settings.host
         PORT = settings.port
-        
+
         # Create an SPI handler, along with its thread
         self.spi_handler = SpiHandler()
 
@@ -129,7 +138,7 @@ class ConfigurationBackendService(rpyc.Service):
         worker_thread = threading.Thread(target=self.worker, name="Worker thread")
         worker_thread.daemon = True
         worker_thread.start()
-        
+
         DSP_TYPE = settings.dsp_type
         logging.info(f"Specified DSP type is '{DSP_TYPE}'.")
 
@@ -156,8 +165,7 @@ class ConfigurationBackendService(rpyc.Service):
                 self.sigma_tcp_server.put_request(ReadResponse(payload))
 
     def exposed_reset_dsp(self):
-        """Soft resets the DSP
-        """
+        """Soft resets the DSP"""
         self.dsp.soft_reset()
 
     def exposed_adjust_volume(self, adjustment_db: float, cell_name: str):
@@ -172,8 +180,7 @@ class ConfigurationBackendService(rpyc.Service):
                 self.dsp.adjust_volume(adjustment_db, volume_cell.parameter_address)
 
     def exposed_load_parameter_file(self, lines: List[str]):
-        """Store a new parameter file locally
-        """
+        """Store a new parameter file locally"""
         self.settings.store_parameters(lines)
 
     def on_connect(self, conn):
@@ -195,23 +202,29 @@ def launch(settings: SigmadspSettings):
             If not specified, a default path is used for loading the settings.
     """
     BACKEND_PORT = settings.backend_port
-        
+
     # Create the backend service, an rpyc handler
     configuration_backend_service = ConfigurationBackendService(settings)
     threaded_server = ThreadedServer(configuration_backend_service, port=BACKEND_PORT)
     threaded_server.start()
 
+
 def main():
-    """Launch the backend with default settings
-    """
+    """Launch the backend with default settings"""
     logging.basicConfig(level=logging.INFO)
 
     argument_parser = argparse.ArgumentParser()
-    argument_parser.add_argument("-s", "--settings", required=False, help="specifies the settings file path for configuring the sigmadsp backend application")
+    argument_parser.add_argument(
+        "-s",
+        "--settings",
+        required=False,
+        help="specifies the settings file path for configuring the sigmadsp backend application",
+    )
     arguments = argument_parser.parse_args()
 
     settings = SigmadspSettings(arguments.settings)
     launch(settings)
-    
+
+
 if __name__ == "__main__":
     main()

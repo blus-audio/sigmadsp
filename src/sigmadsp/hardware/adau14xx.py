@@ -8,11 +8,17 @@ For this, it uses the SpiHandler module, to interface to the DSP.
 import logging
 
 from sigmadsp.hardware.spi import SpiHandler
-from sigmadsp.helper.conversion import int16_to_bytes, int32_to_bytes, bytes_to_int32, db_to_linear, linear_to_db
+from sigmadsp.helper.conversion import (
+    int16_to_bytes,
+    int32_to_bytes,
+    bytes_to_int32,
+    db_to_linear,
+    linear_to_db,
+)
+
 
 class Adau14xx:
-    """A class for controlling functionality of Analog Devices Sigma DSPs, especially ADAU14xx series parts.
-    """
+    """A class for controlling functionality of Analog Devices Sigma DSPs, especially ADAU14xx series parts."""
 
     # Addresses and sizes of important registers
     RESET_REGISTER = 0xF890
@@ -34,7 +40,7 @@ class Adau14xx:
         Returns:
             float: Output in float format
         """
-        return value / 2**24
+        return value / 2 ** 24
 
     def float_to_fixpoint(self, value: float) -> int:
         """Converts a float value to the DSPs fixpoint representation.
@@ -46,11 +52,10 @@ class Adau14xx:
         Returns:
             int: Output in DSP fixpoint format
         """
-        return int(value * 2**24)
+        return int(value * 2 ** 24)
 
     def soft_reset(self):
-        """Soft resets the DSP by writing the reset register twice.
-        """
+        """Soft resets the DSP by writing the reset register twice."""
         self.spi_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(0))
         self.spi_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(1))
 
@@ -61,10 +66,12 @@ class Adau14xx:
             address (int): The address to look at
 
         Returns:
-            float: Float representation of the register content 
+            float: Float representation of the register content
         """
 
-        data_register = self.spi_handler.read(address, Adau14xx.FIXPOINT_REGISTER_LENGTH)
+        data_register = self.spi_handler.read(
+            address, Adau14xx.FIXPOINT_REGISTER_LENGTH
+        )
         data_integer = bytes_to_int32(data_register)
         data_float = self.fixpoint_to_float(data_integer)
         return data_float
@@ -95,10 +102,12 @@ class Adau14xx:
         # Clamp volume to safe levels
         if new_volume >= 1:
             new_volume = 1
-        
+
         elif new_volume <= 0:
             new_volume = 0
 
         self.set_parameter_value(new_volume, address)
 
-        logging.info(f"Adjusted volume from {linear_to_db(current_volume):.2f} dB to {linear_to_db(new_volume):.2f} dB.")
+        logging.info(
+            f"Adjusted volume from {linear_to_db(current_volume):.2f} dB to {linear_to_db(new_volume):.2f} dB."
+        )

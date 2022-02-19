@@ -1,8 +1,12 @@
+"""A module that parses SigmaStudio project files and extracts adjustable cells
+"""
 import logging
 from typing import List
 
 
 class Cell:
+    """A cell object is a unit, which represents a cell from SigmaStudio."""
+
     adjustable_prefix = "adjustable_"
     volume_identifier = "volume"
 
@@ -60,32 +64,36 @@ class Cell:
         except AttributeError:
             return False
 
-        else: 
+        else:
             return self.is_adjustable_cell and (Cell.volume_identifier in self.name)
 
 
 class Parser:
+    def __init__(self):
+        self.cells = []
+        self.cell: Cell = None
+
     def run(self, file_name: str):
         """Parse an input file that was exported from Sigma Studio
 
         Args:
             file_name (str): [description]
         """
-        self.cells = []
-        self.cell: Cell = None
+        self.cells.clear()
+        self.cell = None
 
         if not file_name.endswith(".params"):
             logging.error("The parameter file is not a *.params file! Aborting.")
 
         else:
             try:
-                with open(file_name, "r") as file:
-                    logging.info(f"Using parameter file path {file_name}.")
+                with open(file_name, "r", encoding="utf8") as file:
+                    logging.info("Using parameter file path %s.", file_name)
                     lines = file.readlines()
 
                     for line in lines:
                         split_line = line.split()
-                        
+
                         if split_line:
                             if split_line[0] == "Cell" and split_line[1] == "Name":
                                 self.cell = Cell()
@@ -100,22 +108,22 @@ class Parser:
 
                                 if split_line[1] == "Address":
                                     self.cell.parameter_address = int(split_line[3])
-                                    
+
                                 if split_line[1] == "Value":
                                     data = split_line[3]
-                                    
+
                                     try:
                                         self.cell.parameter_value = int(data)
-                                    
+
                                     except ValueError:
                                         self.cell.parameter_value = float(data)
-                    
-                    logging.info(f"Found a total number of {len(self.cells)} cells.")
+
+                    logging.info("Found a total number of %d cells.", len(self.cells))
 
             except FileNotFoundError:
-                logging.info(f"Parameter file {file_name} not found.")
+                logging.info("Parameter file %s not found.", file_name)
 
-    @property 
+    @property
     def volume_cells(self) -> List[Cell]:
         """Returns all cells that can be used for volume adjustment.
         These are user defined with a certain name pattern.
@@ -127,5 +135,5 @@ class Parser:
         for cell in self.cells:
             if cell.is_adjustable_volume_cell:
                 collected_cells.append(cell)
-        
+
         return collected_cells
