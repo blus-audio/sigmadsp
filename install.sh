@@ -24,10 +24,10 @@ TEMP_FOLDER=/tmp
 ### Installation starts below. ###
 sudo apt-get update
 
-# Install the prerequisite pip3
+Install the prerequisite pip3
 sudo apt-get install -y python3-pip
 
-# Install the package itself, along with its scripts
+Install the package itself, along with its scripts
 sudo pip3 install $PYTHON_PACKAGE --upgrade
 
 echo "Stopping old $SIGMADSP_BACKEND services."
@@ -50,8 +50,8 @@ host:
 
 # Settings for the $SIGMADSP_BACKEND.
 backend:
-  # The port, on which the $SIGMADSP_BACKEND is reachable via rpyc.
-  port: 18866
+  # The port, on which the $SIGMADSP_BACKEND is reachable.
+  port: 50051
 
 parameters:
   # The parameter file path, which contains DSP application parameters,

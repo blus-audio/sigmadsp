@@ -68,13 +68,16 @@ class Adau14xx:
         data_register = int32_to_bytes(data_integer)
         self.spi_handler.write(address, data_register)
 
-    def set_volume(self, value_db: float, address: int):
+    def set_volume(self, value_db: float, address: int) -> float:
         """Sets the volume register at the given address to a certain value in
         dB.
 
         Args:
             value_db (float): The volume setting in dB
             address (int): The volume adjustment register address
+
+        Returns:
+            float: The new volume in dB.
         """
         # Read current volume and apply adjustment
         value_linear = db_to_linear(value_db)
@@ -86,13 +89,18 @@ class Adau14xx:
 
         logging.info("Set volume to %.2f dB.", linear_to_db(value_linear))
 
-    def adjust_volume(self, adjustment_db: float, address: int):
+        return linear_to_db(value_linear)
+
+    def adjust_volume(self, adjustment_db: float, address: int) -> float:
         """Adjust the volume register at the given address by a certain value
         in dB.
 
         Args:
             adjustment_db (float): The volume adjustment in dB
             address (int): The volume adjustment register address
+
+        Returns:
+            float: The new volume in dB.
         """
         # Read current volume and apply adjustment
         current_volume = self.get_parameter_value(address)
@@ -109,3 +117,5 @@ class Adau14xx:
             linear_to_db(current_volume),
             linear_to_db(new_volume),
         )
+
+        return linear_to_db(new_volume)

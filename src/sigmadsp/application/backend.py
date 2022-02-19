@@ -8,17 +8,25 @@ import argparse
 import logging
 import sys
 import threading
+from concurrent.futures import ThreadPoolExecutor
 from typing import List
 
-import rpyc
+import grpc
 import yaml
-from rpyc.utils.server import ThreadedServer
 
 from sigmadsp.communication.sigma_tcp_server import (
     ReadRequest,
     ReadResponse,
     SigmaTCPServer,
     WriteRequest,
+)
+from sigmadsp.generated.backend_service.control_pb2 import (
+    ControlRequest,
+    ControlResponse,
+)
+from sigmadsp.generated.backend_service.control_pb2_grpc import (
+    BackendServicer,
+    add_BackendServicer_to_server,
 )
 from sigmadsp.hardware.adau14xx import Adau14xx
 from sigmadsp.hardware.spi import SpiHandler
@@ -48,8 +56,10 @@ class SigmadspSettings:
                 logging.info("Settings file %s was loaded.", config_path)
 
         except FileNotFoundError:
-            logging.info("Settings file not found. Using default values.")
-            self.config = None
+            logging.error(
+                "Settings file not found at %s. Aborting.", config_path
+            )
+            raise
 
         self.load_parameters()
 
@@ -79,9 +89,9 @@ class SigmadspSettings:
         self.load_parameters()
 
 
-class ConfigurationBackendService(rpyc.Service):
-    """The configuration backend service that handles the underlying TCP server
-    and SPI handler.
+class BackendService(BackendServicer):
+    """The backend service that handles the underlying TCP server and SPI
+    handler.
 
     This service also reacts to rpyc remote procedure calls, for
     performing actions with the DSP over SPI.
@@ -150,65 +160,54 @@ class ConfigurationBackendService(rpyc.Service):
 
                 self.sigma_tcp_server.put_request(ReadResponse(payload))
 
-    def exposed_reset_dsp(self):
-        """Soft resets the DSP."""
-        self.dsp.soft_reset()
-
-    def exposed_set_volume(self, value_db: float, cell_name: str):
-        """Sets the volume of a specified volume cell.
+    def control(self, request: ControlRequest, context):
+        """Main backend entry point for control messages.
 
         Args:
-            value_db (float): The setting in dB for the volume cell
-            cell_name (str): The name of the cell to adjust
+            request (ControlRequest): The request that the backend shall handle.
+            context (Any): The context within which to handle the request (unused).
+
+        Returns:
+            ControlResponse: A control response message, returned to the caller.
         """
-        for volume_cell in self.settings.parameter_parser.volume_cells:
-            if volume_cell.name == cell_name:
-                self.dsp.set_volume(value_db, volume_cell.parameter_address)
+        response = ControlResponse()
+        response.success = True
 
-    def exposed_adjust_volume(self, adjustment_db: float, cell_name: str):
-        """Adjusts the volume of a specified volume cell.
+        # Determine the type of control request.
+        command = request.WhichOneof("command")
 
-        Args:
-            adjustment_db (float): The adjustment in dB for the volume cell
-            cell_name (str): The name of the cell to adjust
-        """
-        for volume_cell in self.settings.parameter_parser.volume_cells:
-            if volume_cell.name == cell_name:
-                self.dsp.adjust_volume(
-                    adjustment_db, volume_cell.parameter_address
-                )
+        if "reset_dsp" == command:
+            self.dsp.soft_reset()
+            response.message = "Reset DSP."
 
-    def exposed_load_parameter_file(self, lines: List[str]):
-        """Receives a new parameter file from the frontend, and stores it
-        locally. The file is stored at the specified location, defined in the
-        backend settings file.
+        elif "change_volume" == command:
+            for volume_cell in self.settings.parameter_parser.volume_cells:
+                if volume_cell.name == request.change_volume.cell_name:
 
-        Args:
-            lines (List[str]): The text lines of the parameter file.
-        """
-        self.settings.store_parameters(lines)
+                    if request.change_volume.relative:
+                        new_volume_db = self.dsp.adjust_volume(
+                            request.change_volume.value,
+                            volume_cell.parameter_address,
+                        )
 
-    def on_connect(self, conn: rpyc.Connection):
-        """Code that runs when a connection to the rpyc service is created. Can
-        be used to initialize the service.
+                    elif not request.change_volume.relative:
+                        new_volume_db = self.dsp.set_volume(
+                            request.change_volume.value,
+                            volume_cell.parameter_address,
+                        )
 
-        Args:
-            conn (rpyc.Connection): The rpyc connection.
-        """
-        # pylint: disable=no-self-use
-        del self
-        del conn
+                    response.message = (
+                        f"Set volume of '{request.change_volume.cell_name}' ",
+                        f"to {new_volume_db:.2f} dB.",
+                    )
 
-    def on_disconnect(self, conn):
-        """Code that runs when after a connection to the rpyc service was
-        closed.
+                    break
 
-        Args:
-            conn (rpyc.Connection): The rpyc connection.
-        """
-        # pylint: disable=no-self-use
-        del self
-        del conn
+        elif "load_parameters" == command:
+            self.settings.store_parameters(request.load_parameters.content)
+            response.message = "Loaded parameters"
+
+        return response
 
 
 def launch(settings: SigmadspSettings):
@@ -220,12 +219,19 @@ def launch(settings: SigmadspSettings):
             for loading the settings.
     """
 
-    # Create the backend service, an rpyc handler
-    configuration_backend_service = ConfigurationBackendService(settings)
-    threaded_server = ThreadedServer(
-        configuration_backend_service, port=settings.config["backend"]["port"]
-    )
-    threaded_server.start()
+    # Create the backend service, a grpc service
+    grpc_server = grpc.server(ThreadPoolExecutor(max_workers=10))
+
+    backend_port = settings.config["backend"]["port"]
+    backend_address = f"[::]:{backend_port}"
+
+    add_BackendServicer_to_server(BackendService(settings), grpc_server)
+    grpc_server.add_insecure_port(backend_address)
+    grpc_server.start()
+
+    logging.info("Backend service started on %s", backend_address)
+
+    grpc_server.wait_for_termination()
 
 
 def main():
