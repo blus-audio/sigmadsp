@@ -4,13 +4,13 @@ Sigma Studio, and the SPI handler that controls the DSP.
 Commands from Sigma Studio are received, and translated to SPI read/write requests.
 """
 import argparse
-import json
 import logging
 import sys
 import threading
-from typing import Any, List
+from typing import List
 
 import rpyc
+import yaml
 from rpyc.utils.server import ThreadedServer
 
 from sigmadsp.communication.sigma_tcp_server import (
@@ -27,28 +27,28 @@ from sigmadsp.helper.parser import Cell, Parser
 class SigmadspSettings:
     """This class holds and manages settings for the SigmaDSP application."""
 
-    default_settings_file_path = "/var/lib/sigmadsp/sigmadsp.json"
+    default_config_path = "/var/lib/sigmadsp/config.yaml"
 
-    def __init__(self, settings_file_path: str = None):
-        """Loads a settings file in .json format from a specified path.
+    def __init__(self, config_path: str = None):
+        """Loads a config file in *.yaml format from a specified path.
         If no file is provided, the default path is used for loading settings.
 
         Args:
-            settings_file_path (str, optional): The input path of the settings file.
+            config_path (str, optional): The input path of the settings file.
                 Defaults to None.
         """
-        if settings_file_path is None:
-            settings_file_path = SigmadspSettings.default_settings_file_path
+        if config_path is None:
+            config_path = SigmadspSettings.default_config_path
 
         try:
             # Open settings file, in order to configure the application
-            with open(settings_file_path, "r", encoding="utf8") as settings_file:
-                self.settings = json.load(settings_file)
-                logging.info("Settings file %s was loaded.", settings_file_path)
+            with open(config_path, "r", encoding="utf8") as settings_file:
+                self.config = yaml.safe_load(settings_file)
+                logging.info("Settings file %s was loaded.", config_path)
 
         except FileNotFoundError:
             logging.info("Settings file not found. Using default values.")
-            self.settings = None
+            self.config = None
 
         self.load_parameters()
 
@@ -59,10 +59,8 @@ class SigmadspSettings:
         Returns:
             List[Cell]: The cells that were found in the parameter file
         """
-        parameter_file_path = self.parameter_file_path
-
         parser = Parser()
-        parser.run(parameter_file_path)
+        parser.run(self.config["parameters"]["path"])
 
         self.parameter_parser = parser
 
@@ -72,76 +70,10 @@ class SigmadspSettings:
         Args:
             lines (List[str]): [description]
         """
-        with open(self.parameter_file_path, "w", encoding="UTF8") as parameter_file:
+        with open(self.config["parameters"]["path"], "w", encoding="UTF8") as parameter_file:
             parameter_file.writelines(lines)
 
         self.load_parameters()
-
-    def get_setting(self, key: str, default_setting: Any = None) -> Any:
-        """Loads certain settings from the settings dictionary
-
-        Args:
-            key (str): The key to look for
-            default_setting (Any): The default return value, if the key is not found
-
-        Returns:
-            Any: Setting for the key, if found, default_setting otherwise.
-        """
-        setting = default_setting
-
-        if self.settings is not None:
-            try:
-                setting = self.settings[key]
-
-            except KeyError:
-                pass
-
-        return setting
-
-    @property
-    def host(self) -> str:
-        """Returns the host IP address, to which the service listens.
-
-        Returns:
-            str: The IP address.
-        """
-        return self.get_setting("host", "0.0.0.0")
-
-    @property
-    def port(self) -> int:
-        """Returns the TCP port, on which the service listens.
-
-        Returns:
-            int: The TCP port.
-        """
-        return self.get_setting("port", 8087)
-
-    @property
-    def backend_port(self) -> int:
-        """Returns the backend port, on which the service can be controlled.
-
-        Returns:
-            int: The backend port.
-        """
-        return self.get_setting("backend_port", 18866)
-
-    @property
-    def dsp_type(self) -> str:
-        """Returns the DSP hardware type that is controlled by the service.
-
-        Returns:
-            str: The DSP hardware type.
-        """
-        return self.get_setting("dsp_type", "adau14xx")
-
-    @property
-    def parameter_file_path(self) -> str:
-        """Returns the path, where parameters are stored, which are used to configure the DSP program.
-
-        Returns:
-            str: The parameter file path.
-        """
-        return self.get_setting("parameter_file_path", "/var/lib/sigmadsp/current.params")
 
 
 class ConfigurationBackendService(rpyc.Service):
@@ -163,21 +95,27 @@ class ConfigurationBackendService(rpyc.Service):
         self.spi_handler = SpiHandler()
 
         # Create a SigmaTCPServer, along with its various threads
-        self.sigma_tcp_server = SigmaTCPServer(settings.host, settings.port)
-        logging.info("Sigma TCP server started on [%s]:%d.", settings.host, settings.port)
+        self.sigma_tcp_server = SigmaTCPServer(
+            self.settings.config["host"]["ip"], self.settings.config["host"]["port"]
+        )
+        logging.info(
+            "Sigma TCP server started on [%s]:%d.",
+            self.settings.config["host"]["ip"],
+            self.settings.config["host"]["port"],
+        )
 
         # Create the worker thread for the handler itself
         worker_thread = threading.Thread(target=self.worker, name="Worker thread")
         worker_thread.daemon = True
         worker_thread.start()
 
-        logging.info("Specified DSP type is '%s'.", settings.dsp_type)
+        logging.info("Specified DSP type is '%s'.", self.settings.config["dsp"]["type"])
 
-        if settings.dsp_type == "adau14xx":
+        if self.settings.config["dsp"]["type"] == "adau14xx":
             self.dsp = Adau14xx(self.spi_handler)
 
         else:
-            logging.error("DSP type '%s' is not known! Aborting.", settings.dsp_type)
+            logging.error("DSP type '%s' is not known! Aborting.", self.config["dsp"]["type"])
             sys.exit(0)
 
     def worker(self):
@@ -256,13 +194,13 @@ def launch(settings: SigmadspSettings):
     """Launches the backend application
 
     Args:
-        settings_file_path (str, optional): Settings file for the backend application. Defaults to None.
+        config_path (str, optional): Settings file for the backend application. Defaults to None.
             If not specified, a default path is used for loading the settings.
     """
 
     # Create the backend service, an rpyc handler
     configuration_backend_service = ConfigurationBackendService(settings)
-    threaded_server = ThreadedServer(configuration_backend_service, port=settings.backend_port)
+    threaded_server = ThreadedServer(configuration_backend_service, port=settings.config["backend"]["port"])
     threaded_server.start()
 
 

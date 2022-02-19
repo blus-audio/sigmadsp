@@ -10,7 +10,7 @@ SIGMADSP_BACKEND=sigmadsp-backend
 CONFIGURATION_FOLDER=/var/lib/sigmadsp
 
 # The main settings file name. This file is stored within the configuration folder.
-CONFIGURATION_FILE=sigmadsp.json
+CONFIGURATION_FILE=config.yaml
 
 # The default DSP type. This is written to the configuration file.
 DSP_TYPE=adau14xx
@@ -40,19 +40,28 @@ sudo mkdir -p $CONFIGURATION_FOLDER
 echo "Generate configuration folder for sigmadsp at $CONFIGURATION_FOLDER."
 
 cat <<EOT >$TEMP_FOLDER/$CONFIGURATION_FILE
-{
-  # The IP address, on which the $SIGMADSP_BACKEND listens.
-  # The default value "0.0.0.0" allows listening on any address.
-  "host": "0.0.0.0",
+# The $CONFIGURATION_FILE.yaml file contains all settings that can be changed on the $SIGMADSP_BACKEND.
 
+# The IP address and port, on which the $SIGMADSP_BACKEND listens for requests from SigmaStudio.
+host:
+  # The default value "0.0.0.0" allows listening on any address.
+  ip: "0.0.0.0"
+  port: 8087
+
+# Settings for the $SIGMADSP_BACKEND.
+backend:
+  # The port, on which the $SIGMADSP_BACKEND is reachable via rpyc.
+  port: 18866
+
+parameters:
   # The parameter file path, which contains DSP application parameters,
   # such as cell names, addresses and other information. This parameter file is required
   # for the backend, in order to be able to control DSP functionality at runtime, e.g. volume.
-  "parameter_file_path": "$CONFIGURATION_FOLDER/$PARAMETER_FILE",
+  path: "$CONFIGURATION_FOLDER/$PARAMETER_FILE"
 
+dsp:
   # The type of the DSP to control with the $SIGMADSP_BACKEND service.
-  "dsp_type": "$DSP_TYPE"
-}
+  type: "$DSP_TYPE"
 EOT
 
 # Write default settings for sigmadsp. Simply change them in the .json file.
@@ -69,7 +78,7 @@ Wants=network-online.target
 After=network.target network-online.target
 [Service]
 Type=simple
-ExecStart=$LOC
+ExecStart=$LOC -s $CONFIGURATION_FOLDER/$CONFIGURATION_FILE
 StandardOutput=journal
 [Install]
 WantedBy=multi-user.target
@@ -98,8 +107,4 @@ sudo mv $TEMP_CONFIG $CONFIG
 
 echo ""
 echo "Finished installation of $SIGMADSP_BACKEND."
-
-echo "Find its configuration file in '$CONFIGURATION_FOLDER/$CONFIGURATION_FILE'. It currently contains:"
-echo ""
-
-cat $CONFIGURATION_FOLDER/$CONFIGURATION_FILE
+echo "Find its configuration file in '$CONFIGURATION_FOLDER/$CONFIGURATION_FILE'."
