@@ -2,8 +2,27 @@
 It can receive read/write requests and return with read response packets.
 """
 import socketserver
+import threading
+import multiprocessing
+import logging
+
+from typing import Union
 from sigmadsp.helper.conversion import bytes_to_int8, bytes_to_int16, bytes_to_int32
 from sigmadsp.helper.conversion import int8_to_bytes, int16_to_bytes, int32_to_bytes
+
+class WriteRequest():
+    def __init__(self, address: int, data: bytes):
+        self.address = address
+        self.data = data
+
+class ReadRequest():
+    def __init__(self, address: int, length: int):
+        self.address = address
+        self.length = length
+
+class ReadResponse():
+    def __init__(self, data: bytes):
+        self.data = data
 
 class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
     """
@@ -52,9 +71,7 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
 
             payload_data += received_data
 
-        self.server.queue.put("write")
-        self.server.queue.put((address, payload_data))
-        self.server.queue.join()
+        self.server.queue.put(WriteRequest(address, payload_data))
 
     def handle_read_request(self, data: bytes):
         """The READ command indicates that SigmaStudio intends to read a packet from the DSP.
@@ -74,14 +91,14 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         address = bytes_to_int16(data, 10)
 
         # Notify application of read request
-        self.server.queue.put("read")
-        self.server.queue.put((address, data_length))
+        self.server.queue.put(ReadRequest(address, data_length))
         self.server.queue.join()
 
         # Wait for payload data that goes into the read response
-        payload_data = self.server.queue.get()
-        self.server.queue.task_done()
+        read_response = self.server.queue.get()
 
+        payload_data = read_response.data
+        
         # Build the read response packet, starting with length calculations ...
         total_transmit_length = ThreadedSigmaTcpRequestHandler.HEADER_LENGTH + data_length
         transmit_data = bytearray(total_transmit_length)
@@ -102,6 +119,7 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         transmit_data[ThreadedSigmaTcpRequestHandler.HEADER_LENGTH:] = payload_data
 
         self.request.sendall(transmit_data)
+        self.server.queue.task_done()
 
     def handle(self):
         """This method is called, when the TCP server receives new data for handling. It never stops,
@@ -135,31 +153,55 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 class SigmaTCPServer:
     """This is a helper class for easily filling the queue to the TCP server and reading from it.
     """
-    def __init__(self, tcp_server: ThreadedTCPServer):
-        self.tcp_server = tcp_server
+    def __init__(self):
+        self.queue = multiprocessing.JoinableQueue()
 
-    def write(self, data: object):
-        """Write data to the queue of the TCP server
+        tcp_server_worker_thread = threading.Thread(target=self.tcp_server_worker, name="TCP server worker thread")
+        tcp_server_worker_thread.daemon = True
+        tcp_server_worker_thread.start()
 
-        Args:
-            data (object): The data object to put into the queue
-        """
-        self.tcp_server.queue.put(data)
+    def get_request(self) -> Union[ReadRequest, WriteRequest]:
+        request = self.queue.get()
+        self.queue.task_done()
+        
+        return request
 
-        # Join the queue, so that the TCP server has a chance to read and process
-        # the data. Otherwise, a "read" that immediately follows would result in a race condition.
-        self.tcp_server.queue.join()
+    def put_request(self, request: ReadResponse):
+        self.queue.put(request)
+        self.queue.join()
 
-    def read(self) -> object:
-        """Reads data from the queue of the TCP server
+    def tcp_server_worker(self):
+        HOST = "0.0.0.0"
+        PORT = 8087
+        self.tcp_server = ThreadedTCPServer((HOST, PORT), ThreadedSigmaTcpRequestHandler)
+        self.tcp_server.queue = multiprocessing.JoinableQueue()
 
-        Returns:
-            object: The object that was found in the queue
-        """
-        data = self.tcp_server.queue.get()
+        with self.tcp_server:
+            # Base TCP server thread
+            # This initial thread starts one more thread for each request.
+            tcp_server_thread = threading.Thread(target=self.tcp_server.serve_forever, name="TCP server thread")
+            tcp_server_thread.daemon = True
+            tcp_server_thread.start()
 
-        # Count down the number of open tasks on the queue. Required, as the "write" command
-        # joins the queue.
-        self.tcp_server.queue.task_done()
+            while True:
+                # Wait for a request from the TCP server
+                request = self.tcp_server.queue.get()
+                self.tcp_server.queue.task_done()
+                
+                if isinstance(request, WriteRequest):
+                    # Write request received, don't do anything else
+                    self.queue.put(request)
+                    self.queue.join()
 
-        return data
+                elif isinstance(request, ReadRequest):
+                    # Read request received, wait for data to send to PC application
+                    self.queue.put(request)
+                    self.queue.join()
+
+                    read_response = self.queue.get()
+                    self.queue.task_done()
+
+                    # Send read response
+                    self.tcp_server.queue.put(read_response)
+                    self.tcp_server.queue.join()
+                    

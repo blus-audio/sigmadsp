@@ -1,7 +1,11 @@
-from sigmadsp.hardware.adau14xx import Adau14xx
-from sigmadsp.application import main
+import rpyc
+import logging
 
-adau14xx = Adau14xx()
-adau14xx.soft_reset()
+try:
+    c = rpyc.connect("localhost", 18861)
 
-main()
+except ConnectionRefusedError:
+    logging.info("Sigmadsp backend is not running!")
+
+else:
+    c.root.adjust_volume(-3, "adjustable_volume_main")

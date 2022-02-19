@@ -8,6 +8,13 @@
             "name": "Python: Aktuelle Datei",
             "type": "python",
             "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: run",
+            "type": "python",
+            "request": "launch",
             "program": "run.py",
             "console": "integratedTerminal",
             "justMyCode": false,

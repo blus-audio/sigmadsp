@@ -3,6 +3,7 @@
 import spidev
 import threading
 import multiprocessing
+import logging
 
 class SpiHandler():
     """Handles SPI transfers from and to SigmaDSP chipsets.
@@ -33,7 +34,8 @@ class SpiHandler():
         self._initialize_spi()
         
         self.queue = multiprocessing.JoinableQueue()
-
+        
+        logging.info("Starting SPI handling thread.")
         self.thread = threading.Thread(target=self.serve_forever, name="SPIHandlerThread")
         self.thread.daemon = True
         self.thread.start()
