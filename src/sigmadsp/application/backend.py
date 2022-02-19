@@ -25,6 +25,8 @@ from sigmadsp.helper.parser import Cell, Parser
 
 
 class SigmadspSettings:
+    """This class holds and manages settings for the SigmaDSP application."""
+
     default_settings_file_path = "/var/lib/sigmadsp/sigmadsp.json"
 
     def __init__(self, settings_file_path: str = None):
@@ -97,22 +99,47 @@ class SigmadspSettings:
 
     @property
     def host(self) -> str:
+        """Returns the host IP address, to which the service listens.
+
+        Returns:
+            str: The IP address.
+        """
         return self.get_setting("host", "0.0.0.0")
 
     @property
     def port(self) -> int:
+        """Returns the TCP port, on which the service listens.
+
+        Returns:
+            int: The TCP port.
+        """
         return self.get_setting("port", 8087)
 
     @property
     def backend_port(self) -> int:
-        return self.get_setting("backend_port", 18861)
+        """Returns the backend port, on which the service can be controlled.
+
+        Returns:
+            int: The backend port.
+        """
+        return self.get_setting("backend_port", 18866)
 
     @property
     def dsp_type(self) -> str:
+        """Returns the DSP hardware type that is controlled by the service.
+
+        Returns:
+            str: The DSP hardware type.
+        """
         return self.get_setting("dsp_type", "adau14xx")
 
     @property
     def parameter_file_path(self) -> str:
+        """Returns the path, where parameters are stored, which are used to configure the DSP program.
+
+        Returns:
+            str: The parameter file path.
+        """
         return self.get_setting("parameter_file_path", "/var/lib/sigmadsp/current.params")
 
 
@@ -186,14 +213,25 @@ class ConfigurationBackendService(rpyc.Service):
         """Store a new parameter file locally"""
         self.settings.store_parameters(lines)
 
-    def on_connect(self, conn):
-        # code that runs when a connection is created
-        # (to init the service, if needed)
+    def on_connect(self, conn: rpyc.Connection):
+        """Code that runs when a connection to the rpyc service is created.
+        Can be used to initialize the service.
+
+        Args:
+            conn (rpyc.Connection): The rpyc connection.
+        """
+        # pylint: disable=no-self-use
+        del self
         del conn
 
     def on_disconnect(self, conn):
-        # code that runs after the connection has already closed
-        # (to finalize the service, if needed)
+        """Code that runs when after a connection to the rpyc service was closed.
+
+        Args:
+            conn (rpyc.Connection): The rpyc connection.
+        """
+        # pylint: disable=no-self-use
+        del self
         del conn
 
 
@@ -204,11 +242,10 @@ def launch(settings: SigmadspSettings):
         settings_file_path (str, optional): Settings file for the backend application. Defaults to None.
             If not specified, a default path is used for loading the settings.
     """
-    BACKEND_PORT = settings.backend_port
 
     # Create the backend service, an rpyc handler
     configuration_backend_service = ConfigurationBackendService(settings)
-    threaded_server = ThreadedServer(configuration_backend_service, port=BACKEND_PORT)
+    threaded_server = ThreadedServer(configuration_backend_service, port=settings.backend_port)
     threaded_server.start()
 
 

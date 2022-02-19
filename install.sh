@@ -1,7 +1,7 @@
 #!/bin/sh
 sudo apt-get update
 sudo apt-get install -y python3-pip
-sudo pip3 install --upgrade sigmadsp
+sudo pip3 install ../sigma-dsp/
 
 for i in sigmadsp; do
  sudo systemctl stop $i
@@ -10,13 +10,16 @@ done
 
 sudo mkdir -p /var/lib/sigmadsp
 
-cat <<EOT >/var/lib/sigmadsp/sigmadsp.json
+cat <<EOT >/tmp/sigmadsp.json
 {
   "host": "0.0.0.0",
   "parameter_file_path": "/var/lib/sigmadsp/current.params",
   "dsp_type": "adau14xx"
 }
 EOT
+
+# Write default settings for sigmadsp. Simply change them in the .json file.
+sudo mv /tmp/sigmadsp.json /var/lib/sigmadsp/sigmadsp.json
 
 # Create systemd config for the TCP server
 LOC=`which sigmadsp-backend`

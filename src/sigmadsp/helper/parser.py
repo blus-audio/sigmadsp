@@ -46,6 +46,8 @@ class Cell:
         if self.parameter_value is not None:
             return self.is_adjustable_cell and (Cell.volume_identifier in self.name)
 
+        return False
+
 
 class Parser:
     """Parses a parameter input file from Sigma Studio and detects cells in it."""

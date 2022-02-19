@@ -7,6 +7,24 @@ import threading
 import spidev
 
 
+def build_spi_frame(address: int, data: bytes) -> bytearray:
+    """Builds an SPI frame that is going to be written to the DSP
+
+    Args:
+        address (int): The register address that the data is written to
+        data (bytes): The register content
+
+    Returns:
+        bytearray: The complete SPI frame buffer
+    """
+    frame = bytearray(SpiHandler.HEADER_LENGTH)
+    frame[0] = SpiHandler.WRITE
+    frame[1:3] = address.to_bytes(SpiHandler.ADDRESS_LENGTH, "big")
+    frame += data
+
+    return frame
+
+
 class SpiHandler:
     """Handles SPI transfers from and to SigmaDSP chipsets.
     Tested with ADAU145X
@@ -133,23 +151,6 @@ class SpiHandler:
 
         return bytes(spi_response[SpiHandler.HEADER_LENGTH :])
 
-    def _build_spi_frame(self, address: int, data: bytes) -> bytearray:
-        """Builds an SPI frame that is going to be written to the DSP
-
-        Args:
-            address (int): The register address that the data is written to
-            data (bytes): The register content
-
-        Returns:
-            bytearray: The complete SPI frame buffer
-        """
-        frame = bytearray(SpiHandler.HEADER_LENGTH)
-        frame[0] = SpiHandler.WRITE
-        frame[1:3] = address.to_bytes(SpiHandler.ADDRESS_LENGTH, "big")
-        frame += data
-
-        return frame
-
     def _write_spi(self, address: int, data: bytes):
         """Write data over the SPI port onto a SigmaDSP
 
@@ -172,7 +173,7 @@ class SpiHandler:
                 # DSP register addresses are counted in words (32 bit per increment).
 
                 # Build the frame from a subset of the input data, and write it
-                frame = self._build_spi_frame(current_address, current_data[: SpiHandler.MAX_PAYLOAD_BYTES])
+                frame = build_spi_frame(current_address, current_data[: SpiHandler.MAX_PAYLOAD_BYTES])
                 self.spi.writebytes(frame)
 
                 # Update address, data counter, and the binary data buffer
@@ -182,6 +183,6 @@ class SpiHandler:
 
             else:
                 # The packet fits into one transmission.
-                frame = self._build_spi_frame(current_address, current_data)
+                frame = build_spi_frame(current_address, current_data)
                 self.spi.writebytes(frame)
                 remaining_data_length = 0

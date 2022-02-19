@@ -171,7 +171,15 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
 
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    """The threaded TCP server that is used for communicating with SigmaStudio.
+    Here, general server settings can be adjusted."""
+
     allow_reuse_address = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.queue = multiprocessing.JoinableQueue()
 
 
 class SigmaTCPServer:
@@ -217,7 +225,6 @@ class SigmaTCPServer:
     def tcp_server_worker(self):
         """The main worker for the TCP server"""
         tcp_server = ThreadedTCPServer((self.host, self.port), ThreadedSigmaTcpRequestHandler)
-        tcp_server.queue = multiprocessing.JoinableQueue()
 
         with tcp_server:
             # Base TCP server thread

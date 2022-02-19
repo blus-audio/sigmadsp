@@ -1,3 +1,5 @@
+"""This module is the frontend to the SigmaDSP backend service. It can control the backend via the command line.
+"""
 import argparse
 import logging
 
@@ -5,6 +7,7 @@ import rpyc
 
 
 def main():
+    """The main frontend command-line application, which controls the SigmaDSP backend."""
     logging.basicConfig(level=logging.INFO)
 
     argument_parser = argparse.ArgumentParser()
@@ -20,7 +23,7 @@ def main():
     arguments = argument_parser.parse_args()
 
     try:
-        sigmadsp_backend_service = rpyc.connect("localhost", 18861)
+        sigmadsp_backend_service = rpyc.connect("localhost", 18866)
 
     except ConnectionRefusedError:
         logging.info("Sigmadsp backend is not running! Aborting.")
@@ -30,7 +33,7 @@ def main():
             sigmadsp_backend_service.root.adjust_volume(arguments.adjust_volume, "adjustable_volume_main")
 
         if arguments.load_parameters is not None:
-            with open(arguments.load_parameters, "r") as parameter_file:
+            with open(arguments.load_parameters, "r", encoding="utf8") as parameter_file:
                 parameters = parameter_file.readlines()
 
             sigmadsp_backend_service.root.load_parameter_file(parameters)

@@ -1,3 +1,6 @@
+"""Installs the SigmaDSP package.
+"""
+
 import setuptools
 
 import versioneer
