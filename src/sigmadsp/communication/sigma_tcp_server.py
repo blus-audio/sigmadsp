@@ -4,6 +4,7 @@ It can receive read/write requests and return with read response packets.
 """
 import logging
 import multiprocessing
+import socket
 import socketserver
 import threading
 from dataclasses import dataclass
@@ -19,34 +20,25 @@ from sigmadsp.helper.conversion import (
 )
 
 
-@dataclass
+@dataclass(frozen=True)
 class WriteRequest:
-    """Helper class for defining a write request.
-
-    A write request consists of a target address and data.
-    """
+    """SigmaStudio requests to write data to the DSP."""
 
     address: int
     data: bytes
 
 
-@dataclass
+@dataclass(frozen=True)
 class ReadRequest:
-    """Helper class for defining a read request.
-
-    A read request consists of a read address, and a field length.
-    """
+    """SigmaStudio requests to read data from the DSP."""
 
     address: int
     length: int
 
 
-@dataclass
+@dataclass(frozen=True)
 class ReadResponse:
-    """Helper class for defining a read response.
-
-    A read response only contains the data that was read from the read address.
-    """
+    """SigmaStudio is sent a response to its ReadRequest."""
 
     data: bytes
 
@@ -68,12 +60,13 @@ class ThreadedTCPServer(socketserver.ThreadingTCPServer):
 class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
     """Handling class for the Sigma TCP server."""
 
+    request: socket.socket
     server: ThreadedTCPServer
 
-    HEADER_LENGTH = 14
-    COMMAND_WRITE = 0x09
-    COMMAND_READ = 0x0A
-    COMMAND_READ_RESPONSE = 0x0B
+    HEADER_LENGTH: int = 14
+    COMMAND_WRITE: int = 0x09
+    COMMAND_READ: int = 0x0A
+    COMMAND_READ_RESPONSE: int = 0x0B
 
     def receive_amount(self, total_size: int) -> bytearray:
         """Receives data from a request, until the desired size is reached.
@@ -85,13 +78,24 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
             bytearray: The received data.
         """
         payload_data = bytearray()
+
         while total_size > len(payload_data):
             # Wait until the complete TCP payload was received.
-            payload_data.extend(self.request.recv(total_size - len(payload_data)))
+            received = self.request.recv(total_size - len(payload_data))
+
+            if 0 == len(received):
+                # Give up, if no more data arrives.
+                # Close the socket.
+                self.request.shutdown(socket.SHUT_RDWR)
+                self.request.close()
+
+                raise ConnectionError
+
+            payload_data.extend(received)
 
         return payload_data
 
-    def handle_write_data(self, write_request: bytes):
+    def handle_write_data(self, packet_header: bytes):
         """Handles requests, where SigmaStudio wants to write to the DSP.
 
         Args:
@@ -100,36 +104,36 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
 
         # This field indicates whether the packet is a block write or a safeload write.
         # TODO: This field is currently unused.
-        block_safeload = bytes_to_int8(write_request, 1)
+        block_safeload = bytes_to_int8(packet_header, 1)
         del block_safeload
 
         # This indicates the channel number.
         # TODO: This field is currently unused.
-        channel_number = bytes_to_int8(write_request, 2)
+        channel_number = bytes_to_int8(packet_header, 2)
         del channel_number
 
         # This indicates the total length of the write packet (uint32).
         # This field is currently unused.
-        total_length = bytes_to_int32(write_request, 3)
+        total_length = bytes_to_int32(packet_header, 3)
         del total_length
 
         # The address of the chip to which the data has to be written.
         # The chip address is appended by the read/write bit: shifting right by one bit removes it.
         # TODO: This field is currently unused.
-        chip_address = bytes_to_int8(write_request, 7) >> 1
+        chip_address = bytes_to_int8(packet_header, 7) >> 1
         del chip_address
 
         # The length of the data (uint32).
-        total_payload_size = bytes_to_int32(write_request, 8)
+        total_payload_size = bytes_to_int32(packet_header, 8)
 
         # The address of the module whose data is being written to the DSP (uint16).
-        address = bytes_to_int16(write_request, 12)
+        address = bytes_to_int16(packet_header, 12)
 
         payload_data = self.receive_amount(total_payload_size)
 
         self.server.queue.put(WriteRequest(address, payload_data))
 
-    def handle_read_request(self, read_request: bytes):
+    def handle_read_request(self, packet_header: bytes):
         """Handles requests, where SigmaStudio wants to read from the DSP.
 
         Args:
@@ -137,17 +141,17 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         """
 
         # This indicates the total length of the read packet (uint32)
-        total_length = bytes_to_int32(read_request, 1)
+        total_length = bytes_to_int32(packet_header, 1)
         del total_length
 
         # The address of the chip from which the data has to be read
-        chip_address = bytes_to_int8(read_request, 5)
+        chip_address = bytes_to_int8(packet_header, 5)
 
         # The length of the data (uint32)
-        data_length = bytes_to_int32(read_request, 6)
+        data_length = bytes_to_int32(packet_header, 6)
 
         # The address of the module whose data is being read from the DSP (uint16)
-        address = bytes_to_int16(read_request, 10)
+        address = bytes_to_int16(packet_header, 10)
 
         # Notify application of read request
         self.server.queue.put(ReadRequest(address, data_length))
@@ -190,20 +194,24 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         It never stops, except if the connection is reset.
         """
         while True:
-            # Receive the packet header.
-            payload_data = self.receive_amount(ThreadedSigmaTcpRequestHandler.HEADER_LENGTH)
+            try:
+                # Receive the packet header in the beginning.
+                packet_header = self.receive_amount(ThreadedSigmaTcpRequestHandler.HEADER_LENGTH)
 
-            # The first byte of the header contains the command from SigmaStudio.
-            command = payload_data[0]
+                # The first byte of the header contains the command from SigmaStudio.
+                command = packet_header[0]
 
-            if command == ThreadedSigmaTcpRequestHandler.COMMAND_WRITE:
-                self.handle_write_data(payload_data)
+                if command == ThreadedSigmaTcpRequestHandler.COMMAND_WRITE:
+                    self.handle_write_data(packet_header)
 
-            elif command == ThreadedSigmaTcpRequestHandler.COMMAND_READ:
-                self.handle_read_request(payload_data)
+                elif command == ThreadedSigmaTcpRequestHandler.COMMAND_READ:
+                    self.handle_read_request(packet_header)
 
-            else:
-                logging.info("Received unknown command: %d", command)
+                else:
+                    logging.info("Received an unknown command code '%s'.", hex(command))
+
+            except ConnectionError:
+                break
 
 
 class SigmaTCPServer:

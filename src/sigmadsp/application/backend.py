@@ -111,7 +111,7 @@ class BackendService(BackendServicer):
         )
 
         # Create the worker thread for the handler itself
-        worker_thread = threading.Thread(target=self.worker, name="Worker thread")
+        worker_thread = threading.Thread(target=self.worker, name="Backend service worker thread")
         worker_thread.daemon = True
         worker_thread.start()
 
