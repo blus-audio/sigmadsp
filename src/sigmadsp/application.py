@@ -1,5 +1,5 @@
-from communication.sigma_tcp_server import ThreadedSigmaTcpRequestHandler, ThreadedTCPServer, SigmaTCPServer
-from hardware.spi import SpiHandler
+from sigmadsp.communication.sigma_tcp_server import ThreadedSigmaTcpRequestHandler, ThreadedTCPServer, SigmaTCPServer
+from sigmadsp.hardware.spi import SpiHandler
 
 import threading
 import multiprocessing
