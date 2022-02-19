@@ -13,20 +13,35 @@ DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class ChangeVolume(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    CELL_NAME_FIELD_NUMBER: builtins.int
+    NAME_TOKENS_FIELD_NUMBER: builtins.int
     VALUE_FIELD_NUMBER: builtins.int
     RELATIVE_FIELD_NUMBER: builtins.int
-    cell_name: typing.Text
+    @property
+    def name_tokens(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
     value: builtins.float
     relative: builtins.bool
     def __init__(self,
         *,
-        cell_name: typing.Text = ...,
+        name_tokens: typing.Optional[typing.Iterable[typing.Text]] = ...,
         value: builtins.float = ...,
         relative: builtins.bool = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["cell_name",b"cell_name","relative",b"relative","value",b"value"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["name_tokens",b"name_tokens","relative",b"relative","value",b"value"]) -> None: ...
 global___ChangeVolume = ChangeVolume
+
+class ControlParameterRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    CHANGE_VOLUME_FIELD_NUMBER: builtins.int
+    @property
+    def change_volume(self) -> global___ChangeVolume: ...
+    def __init__(self,
+        *,
+        change_volume: typing.Optional[global___ChangeVolume] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["change_volume",b"change_volume","command",b"command"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["change_volume",b"change_volume","command",b"command"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["command",b"command"]) -> typing.Optional[typing_extensions.Literal["change_volume"]]: ...
+global___ControlParameterRequest = ControlParameterRequest
 
 class LoadParameters(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -42,23 +57,19 @@ global___LoadParameters = LoadParameters
 
 class ControlRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    CHANGE_VOLUME_FIELD_NUMBER: builtins.int
     RESET_DSP_FIELD_NUMBER: builtins.int
     LOAD_PARAMETERS_FIELD_NUMBER: builtins.int
-    @property
-    def change_volume(self) -> global___ChangeVolume: ...
     reset_dsp: builtins.bool
     @property
     def load_parameters(self) -> global___LoadParameters: ...
     def __init__(self,
         *,
-        change_volume: typing.Optional[global___ChangeVolume] = ...,
         reset_dsp: builtins.bool = ...,
         load_parameters: typing.Optional[global___LoadParameters] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["change_volume",b"change_volume","command",b"command","load_parameters",b"load_parameters","reset_dsp",b"reset_dsp"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["change_volume",b"change_volume","command",b"command","load_parameters",b"load_parameters","reset_dsp",b"reset_dsp"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["command",b"command"]) -> typing.Optional[typing_extensions.Literal["change_volume","reset_dsp","load_parameters"]]: ...
+    def HasField(self, field_name: typing_extensions.Literal["command",b"command","load_parameters",b"load_parameters","reset_dsp",b"reset_dsp"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["command",b"command","load_parameters",b"load_parameters","reset_dsp",b"reset_dsp"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["command",b"command"]) -> typing.Optional[typing_extensions.Literal["reset_dsp","load_parameters"]]: ...
 global___ControlRequest = ControlRequest
 
 class ControlResponse(google.protobuf.message.Message):

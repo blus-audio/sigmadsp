@@ -3,9 +3,15 @@ syntax = "proto3";
 package sigmadsp.backend_service;
 
 message ChangeVolume {
-  string cell_name = 1;
+  repeated string name_tokens = 1;
   double value = 2;
   bool relative = 3;
+}
+
+message ControlParameterRequest {
+  oneof command {
+    ChangeVolume change_volume = 1;
+  }
 }
 
 message LoadParameters {
@@ -14,9 +20,8 @@ message LoadParameters {
 
 message ControlRequest {
   oneof command {
-    ChangeVolume change_volume = 1;
-    bool reset_dsp = 2;
-    LoadParameters load_parameters = 3;
+    bool reset_dsp = 1;
+    LoadParameters load_parameters = 2;
   }
 }
 
@@ -27,5 +32,5 @@ message ControlResponse {
 
 service Backend {
   rpc control (ControlRequest) returns (ControlResponse);
-  rpc control_parameter (ControlRequest) returns (ControlResponse);
+  rpc control_parameter (ControlParameterRequest) returns (ControlResponse);
 }

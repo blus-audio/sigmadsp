@@ -21,6 +21,7 @@ from sigmadsp.communication.sigma_tcp_server import (
     WriteRequest,
 )
 from sigmadsp.generated.backend_service.control_pb2 import (
+    ControlParameterRequest,
     ControlRequest,
     ControlResponse,
 )
@@ -94,7 +95,9 @@ class BackendService(BackendServicer):
         """
         super().__init__()
 
+        # If configuration_unlocked is False, no DSP parameters can be changed.
         self.configuration_unlocked: bool = False
+
         self.settings = settings
 
         # Create an SPI handler, along with its thread
@@ -133,7 +136,8 @@ class BackendService(BackendServicer):
     def safety_check(self) -> None:
         """Checks a hash cell within the DSP's memory against a hash value from the parameter file.
 
-        Only if they match, configuration of the DSP is allowed.
+        Only if they match, configuration of DSP parameters is allowed. Other operations (e.g. reset, or
+        loading a new parameter file) are still allowed, even in a locked configuration state.
         """
         safety_hash_cell = self.settings.parameter_parser.safety_hash_cell
 
@@ -168,14 +172,14 @@ class BackendService(BackendServicer):
 
                 self.sigma_tcp_server.put_request(ReadResponse(payload))
 
-    def control_parameter(self, request: ControlRequest, context):
+    def control_parameter(self, request: ControlParameterRequest, context):
         """Main backend entry point for control messages that change or read parameters.
 
         Here, the configuration has to be in an unlocked state, which requires a hash number in the DSP firmware to
         match the hash number that is provided in the parameter file.
 
         Args:
-            request (ControlRequest): The request that the backend shall handle.
+            request (ControlParameterRequest): The request that the backend shall handle.
             context (Any): The context within which to handle the request (unused).
 
         Returns:
@@ -185,32 +189,39 @@ class BackendService(BackendServicer):
 
         # Determine the type of control request.
         command = request.WhichOneof("command")
+        response.success = False
 
         if not self.configuration_unlocked:
             # Do not allow to change parameters.
-            response.success = False
             response.message = "Configuration locked, parameters cannot be changed."
             return response
 
         if "change_volume" == command:
-            for volume_cell in self.settings.parameter_parser.volume_cells:
-                if volume_cell.name == request.change_volume.cell_name:
+            volume_cells_to_adjust = self.settings.parameter_parser.get_matching_cells_by_name_tokens(
+                self.settings.parameter_parser.volume_cells, list(request.change_volume.name_tokens)
+            )
 
-                    if request.change_volume.relative:
-                        new_volume_db = self.dsp.adjust_volume(
-                            request.change_volume.value,
-                            volume_cell.parameter_address,
-                        )
+            if not volume_cells_to_adjust:
+                response.message = (
+                    f"No volume cell identified by {request.change_volume.name_tokens} was found."
+                    "Available controls are "
+                    f"{([cell.name_tokens for cell in self.settings.parameter_parser.volume_cells])}."
+                )
 
-                    elif not request.change_volume.relative:
-                        new_volume_db = self.dsp.set_volume(
-                            request.change_volume.value,
-                            volume_cell.parameter_address,
-                        )
+            for volume_cell in volume_cells_to_adjust:
+                if request.change_volume.relative:
+                    new_volume_db = self.dsp.adjust_volume(
+                        request.change_volume.value,
+                        volume_cell.parameter_address,
+                    )
 
-                    response.message = f"Set volume of '{request.change_volume.cell_name}' to {new_volume_db:.2f} dB."
+                elif not request.change_volume.relative:
+                    new_volume_db = self.dsp.set_volume(
+                        request.change_volume.value,
+                        volume_cell.parameter_address,
+                    )
 
-                    break
+                response.message = f"Set volume of cell '{volume_cell.full_name}' to {new_volume_db:.2f} dB."
 
         response.success = True
         return response
@@ -236,8 +247,15 @@ class BackendService(BackendServicer):
 
         elif "load_parameters" == command:
             self.settings.store_parameters(list(request.load_parameters.content))
-            response.message = "Loaded parameters"
+
+            # Repeat safety check after loading a new set of parameters
             self.safety_check()
+
+            if self.configuration_unlocked:
+                response.message = "Loaded parameters, control is unlocked."
+
+            else:
+                response.message = "Safety check failed, parameters cannot be adjusted."
 
         response.success = True
         return response

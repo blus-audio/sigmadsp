@@ -33,6 +33,11 @@ class Adau14xx:
     FIXPOINT_REGISTER_LENGTH = 4
 
     def __init__(self, spi_handler: SpiHandler):
+        """Initialize the DSP with an SpiHandler that talks to it.
+
+        Args:
+            spi_handler (SpiHandler): The SpiHandler that communicates with the DSP.
+        """
         self.spi_handler = spi_handler
 
     def soft_reset(self):

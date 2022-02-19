@@ -21,7 +21,7 @@ class BackendStub(object):
                 )
         self.control_parameter = channel.unary_unary(
                 '/sigmadsp.backend_service.Backend/control_parameter',
-                request_serializer=control__pb2.ControlRequest.SerializeToString,
+                request_serializer=control__pb2.ControlParameterRequest.SerializeToString,
                 response_deserializer=control__pb2.ControlResponse.FromString,
                 )
 
@@ -51,7 +51,7 @@ def add_BackendServicer_to_server(servicer, server):
             ),
             'control_parameter': grpc.unary_unary_rpc_method_handler(
                     servicer.control_parameter,
-                    request_deserializer=control__pb2.ControlRequest.FromString,
+                    request_deserializer=control__pb2.ControlParameterRequest.FromString,
                     response_serializer=control__pb2.ControlResponse.SerializeToString,
             ),
     }
@@ -93,7 +93,7 @@ class Backend(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/sigmadsp.backend_service.Backend/control_parameter',
-            control__pb2.ControlRequest.SerializeToString,
+            control__pb2.ControlParameterRequest.SerializeToString,
             control__pb2.ControlResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

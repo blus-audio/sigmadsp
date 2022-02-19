@@ -1,61 +1,88 @@
 """A module that parses SigmaStudio project files and extracts adjustable cells."""
 import logging
+from dataclasses import dataclass
+from itertools import dropwhile, takewhile
 from typing import List, Union
 
+prefix_separator: str = "_"
 
+adjustable_prefix: str = "adjustable"
+target_parameter: str = "target"
+volume_prefix: str = "volume"
+safety_hash: str = "safety_hash"
+
+valid_prefix_tokens: List[str] = [adjustable_prefix, volume_prefix]
+
+
+@dataclass
 class Cell:
     """A cell object is a unit, which represents a cell from SigmaStudio."""
 
-    adjustable_prefix = "adjustable_"
-    volume_identifier = "volume"
-    safety_hash = "safety_hash"
+    # The full name of the cell (e.g. 'adjustable_volume_main_left')
+    full_name: str
 
-    def __init__(self, name: str):
-        """Initializes a new cell.
+    # The register address of the parameter
+    parameter_address: int
 
-        Args:
-            name (str): The name of the cell, as a list of string tokens.
-        """
-        self.name: str = name
+    # The name of the parameter, as defined in SigmaStudio
+    parameter_name: str
 
-        # The value of the parameter that is stored in this cell
-        self.parameter_value: Union[int, float, None] = None
-
-        # The address of the parameter in the DSP's memory
-        self.parameter_address: int
-
-        # The name of the parameter
-        self.parameter_name: str
+    # The value of the parameter, if applicable
+    parameter_value: Union[int, float, None] = None
 
     @property
-    def is_safety_hash_cell(self) -> bool:
-        """Determine, whether this is a safety hash cell.
+    def full_name_tokens(self) -> List[str]:
+        """The separated full name, where the separator string is removed.
+
+        For example 'adjustable_volume_main_left' is converted to ['adjustable', 'volume', 'main', 'left']
 
         Returns:
-            bool: True, if it is a safety hash cell, False otherwise.
+            List[str]: The list of tokens in the full name.
         """
-        return Cell.safety_hash == self.name
+        return self.full_name.split(prefix_separator)
 
     @property
-    def is_adjustable_cell(self) -> bool:
-        """Determine, whether this is a user adjustable cell.
+    def name_tokens(self) -> List[str]:
+        """Returns the name tokens of the cell without prefix tokens.
+
+        For example ['main', 'left'] for a full cell name 'adjustable_volume_main_left'.
 
         Returns:
-            bool: True, if adjustable, False otherwise.
+            str: The unprefixed cell name, if prefix tokens exist. The 'full_name_tokens' otherwise.
         """
-        return self.name.startswith(Cell.adjustable_prefix)
+        if self.prefix_tokens is None:
+            return self.full_name_tokens
+
+        return self.full_name_tokens[len(self.prefix_tokens) :]
 
     @property
-    def is_adjustable_volume_cell(self):
-        """Determine, whether this is an adjustable volume cell.
+    def prefix_tokens(self) -> List[str]:
+        """Returns only the prefix tokens of the cell.
+
+        For example ['adjustable', 'volume'] for a full cell name 'adjustable_volume_main_left'.
 
         Returns:
-            bool: True, if an adjustable volume cell, False otherwise.
+            Union[List[str], None]: The list of tokens, if they are valid prefixes, None otherwise.
         """
-        if self.parameter_value is not None:
-            return self.is_adjustable_cell and (Cell.volume_identifier in self.name)
+        if prefix_separator in self.full_name:
+            return [prefix for prefix in self.full_name_tokens if prefix in valid_prefix_tokens]
 
-        return False
+        else:
+            return []
+
+    @property
+    def is_adjustable(self):
+        return adjustable_prefix in self.prefix_tokens
+
+    @property
+    def is_safety_hash(self):
+        return self.full_name == safety_hash
+
+    @property
+    def is_volume_cell(self):
+        return (
+            self.is_adjustable and (volume_prefix in self.prefix_tokens) and (target_parameter in self.parameter_name)
+        )
 
 
 class Parser:
@@ -81,37 +108,53 @@ class Parser:
         try:
             with open(file_path, "r", encoding="utf8") as file:
                 logging.info("Using parameter file path %s.", file_path)
-                lines = file.readlines()
 
-                cell: Cell
+                line_iterator = iter(file.readlines())
 
-                for line in lines:
-                    split_line = line.split()
+                while True:
+                    # The cascaded iterator looks for blocks within the parameter file, which define a cell.
+                    # These blocks are surrounded by empty lines that only contain '\n'.
+                    cell_lines = list(takewhile(lambda x: x != "\n", dropwhile(lambda x: x == "\n", line_iterator)))
 
-                    if split_line:
-                        if split_line[0] == "Cell" and split_line[1] == "Name":
-                            name = " ".join(split_line[3:])
-                            cell = Cell(name)
-                            self.cells.append(cell)
+                    if not cell_lines:
+                        # No more blocks to be found in the parameter file.
+                        break
 
-                        elif split_line[0] == "Parameter":
+                    for line in cell_lines:
+                        # Assemble a cell from the information in the cell_lines
+                        split_line = line.split()
 
-                            if split_line[1] == "Name":
-                                cell.parameter_name = " ".join(split_line[3:])
+                        if split_line:
+                            if split_line[0] == "Cell" and split_line[1] == "Name":
 
-                            if split_line[1] == "Address":
-                                cell.parameter_address = int(split_line[3])
+                                name = " ".join(split_line[3:])
 
-                            if split_line[1] == "Value":
-                                data = split_line[3]
+                            elif split_line[0] == "Parameter":
 
-                                try:
-                                    cell.parameter_value = int(data)
+                                if split_line[1] == "Name":
+                                    parameter_name = " ".join(split_line[3:])
 
-                                except ValueError:
-                                    cell.parameter_value = float(data)
+                                if split_line[1] == "Address":
+                                    parameter_address = int(split_line[3])
 
-                logging.info("Found a total number of %d parameter cells.", len(self.cells))
+                                if split_line[1] == "Value":
+                                    data = split_line[3]
+
+                                    parameter_value: Union[float, int, None] = None
+
+                                    try:
+                                        parameter_value = int(data)
+
+                                    except ValueError:
+                                        parameter_value = float(data)
+
+                    # Create a new cell, based on the collected parameters
+                    cell = Cell(name, parameter_address, parameter_name, parameter_value)
+
+                    if cell not in self.cells:
+                        self.cells.append(cell)
+
+                logging.info("Found a total number of %d unique parameter cells.", len(self.cells))
 
         except FileNotFoundError:
             logging.info("Parameter file %s not found.", file_path)
@@ -123,9 +166,10 @@ class Parser:
         Returns:
             Cell: The safety hash cell.
         """
-        safety_hash_cells = [cell for cell in self.cells if cell.is_safety_hash_cell]
+        safety_hash_cells = [cell for cell in self.cells if cell.is_safety_hash]
 
         if 1 != len(safety_hash_cells):
+            # There must be exactly one safety hash cell.
             return None
 
         else:
@@ -138,4 +182,16 @@ class Parser:
         Returns:
             List[Cell]: The list of adjustable volume cells
         """
-        return [cell for cell in self.cells if cell.is_adjustable_volume_cell]
+        return [cell for cell in self.cells if cell.is_volume_cell]
+
+    def get_matching_cells_by_name_tokens(self, all_cells: List[Cell], name_tokens: List[str]) -> List[Cell]:
+        """Finds cells in a list of cells, whose names match the specified name tokens.
+
+        Args:
+            all_cells (List[Cell]): The list of cells to parse.
+            name_tokens (List[str]): The tokens to check against.
+
+        Returns:
+            List[Cell]: The matched cells
+        """
+        return [cell for cell in all_cells if name_tokens == cell.name_tokens]

@@ -8,6 +8,7 @@ import logging
 import grpc
 
 from sigmadsp.generated.backend_service.control_pb2 import (
+    ControlParameterRequest,
     ControlRequest,
     ControlResponse,
 )
@@ -79,25 +80,26 @@ def main():
     if arguments.address is not None:
         backend_address = arguments.address
 
-    control_request = ControlRequest()
     response: ControlResponse
+    control_request = ControlRequest()
+    control_parameter_request = ControlParameterRequest()
 
     with grpc.insecure_channel(f"{backend_address}:{backend_port}") as channel:
         stub = BackendStub(channel)
 
         if arguments.adjust_volume is not None:
-            control_request.change_volume.cell_name = "adjustable_volume_main"
-            control_request.change_volume.value = arguments.adjust_volume
-            control_request.change_volume.relative = True
+            control_parameter_request.change_volume.name_tokens[:] = ["main"]
+            control_parameter_request.change_volume.value = arguments.adjust_volume
+            control_parameter_request.change_volume.relative = True
 
-            response = stub.control_parameter(control_request)
+            response = stub.control_parameter(control_parameter_request)
 
         if arguments.set_volume is not None:
-            control_request.change_volume.cell_name = "adjustable_volume_main"
-            control_request.change_volume.value = arguments.set_volume
-            control_request.change_volume.relative = False
+            control_parameter_request.change_volume.name_tokens[:] = ["main"]
+            control_parameter_request.change_volume.value = arguments.set_volume
+            control_parameter_request.change_volume.relative = False
 
-            response = stub.control_parameter(control_request)
+            response = stub.control_parameter(control_parameter_request)
 
         if arguments.load_parameters is not None:
             with open(arguments.load_parameters, "r", encoding="utf8") as parameter_file:
@@ -107,8 +109,6 @@ def main():
 
         if arguments.reset is True:
             control_request.reset_dsp = True
-
-            response = stub.control(control_request)
 
             response = stub.control(control_request)
 

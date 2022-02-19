@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\rcontrol.proto\x12\x18sigmadsp.backend_service\"B\n\x0c\x43hangeVolume\x12\x11\n\tcell_name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01\x12\x10\n\x08relative\x18\x03 \x01(\x08\"!\n\x0eLoadParameters\x12\x0f\n\x07\x63ontent\x18\x01 \x03(\t\"\xb6\x01\n\x0e\x43ontrolRequest\x12?\n\rchange_volume\x18\x01 \x01(\x0b\x32&.sigmadsp.backend_service.ChangeVolumeH\x00\x12\x13\n\treset_dsp\x18\x02 \x01(\x08H\x00\x12\x43\n\x0fload_parameters\x18\x03 \x01(\x0b\x32(.sigmadsp.backend_service.LoadParametersH\x00\x42\t\n\x07\x63ommand\"3\n\x0f\x43ontrolResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t2\xd3\x01\n\x07\x42\x61\x63kend\x12^\n\x07\x63ontrol\x12(.sigmadsp.backend_service.ControlRequest\x1a).sigmadsp.backend_service.ControlResponse\x12h\n\x11\x63ontrol_parameter\x12(.sigmadsp.backend_service.ControlRequest\x1a).sigmadsp.backend_service.ControlResponseb\x06proto3'
+  serialized_pb=b'\n\rcontrol.proto\x12\x18sigmadsp.backend_service\"D\n\x0c\x43hangeVolume\x12\x13\n\x0bname_tokens\x18\x01 \x03(\t\x12\r\n\x05value\x18\x02 \x01(\x01\x12\x10\n\x08relative\x18\x03 \x01(\x08\"e\n\x17\x43ontrolParameterRequest\x12?\n\rchange_volume\x18\x01 \x01(\x0b\x32&.sigmadsp.backend_service.ChangeVolumeH\x00\x42\t\n\x07\x63ommand\"!\n\x0eLoadParameters\x12\x0f\n\x07\x63ontent\x18\x01 \x03(\t\"u\n\x0e\x43ontrolRequest\x12\x13\n\treset_dsp\x18\x01 \x01(\x08H\x00\x12\x43\n\x0fload_parameters\x18\x02 \x01(\x0b\x32(.sigmadsp.backend_service.LoadParametersH\x00\x42\t\n\x07\x63ommand\"3\n\x0f\x43ontrolResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t2\xdc\x01\n\x07\x42\x61\x63kend\x12^\n\x07\x63ontrol\x12(.sigmadsp.backend_service.ControlRequest\x1a).sigmadsp.backend_service.ControlResponse\x12q\n\x11\x63ontrol_parameter\x12\x31.sigmadsp.backend_service.ControlParameterRequest\x1a).sigmadsp.backend_service.ControlResponseb\x06proto3'
 )
 
 
@@ -34,9 +34,9 @@ _CHANGEVOLUME = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='cell_name', full_name='sigmadsp.backend_service.ChangeVolume.cell_name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
+      name='name_tokens', full_name='sigmadsp.backend_service.ChangeVolume.name_tokens', index=0,
+      number=1, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -67,7 +67,44 @@ _CHANGEVOLUME = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=43,
-  serialized_end=109,
+  serialized_end=111,
+)
+
+
+_CONTROLPARAMETERREQUEST = _descriptor.Descriptor(
+  name='ControlParameterRequest',
+  full_name='sigmadsp.backend_service.ControlParameterRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='change_volume', full_name='sigmadsp.backend_service.ControlParameterRequest.change_volume', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+    _descriptor.OneofDescriptor(
+      name='command', full_name='sigmadsp.backend_service.ControlParameterRequest.command',
+      index=0, containing_type=None,
+      create_key=_descriptor._internal_create_key,
+    fields=[]),
+  ],
+  serialized_start=113,
+  serialized_end=214,
 )
 
 
@@ -98,8 +135,8 @@ _LOADPARAMETERS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=111,
-  serialized_end=144,
+  serialized_start=216,
+  serialized_end=249,
 )
 
 
@@ -112,22 +149,15 @@ _CONTROLREQUEST = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='change_volume', full_name='sigmadsp.backend_service.ControlRequest.change_volume', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='reset_dsp', full_name='sigmadsp.backend_service.ControlRequest.reset_dsp', index=1,
-      number=2, type=8, cpp_type=7, label=1,
+      name='reset_dsp', full_name='sigmadsp.backend_service.ControlRequest.reset_dsp', index=0,
+      number=1, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='load_parameters', full_name='sigmadsp.backend_service.ControlRequest.load_parameters', index=2,
-      number=3, type=11, cpp_type=10, label=1,
+      name='load_parameters', full_name='sigmadsp.backend_service.ControlRequest.load_parameters', index=1,
+      number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -149,8 +179,8 @@ _CONTROLREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=147,
-  serialized_end=329,
+  serialized_start=251,
+  serialized_end=368,
 )
 
 
@@ -188,15 +218,15 @@ _CONTROLRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=331,
-  serialized_end=382,
+  serialized_start=370,
+  serialized_end=421,
 )
 
-_CONTROLREQUEST.fields_by_name['change_volume'].message_type = _CHANGEVOLUME
+_CONTROLPARAMETERREQUEST.fields_by_name['change_volume'].message_type = _CHANGEVOLUME
+_CONTROLPARAMETERREQUEST.oneofs_by_name['command'].fields.append(
+  _CONTROLPARAMETERREQUEST.fields_by_name['change_volume'])
+_CONTROLPARAMETERREQUEST.fields_by_name['change_volume'].containing_oneof = _CONTROLPARAMETERREQUEST.oneofs_by_name['command']
 _CONTROLREQUEST.fields_by_name['load_parameters'].message_type = _LOADPARAMETERS
-_CONTROLREQUEST.oneofs_by_name['command'].fields.append(
-  _CONTROLREQUEST.fields_by_name['change_volume'])
-_CONTROLREQUEST.fields_by_name['change_volume'].containing_oneof = _CONTROLREQUEST.oneofs_by_name['command']
 _CONTROLREQUEST.oneofs_by_name['command'].fields.append(
   _CONTROLREQUEST.fields_by_name['reset_dsp'])
 _CONTROLREQUEST.fields_by_name['reset_dsp'].containing_oneof = _CONTROLREQUEST.oneofs_by_name['command']
@@ -204,6 +234,7 @@ _CONTROLREQUEST.oneofs_by_name['command'].fields.append(
   _CONTROLREQUEST.fields_by_name['load_parameters'])
 _CONTROLREQUEST.fields_by_name['load_parameters'].containing_oneof = _CONTROLREQUEST.oneofs_by_name['command']
 DESCRIPTOR.message_types_by_name['ChangeVolume'] = _CHANGEVOLUME
+DESCRIPTOR.message_types_by_name['ControlParameterRequest'] = _CONTROLPARAMETERREQUEST
 DESCRIPTOR.message_types_by_name['LoadParameters'] = _LOADPARAMETERS
 DESCRIPTOR.message_types_by_name['ControlRequest'] = _CONTROLREQUEST
 DESCRIPTOR.message_types_by_name['ControlResponse'] = _CONTROLRESPONSE
@@ -215,6 +246,13 @@ ChangeVolume = _reflection.GeneratedProtocolMessageType('ChangeVolume', (_messag
   # @@protoc_insertion_point(class_scope:sigmadsp.backend_service.ChangeVolume)
   })
 _sym_db.RegisterMessage(ChangeVolume)
+
+ControlParameterRequest = _reflection.GeneratedProtocolMessageType('ControlParameterRequest', (_message.Message,), {
+  'DESCRIPTOR' : _CONTROLPARAMETERREQUEST,
+  '__module__' : 'control_pb2'
+  # @@protoc_insertion_point(class_scope:sigmadsp.backend_service.ControlParameterRequest)
+  })
+_sym_db.RegisterMessage(ControlParameterRequest)
 
 LoadParameters = _reflection.GeneratedProtocolMessageType('LoadParameters', (_message.Message,), {
   'DESCRIPTOR' : _LOADPARAMETERS,
@@ -246,8 +284,8 @@ _BACKEND = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=385,
-  serialized_end=596,
+  serialized_start=424,
+  serialized_end=644,
   methods=[
   _descriptor.MethodDescriptor(
     name='control',
@@ -264,7 +302,7 @@ _BACKEND = _descriptor.ServiceDescriptor(
     full_name='sigmadsp.backend_service.Backend.control_parameter',
     index=1,
     containing_service=None,
-    input_type=_CONTROLREQUEST,
+    input_type=_CONTROLPARAMETERREQUEST,
     output_type=_CONTROLRESPONSE,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
