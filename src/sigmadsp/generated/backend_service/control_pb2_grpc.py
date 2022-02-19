@@ -19,6 +19,11 @@ class BackendStub(object):
                 request_serializer=control__pb2.ControlRequest.SerializeToString,
                 response_deserializer=control__pb2.ControlResponse.FromString,
                 )
+        self.control_parameter = channel.unary_unary(
+                '/sigmadsp.backend_service.Backend/control_parameter',
+                request_serializer=control__pb2.ControlRequest.SerializeToString,
+                response_deserializer=control__pb2.ControlResponse.FromString,
+                )
 
 
 class BackendServicer(object):
@@ -30,11 +35,22 @@ class BackendServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def control_parameter(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_BackendServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'control': grpc.unary_unary_rpc_method_handler(
                     servicer.control,
+                    request_deserializer=control__pb2.ControlRequest.FromString,
+                    response_serializer=control__pb2.ControlResponse.SerializeToString,
+            ),
+            'control_parameter': grpc.unary_unary_rpc_method_handler(
+                    servicer.control_parameter,
                     request_deserializer=control__pb2.ControlRequest.FromString,
                     response_serializer=control__pb2.ControlResponse.SerializeToString,
             ),
@@ -60,6 +76,23 @@ class Backend(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/sigmadsp.backend_service.Backend/control',
+            control__pb2.ControlRequest.SerializeToString,
+            control__pb2.ControlResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def control_parameter(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/sigmadsp.backend_service.Backend/control_parameter',
             control__pb2.ControlRequest.SerializeToString,
             control__pb2.ControlResponse.FromString,
             options, channel_credentials,

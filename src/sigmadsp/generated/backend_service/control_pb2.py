@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\rcontrol.proto\x12\x18sigmadsp.backend_service\"B\n\x0c\x43hangeVolume\x12\x11\n\tcell_name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01\x12\x10\n\x08relative\x18\x03 \x01(\x08\"!\n\x0eLoadParameters\x12\x0f\n\x07\x63ontent\x18\x01 \x03(\t\"\xb6\x01\n\x0e\x43ontrolRequest\x12?\n\rchange_volume\x18\x01 \x01(\x0b\x32&.sigmadsp.backend_service.ChangeVolumeH\x00\x12\x13\n\treset_dsp\x18\x02 \x01(\x08H\x00\x12\x43\n\x0fload_parameters\x18\x03 \x01(\x0b\x32(.sigmadsp.backend_service.LoadParametersH\x00\x42\t\n\x07\x63ommand\"3\n\x0f\x43ontrolResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t2i\n\x07\x42\x61\x63kend\x12^\n\x07\x63ontrol\x12(.sigmadsp.backend_service.ControlRequest\x1a).sigmadsp.backend_service.ControlResponseb\x06proto3'
+  serialized_pb=b'\n\rcontrol.proto\x12\x18sigmadsp.backend_service\"B\n\x0c\x43hangeVolume\x12\x11\n\tcell_name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01\x12\x10\n\x08relative\x18\x03 \x01(\x08\"!\n\x0eLoadParameters\x12\x0f\n\x07\x63ontent\x18\x01 \x03(\t\"\xb6\x01\n\x0e\x43ontrolRequest\x12?\n\rchange_volume\x18\x01 \x01(\x0b\x32&.sigmadsp.backend_service.ChangeVolumeH\x00\x12\x13\n\treset_dsp\x18\x02 \x01(\x08H\x00\x12\x43\n\x0fload_parameters\x18\x03 \x01(\x0b\x32(.sigmadsp.backend_service.LoadParametersH\x00\x42\t\n\x07\x63ommand\"3\n\x0f\x43ontrolResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t2\xd3\x01\n\x07\x42\x61\x63kend\x12^\n\x07\x63ontrol\x12(.sigmadsp.backend_service.ControlRequest\x1a).sigmadsp.backend_service.ControlResponse\x12h\n\x11\x63ontrol_parameter\x12(.sigmadsp.backend_service.ControlRequest\x1a).sigmadsp.backend_service.ControlResponseb\x06proto3'
 )
 
 
@@ -246,13 +246,23 @@ _BACKEND = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=384,
-  serialized_end=489,
+  serialized_start=385,
+  serialized_end=596,
   methods=[
   _descriptor.MethodDescriptor(
     name='control',
     full_name='sigmadsp.backend_service.Backend.control',
     index=0,
+    containing_service=None,
+    input_type=_CONTROLREQUEST,
+    output_type=_CONTROLRESPONSE,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='control_parameter',
+    full_name='sigmadsp.backend_service.Backend.control_parameter',
+    index=1,
     containing_service=None,
     input_type=_CONTROLREQUEST,
     output_type=_CONTROLRESPONSE,

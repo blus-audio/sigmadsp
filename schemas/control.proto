@@ -27,4 +27,5 @@ message ControlResponse {
 
 service Backend {
   rpc control (ControlRequest) returns (ControlResponse);
+  rpc control_parameter (ControlRequest) returns (ControlResponse);
 }

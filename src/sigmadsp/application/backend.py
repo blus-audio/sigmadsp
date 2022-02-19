@@ -94,6 +94,7 @@ class BackendService(BackendServicer):
         """
         super().__init__()
 
+        self.configuration_unlocked: bool = False
         self.settings = settings
 
         # Create an SPI handler, along with its thread
@@ -127,6 +128,30 @@ class BackendService(BackendServicer):
             )
             sys.exit(0)
 
+        self.safety_check()
+
+    def safety_check(self) -> None:
+        """Checks a hash cell within the DSP's memory against a hash value from the parameter file.
+
+        Only if they match, configuration of the DSP is allowed.
+        """
+        safety_hash_cell = self.settings.parameter_parser.safety_hash_cell
+
+        if safety_hash_cell is None:
+            logging.warning("Safety hash in cell not present! Configuration locked.")
+            self.configuration_unlocked = False
+
+        else:
+            dsp_hash = self.dsp.get_parameter_value(safety_hash_cell.parameter_address, data_format="int")
+
+            if safety_hash_cell.parameter_value != dsp_hash:
+                logging.warning("Safety hash in cell does not match! Configuration locked.")
+                self.configuration_unlocked = False
+
+            else:
+                logging.info("Safety check successful. Configuration unlocked.")
+                self.configuration_unlocked = True
+
     def worker(self):
         """Main worker functionality.
 
@@ -143,8 +168,11 @@ class BackendService(BackendServicer):
 
                 self.sigma_tcp_server.put_request(ReadResponse(payload))
 
-    def control(self, request: ControlRequest, context):
-        """Main backend entry point for control messages.
+    def control_parameter(self, request: ControlRequest, context):
+        """Main backend entry point for control messages that change or read parameters.
+
+        Here, the configuration has to be in an unlocked state, which requires a hash number in the DSP firmware to
+        match the hash number that is provided in the parameter file.
 
         Args:
             request (ControlRequest): The request that the backend shall handle.
@@ -154,16 +182,17 @@ class BackendService(BackendServicer):
             ControlResponse: A control response message, returned to the caller.
         """
         response = ControlResponse()
-        response.success = True
 
         # Determine the type of control request.
         command = request.WhichOneof("command")
 
-        if "reset_dsp" == command:
-            self.dsp.soft_reset()
-            response.message = "Reset DSP."
+        if not self.configuration_unlocked:
+            # Do not allow to change parameters.
+            response.success = False
+            response.message = "Configuration locked, parameters cannot be changed."
+            return response
 
-        elif "change_volume" == command:
+        if "change_volume" == command:
             for volume_cell in self.settings.parameter_parser.volume_cells:
                 if volume_cell.name == request.change_volume.cell_name:
 
@@ -183,10 +212,34 @@ class BackendService(BackendServicer):
 
                     break
 
+        response.success = True
+        return response
+
+    def control(self, request: ControlRequest, context):
+        """Main backend entry point for control messages.
+
+        Args:
+            request (ControlRequest): The request that the backend shall handle.
+            context (Any): The context within which to handle the request (unused).
+
+        Returns:
+            ControlResponse: A control response message, returned to the caller.
+        """
+        response = ControlResponse()
+
+        # Determine the type of control request.
+        command = request.WhichOneof("command")
+
+        if "reset_dsp" == command:
+            self.dsp.soft_reset()
+            response.message = "Reset DSP."
+
         elif "load_parameters" == command:
             self.settings.store_parameters(list(request.load_parameters.content))
             response.message = "Loaded parameters"
+            self.safety_check()
 
+        response.success = True
         return response
 
 

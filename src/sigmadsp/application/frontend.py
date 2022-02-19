@@ -7,7 +7,10 @@ import logging
 
 import grpc
 
-from sigmadsp.generated.backend_service.control_pb2 import ControlRequest
+from sigmadsp.generated.backend_service.control_pb2 import (
+    ControlRequest,
+    ControlResponse,
+)
 from sigmadsp.generated.backend_service.control_pb2_grpc import BackendStub
 
 
@@ -77,28 +80,39 @@ def main():
         backend_address = arguments.address
 
     control_request = ControlRequest()
-
-    if arguments.adjust_volume is not None:
-        control_request.change_volume.cell_name = "adjustable_volume_main"
-        control_request.change_volume.value = arguments.adjust_volume
-        control_request.change_volume.relative = True
-
-    if arguments.set_volume is not None:
-        control_request.change_volume.cell_name = "adjustable_volume_main"
-        control_request.change_volume.value = arguments.set_volume
-        control_request.change_volume.relative = False
-
-    if arguments.load_parameters is not None:
-        with open(arguments.load_parameters, "r", encoding="utf8") as parameter_file:
-            control_request.load_parameters.content[:] = parameter_file.readlines()
-
-    if arguments.reset is True:
-        control_request.reset_dsp = True
+    response: ControlResponse
 
     with grpc.insecure_channel(f"{backend_address}:{backend_port}") as channel:
         stub = BackendStub(channel)
-        response = stub.control(control_request)
-        logging.info(response.message)
+
+        if arguments.adjust_volume is not None:
+            control_request.change_volume.cell_name = "adjustable_volume_main"
+            control_request.change_volume.value = arguments.adjust_volume
+            control_request.change_volume.relative = True
+
+            response = stub.control_parameter(control_request)
+
+        if arguments.set_volume is not None:
+            control_request.change_volume.cell_name = "adjustable_volume_main"
+            control_request.change_volume.value = arguments.set_volume
+            control_request.change_volume.relative = False
+
+            response = stub.control_parameter(control_request)
+
+        if arguments.load_parameters is not None:
+            with open(arguments.load_parameters, "r", encoding="utf8") as parameter_file:
+                control_request.load_parameters.content[:] = parameter_file.readlines()
+
+            response = stub.control(control_request)
+
+        if arguments.reset is True:
+            control_request.reset_dsp = True
+
+            response = stub.control(control_request)
+
+            response = stub.control(control_request)
+
+    logging.info(response.message)
 
 
 if __name__ == "__main__":

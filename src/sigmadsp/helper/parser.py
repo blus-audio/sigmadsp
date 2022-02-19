@@ -8,6 +8,7 @@ class Cell:
 
     adjustable_prefix = "adjustable_"
     volume_identifier = "volume"
+    safety_hash = "safety_hash"
 
     def __init__(self, name: str):
         """Initializes a new cell.
@@ -25,6 +26,15 @@ class Cell:
 
         # The name of the parameter
         self.parameter_name: str
+
+    @property
+    def is_safety_hash_cell(self) -> bool:
+        """Determine, whether this is a safety hash cell.
+
+        Returns:
+            bool: True, if it is a safety hash cell, False otherwise.
+        """
+        return Cell.safety_hash == self.name
 
     @property
     def is_adjustable_cell(self) -> bool:
@@ -101,10 +111,25 @@ class Parser:
                                 except ValueError:
                                     cell.parameter_value = float(data)
 
-                logging.info("Found a total number of %d cells.", len(self.cells))
+                logging.info("Found a total number of %d parameter cells.", len(self.cells))
 
         except FileNotFoundError:
             logging.info("Parameter file %s not found.", file_path)
+
+    @property
+    def safety_hash_cell(self) -> Union[Cell, None]:
+        """Finds and returns the safety hash cell, if it exists.
+
+        Returns:
+            Cell: The safety hash cell.
+        """
+        safety_hash_cells = [cell for cell in self.cells if cell.is_safety_hash_cell]
+
+        if 1 != len(safety_hash_cells):
+            return None
+
+        else:
+            return safety_hash_cells[0]
 
     @property
     def volume_cells(self) -> List[Cell]:
@@ -113,9 +138,4 @@ class Parser:
         Returns:
             List[Cell]: The list of adjustable volume cells
         """
-        collected_cells = []
-        for cell in self.cells:
-            if cell.is_adjustable_volume_cell:
-                collected_cells.append(cell)
-
-        return collected_cells
+        return [cell for cell in self.cells if cell.is_adjustable_volume_cell]

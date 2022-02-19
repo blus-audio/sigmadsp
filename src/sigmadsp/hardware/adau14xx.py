@@ -7,6 +7,7 @@
 For this, it uses the SpiHandler module, to interface to the DSP.
 """
 import logging
+from typing import Union
 
 from sigmadsp.hardware.spi import SpiHandler
 from sigmadsp.helper.conversion import (
@@ -41,31 +42,46 @@ class Adau14xx:
         self.spi_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(0))
         self.spi_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(1))
 
-    def get_parameter_value(self, address: int) -> float:
+    def get_parameter_value(self, address: int, data_format: str = "float") -> Union[float, int, None]:
         """Gets a parameter value from a chosen register address.
 
         Args:
             address (int): The address to look at.
+            data_format (str): The data type to return the register in. Can be 'float' or 'int'.
 
         Returns:
-            float: Float representation of the register content.
+            Union[float, int, None]: Representation of the register content in the specified format.
         """
 
         data_register = self.spi_handler.read(address, Adau14xx.FIXPOINT_REGISTER_LENGTH)
         data_integer = bytes_to_int32(data_register)
-        data_float = frac_8_24_to_float(data_integer)
-        return data_float
 
-    def set_parameter_value(self, value: float, address: int):
+        if "int" == data_format:
+            return data_integer
+
+        elif "float" == data_format:
+            return frac_8_24_to_float(data_integer)
+
+        else:
+            return None
+
+    def set_parameter_value(self, value: Union[float, int], address: int) -> None:
         """Sets a parameter value for a chosen register address.
 
         Args:
             value (float): The value to store in the register
             address (int): The target address
         """
-        data_integer = float_to_frac_8_24(value)
-        data_register = int32_to_bytes(data_integer)
-        self.spi_handler.write(address, data_register)
+        data_register: Union[bytes, None] = None
+
+        if isinstance(value, float):
+            data_register = int32_to_bytes(float_to_frac_8_24(value))
+
+        elif isinstance(value, int):
+            data_register = int32_to_bytes(value)
+
+        if data_register is not None:
+            self.spi_handler.write(address, data_register)
 
     def set_volume(self, value_db: float, address: int) -> float:
         """Sets the volume register at the given address to a certain value in dB.
@@ -101,6 +117,10 @@ class Adau14xx:
         """
         # Read current volume and apply adjustment
         current_volume = self.get_parameter_value(address)
+
+        if not isinstance(current_volume, float):
+            raise TypeError
+
         linear_adjustment = db_to_linear(adjustment_db)
         new_volume = current_volume * linear_adjustment
 
