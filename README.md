@@ -36,7 +36,7 @@ DSP|Status|Backend settings `dsp_type`
 [ADAU146X](https://www.analog.com/media/en/technical-documentation/data-sheets/ADAU1463-1467.pdf) | Untested, register compatible with ADAU145X | `adau14xx`
 
 ## Installation
-:zap: Running the installation will overwrite your existing configuration. For upgrading, see [Upgrading](#upgrading)!
+:zap: **Running the installation will overwrite your existing configuration.** For upgrading, see [Upgrading](#upgrading)!
 
 For installing, please install git first, with
 
