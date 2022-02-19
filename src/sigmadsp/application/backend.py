@@ -14,6 +14,7 @@ from typing import List
 import grpc
 import yaml
 
+import sigmadsp
 from sigmadsp.communication.sigma_tcp_server import (
     ReadRequest,
     ReadResponse,
@@ -234,6 +235,10 @@ def launch(settings: SigmadspSettings):
 def main():
     """Launch the backend with default settings."""
     logging.basicConfig(level=logging.INFO)
+
+    logging.info(
+        "Starting the sigmadsp backend, version %s.", sigmadsp.__version__
+    )
 
     argument_parser = argparse.ArgumentParser()
     argument_parser.add_argument(
