@@ -24,10 +24,7 @@ setuptools.setup(
     name="sigmadsp",
     author="Adrian Figueroa",
     author_email="elagil@takanome.de",
-    description=(
-        "Package for controlling Sigma DSP devices over SPI, ",
-        "e.g. via SigmaStudio.",
-    ),
+    description="A package for controlling Analog Devices Sigma DSP chipsets.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/elagil/sigmadsp",
