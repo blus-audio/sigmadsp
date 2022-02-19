@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# The name of the python package
+# The name of the python package to install
 PYTHON_PACKAGE=sigmadsp
 
 # The name of the sigmadsp-backend service
@@ -30,7 +30,7 @@ sudo apt-get install -y python3-pip
 # Install the package itself, along with its scripts
 sudo pip3 install $PYTHON_PACKAGE --upgrade
 
-echo "Stopping any old $SIGMADSP_BACKEND services."
+echo "Stopping old $SIGMADSP_BACKEND services."
 for i in $SIGMADSP_BACKEND; do
  sudo systemctl stop $i
  sudo systemctl disable $i
@@ -41,8 +41,16 @@ echo "Generate configuration folder for sigmadsp at $CONFIGURATION_FOLDER."
 
 cat <<EOT >$TEMP_FOLDER/$CONFIGURATION_FILE
 {
+  # The IP address, on which the $SIGMADSP_BACKEND listens.
+  # The default value "0.0.0.0" allows listening on any address.
   "host": "0.0.0.0",
+
+  # The parameter file path, which contains DSP application parameters,
+  # such as cell names, addresses and other information. This parameter file is required
+  # for the backend, in order to be able to control DSP functionality at runtime, e.g. volume.
   "parameter_file_path": "$CONFIGURATION_FOLDER/$PARAMETER_FILE",
+
+  # The type of the DSP to control with the $SIGMADSP_BACKEND service.
   "dsp_type": "$DSP_TYPE"
 }
 EOT
@@ -80,9 +88,6 @@ done
 CONFIG=/boot/config.txt
 TEMP_CONFIG=$TEMP_FOLDER/config.txt
 
-# Ignore failed removal of temporary config
-sudo rm $TEMP_CONFIG || true
-
 cat $CONFIG | grep -v "dtparam=spi" > $TEMP_CONFIG
 echo "dtparam=spi=on # SPI enabled for $SIGMADSP_BACKEND" >> $TEMP_CONFIG
 
@@ -90,4 +95,11 @@ sudo chmod --reference=$CONFIG $TEMP_CONFIG
 sudo chown --reference=$CONFIG $TEMP_CONFIG
 
 sudo mv $TEMP_CONFIG $CONFIG
-echo "Finished installation of $SIGMADSP_BACKEND successfully."
+
+echo ""
+echo "Finished installation of $SIGMADSP_BACKEND."
+
+echo "Find its configuration file in '$CONFIGURATION_FOLDER/$CONFIGURATION_FILE'. It currently contains:"
+echo ""
+
+cat $CONFIGURATION_FOLDER/$CONFIGURATION_FILE
