@@ -1,9 +1,19 @@
 """Installs the SigmaDSP package.
 """
 
+import os
+import sys
+
 import setuptools
 
-import versioneer
+# Add current folder to path
+# This is required to import versioneer in an isolated pip build
+# Prepending allows not to break on a non-isolated build when versioneer
+# is already installed (c.f. https://github.com/scikit-build/cmake-python-distributions/issues/171)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+
+import versioneer  # noqa: E402 # pylint: disable=wrong-import-position
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
