@@ -10,22 +10,22 @@ class Cell:
     adjustable_prefix = "adjustable_"
     volume_identifier = "volume"
 
-    def __init__(self, name: List[str]):
+    def __init__(self, name: str):
         """Initializes a new cell.
 
         Args:
-            name (List[str]): The name of the cell, as a list of string tokens.
+            name (str): The name of the cell, as a list of string tokens.
         """
-        self.name = name
+        self.name: str = name
 
         # The value of the parameter that is stored in this cell
-        self.parameter_value: Union[int, float] = None
+        self.parameter_value: Union[int, float, None] = None
 
         # The address of the parameter in the DSP's memory
-        self.parameter_address: int = None
+        self.parameter_address: int
 
         # The name of the parameter
-        self.parameter_name: str = None
+        self.parameter_name: str
 
     @property
     def is_adjustable_cell(self) -> bool:
@@ -79,7 +79,7 @@ class Parser:
                 logging.info("Using parameter file path %s.", file_path)
                 lines = file.readlines()
 
-                cell: Cell = None
+                cell: Cell
 
                 for line in lines:
                     split_line = line.split()

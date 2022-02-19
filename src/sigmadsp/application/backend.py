@@ -30,7 +30,7 @@ from sigmadsp.generated.backend_service.control_pb2_grpc import (
 )
 from sigmadsp.hardware.adau14xx import Adau14xx
 from sigmadsp.hardware.spi import SpiHandler
-from sigmadsp.helper.parser import Cell, Parser
+from sigmadsp.helper.parser import Parser
 
 
 class SigmadspSettings:
@@ -63,13 +63,9 @@ class SigmadspSettings:
 
         self.load_parameters()
 
-    def load_parameters(self) -> List[Cell]:
+    def load_parameters(self) -> None:
         """Loads parameter cells, according to the parameter file path that is
-        defined in the settings object.
-
-        Returns:
-            List[Cell]: The cells that were found in the parameter file
-        """
+        defined in the settings object."""
         parser = Parser()
         parser.run(self.config["parameters"]["path"])
 
@@ -97,12 +93,11 @@ class BackendService(BackendServicer):
     performing actions with the DSP over SPI.
     """
 
-    def __init__(self, settings: SigmadspSettings = None):
+    def __init__(self, settings: SigmadspSettings):
         """Initialize service and start all relevant threads (TCP, SPI)
 
         Args:
-            settings (SigmadspSettings, optional): The settings object.
-                Defaults to None.
+            settings (SigmadspSettings): The settings object.
         """
         super().__init__()
 
@@ -139,7 +134,7 @@ class BackendService(BackendServicer):
         else:
             logging.error(
                 "DSP type '%s' is not known! Aborting.",
-                self.config["dsp"]["type"],
+                self.settings.config["dsp"]["type"],
             )
             sys.exit(0)
 
@@ -204,7 +199,9 @@ class BackendService(BackendServicer):
                     break
 
         elif "load_parameters" == command:
-            self.settings.store_parameters(request.load_parameters.content)
+            self.settings.store_parameters(
+                list(request.load_parameters.content)
+            )
             response.message = "Loaded parameters"
 
         return response

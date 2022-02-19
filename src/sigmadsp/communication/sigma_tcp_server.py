@@ -3,6 +3,7 @@
 It can receive read/write requests and return with read response
 packets.
 """
+import logging
 import multiprocessing
 import socketserver
 import threading
@@ -52,8 +53,27 @@ class ReadResponse:
     data: bytes
 
 
+class ThreadedTCPServer(socketserver.ThreadingTCPServer):
+    """The threaded TCP server that is used for communicating with SigmaStudio.
+
+    It will be instantiated by SigmaTCPServer. Here, general server
+    settings can be adjusted.
+    """
+
+    allow_reuse_address = True
+
+    def __init__(self, *args, **kwargs):
+        self.queue: multiprocessing.JoinableQueue = (
+            multiprocessing.JoinableQueue()
+        )
+
+        super().__init__(*args, **kwargs)
+
+
 class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
     """Handling class for the Sigma TCP server."""
+
+    server: ThreadedTCPServer
 
     HEADER_LENGTH = 14
     COMMAND_WRITE = 0x09
@@ -186,21 +206,7 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
                 self.handle_read_request(received_data)
 
             else:
-                print(command)
-
-
-class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
-    """The threaded TCP server that is used for communicating with SigmaStudio.
-
-    Here, general server settings can be adjusted.
-    """
-
-    allow_reuse_address = True
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.queue = multiprocessing.JoinableQueue()
+                logging.info("Received unknown command: %d", command)
 
 
 class SigmaTCPServer:
@@ -217,7 +223,9 @@ class SigmaTCPServer:
         """
         self.host = host
         self.port = port
-        self.queue = multiprocessing.JoinableQueue()
+        self.queue: multiprocessing.JoinableQueue = (
+            multiprocessing.JoinableQueue()
+        )
 
         tcp_server_worker_thread = threading.Thread(
             target=self.tcp_server_worker, name="TCP server worker thread"
