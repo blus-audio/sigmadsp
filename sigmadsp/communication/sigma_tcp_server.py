@@ -120,14 +120,15 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 
 class SigmaTCPServer:
-    @classmethod
-    def write(self, tcp_server: ThreadedTCPServer, data):
-        tcp_server.queue.put(data)
-        tcp_server.queue.join()
+    def __init__(self, tcp_server: ThreadedTCPServer):
+        self.tcp_server = tcp_server
 
-    @classmethod
-    def read(self, tcp_server: ThreadedTCPServer):
-        data = tcp_server.queue.get()
-        tcp_server.queue.task_done()
+    def write(self, data):
+        self.tcp_server.queue.put(data)
+        self.tcp_server.queue.join()
+
+    def read(self):
+        data = self.tcp_server.queue.get()
+        self.tcp_server.queue.task_done()
 
         return data

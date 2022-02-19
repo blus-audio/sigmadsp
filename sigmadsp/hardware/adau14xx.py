@@ -11,9 +11,9 @@ class Adau14xx:
         self.spi_handler = SpiHandler()
 
     def soft_reset(self):
-        SpiHandler.write(self.spi_handler, Adau14xx.RESET_REGISTER, int16_to_bytes(0))
+        self.spi_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(0))
         time.sleep(1)
-        SpiHandler.write(self.spi_handler, Adau14xx.RESET_REGISTER, int16_to_bytes(1))
+        self.spi_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(1))
 
     def get_volume(self):
         pass

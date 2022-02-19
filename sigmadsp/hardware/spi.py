@@ -15,23 +15,6 @@ class SpiHandler():
     WRITE = 0
     READ = 1
 
-    @classmethod
-    def write(self, spi_handler, address: int, data: bytes):
-        spi_handler.queue.put("write")
-        spi_handler.queue.put((address, data))
-        spi_handler.queue.join()
-
-    @classmethod
-    def read(self, spi_handler, address: int, length: int) -> bytes:
-        spi_handler.queue.put("read")
-        spi_handler.queue.put((address, length))
-        spi_handler.queue.join()
-
-        data = spi_handler.queue.get()
-        spi_handler.queue.task_done()
-
-        return data
-
     def __init__(self):
         """Initialize the SpiHandler thread
         """
@@ -62,6 +45,36 @@ class SpiHandler():
         # The SigmaDSP uses SPI mode 0 with 8 bits per word. Do not change.
         self.spi.mode = 0
         self.spi.bits_per_word = 8
+
+    def write(self, address: int, data: bytes):
+        """Write data over the SPI interface via the queue to the SPI thread.
+
+        Args:
+            address (int): DSP register address to write to
+            data (bytes): Binary data to write
+        """
+        self.queue.put("write")
+        self.queue.put((address, data))
+        self.queue.join()
+
+    def read(self, address: int, length: int) -> bytes:
+        """Read data from the SPI interface via the queue to the SPI thread.
+
+        Args:
+            address (int): DSP register address to read from
+            length (int): Number of bytes to read
+
+        Returns:
+            bytes: Register content
+        """
+        self.queue.put("read")
+        self.queue.put((address, length))
+        self.queue.join()
+
+        data = self.queue.get()
+        self.queue.task_done()
+
+        return data
 
     def serve_forever(self):
         """Handles incoming requests for writing or reading data over SPI
@@ -104,7 +117,7 @@ class SpiHandler():
 
         return bytes(spi_response[SpiHandler.HEADER_LENGTH:])
 
-    def _build_write_spi_frame(self, address: int, data: bytes) -> bytearray:
+    def _build_spi_frame(self, address: int, data: bytes) -> bytearray:
         """Builds an SPI frame that is going to be written to the DSP
 
         Args:
@@ -143,7 +156,7 @@ class SpiHandler():
                 # DSP register addresses are counted in words (32 bit per increment).
 
                 # Build the frame from a subset of the input data, and write it
-                frame = self._build_write_spi_frame(current_address, current_data[:SpiHandler.MAX_PAYLOAD_BYTES])
+                frame = self._build_spi_frame(current_address, current_data[:SpiHandler.MAX_PAYLOAD_BYTES])
                 self.spi.writebytes(frame)
 
                 # Update address, data counter, and the binary data buffer
@@ -153,6 +166,6 @@ class SpiHandler():
 
             else:
                 # The packet fits into one transmission.
-                frame = self._build_write_spi_frame(current_address, current_data)
+                frame = self._build_spi_frame(current_address, current_data)
                 self.spi.writebytes(frame)
                 remaining_data_length = 0
