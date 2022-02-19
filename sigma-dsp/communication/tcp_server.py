@@ -1,6 +1,4 @@
-import threading
 import socketserver
-import queue
 
 class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
     """
@@ -61,18 +59,49 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         """
         return self.bytes_to_int(data, offset, length = 4)
 
-    def int_to_bytes(self, buffer, value, offset, length = 1):
+    def int_to_bytes(self, buffer: bytearray, value: int, offset: int, length: int = 1):
+        """Fill a buffer with values
+
+        Args:
+            buffer (bytearray): The buffer to fill
+            value (int): The value to pack into the buffer
+            offset (int): Offset in number of bytes, from the beginning of the data buffer
+            length (int): Number of bytes to be written
+        """
         buffer[offset:offset+length] = value.to_bytes(length, byteorder='big')
-        return buffer
 
     def int8_to_bytes(self, buffer, value, offset):
-        return self.int_to_bytes(buffer, value, offset, length = 1)
+        """Fill a buffer with an 8 bit value (1 byte)
+
+        Args:
+            buffer (bytearray): The buffer to fill
+            value (int): The value to pack into the buffer
+            offset (int): Offset in number of bytes, from the beginning of the data buffer
+            length (int): Number of bytes to be written
+        """
+        self.int_to_bytes(buffer, value, offset, length = 1)
 
     def int16_to_bytes(self, buffer, value, offset):
-        return self.int_to_bytes(buffer, value, offset, length = 2)
+        """Fill a buffer with a 16 bit value (2 bytes)
+
+        Args:
+            buffer (bytearray): The buffer to fill
+            value (int): The value to pack into the buffer
+            offset (int): Offset in number of bytes, from the beginning of the data buffer
+            length (int): Number of bytes to be written
+        """
+        self.int_to_bytes(buffer, value, offset, length = 2)
 
     def int32_to_bytes(self, buffer, value, offset):
-        return self.int_to_bytes(buffer, value, offset, length = 4)
+        """Fill a buffer with a 32 bit value (4 bytes)
+
+        Args:
+            buffer (bytearray): The buffer to fill
+            value (int): The value to pack into the buffer
+            offset (int): Offset in number of bytes, from the beginning of the data buffer
+            length (int): Number of bytes to be written
+        """
+        self.int_to_bytes(buffer, value, offset, length = 4)
 
     def handle_write_data(self, data):
         """The WRITE command indicates that SigmaStudio intends to write a packet to the DSP.
@@ -104,9 +133,10 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
 
             payload_data += received_data
 
-        self.server.queue.put(payload_data)
+        self.server.out_pipe.send("write")
+        self.server.out_pipe.send((address, payload_data))
 
-    def handle_read_request(self, data):
+    def handle_read_request(self, data: bytes):
         """The READ command indicates that SigmaStudio intends to read a packet from the DSP.
 
         total_length	        This indicates the total length of the read packet (uint32)
@@ -115,27 +145,40 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         address	                The address of the module whose data is being read from the DSP (uint16)
         """
 
+        # Unpack received data
         total_length = self.bytes_to_int32(data, 1)
         chip_address = self.bytes_to_int8(data, 5)
         data_length = self.bytes_to_int32(data, 6)
         address = self.bytes_to_int16(data, 10)
 
+        # Notify application of read request
+        self.server.out_pipe.send("read")
+        self.server.out_pipe.send((address, data_length))
+
+        # Wait for payload data that goes into the read response
+        payload_data = self.server.in_pipe.recv()
+
+        # Build the read response packet, starting with length calculations ...
         total_transmit_length = ThreadedSigmaTcpRequestHandler.HEADER_LENGTH + data_length
         transmit_data = bytearray(total_transmit_length)
 
+        # ... followed by populating the byte fields.
         self.int8_to_bytes(transmit_data, ThreadedSigmaTcpRequestHandler.COMMAND_READ_RESPONSE, 0)
         self.int32_to_bytes(transmit_data, total_transmit_length, 1)
         self.int8_to_bytes(transmit_data, chip_address, 5)
         self.int32_to_bytes(transmit_data, data_length, 6)
         self.int16_to_bytes(transmit_data, address, 10)
 
-        # Success/failure
-        self.int16_to_bytes(transmit_data, 1, 11)
-
-        # Reserved
+        # Success (0)/failure (1) byte at pos. 12. Always assume success.
         self.int16_to_bytes(transmit_data, 0, 12)
 
+        # Reserved zero byte at pos. 13
+        self.int16_to_bytes(transmit_data, 0, 13)
+
+        transmit_data[ThreadedSigmaTcpRequestHandler.HEADER_LENGTH:] = payload_data
+
         self.request.sendall(transmit_data)
+        
 
     def handle(self):
         """This method is called, when the TCP server receives new data for handling
@@ -162,25 +205,5 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
             else:
                 print(command)
 
-
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     allow_reuse_address = True
-
-if __name__ == "__main__":
-    HOST, PORT = "0.0.0.0", 8086
-
-    server = ThreadedTCPServer((HOST, PORT), ThreadedSigmaTcpRequestHandler)
-    data_queue = queue.Queue()
-    server.queue = data_queue
-
-    with server:
-        # Base sever thread
-        # This initial thread starts one more thread for each request.
-        server_thread = threading.Thread(target=server.serve_forever)
-        server_thread.daemon = True
-        server_thread.start()
-
-        input("Press any key to stop the Sigma TCP server.")
-
-        server.shutdown()
-        

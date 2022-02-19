@@ -1,23 +1,16 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    // Verwendet IntelliSense zum Ermitteln möglicher Attribute.
+    // Zeigen Sie auf vorhandene Attribute, um die zugehörigen Beschreibungen anzuzeigen.
+    // Weitere Informationen finden Sie unter https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Anfügen",
+            "name": "Python: Aktuelle Datei",
             "type": "python",
-            "request": "attach",
-            "connect": {
-                "host": "10.10.10.22",
-                "port": 5678
-            },
-            "pathMappings": [
-                {
-                    "localRoot": "${workspaceFolder}",
-                    "remoteRoot": "."
-                }
-            ]
+            "request": "launch",
+            "program": "sigma-dsp/application.py",
+            "console": "integratedTerminal",
+            "subProcess": true
         }
     ]
 }
