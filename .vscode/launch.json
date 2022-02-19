@@ -10,6 +10,7 @@
             "request": "launch",
             "program": "run.py",
             "console": "integratedTerminal",
+            "justMyCode": false,
             "subProcess": true
         }
     ]

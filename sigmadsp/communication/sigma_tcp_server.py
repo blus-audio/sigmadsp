@@ -114,5 +114,20 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
             else:
                 print(command)
 
+
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     allow_reuse_address = True
+
+
+class SigmaTCPServer:
+    @classmethod
+    def write(self, tcp_server: ThreadedTCPServer, data):
+        tcp_server.queue.put(data)
+        tcp_server.queue.join()
+
+    @classmethod
+    def read(self, tcp_server: ThreadedTCPServer):
+        data = tcp_server.queue.get()
+        tcp_server.queue.task_done()
+
+        return data

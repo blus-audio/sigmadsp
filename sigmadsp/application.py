@@ -1,21 +1,21 @@
-from communication.tcp_server import ThreadedTCPServer, ThreadedSigmaTcpRequestHandler
+from communication.sigma_tcp_server import ThreadedSigmaTcpRequestHandler, ThreadedTCPServer, SigmaTCPServer
 from hardware.spi import SpiHandler
 
 import threading
 import multiprocessing
 
 def main():
-    HOST, PORT = "0.0.0.0", 8087
+    HOST = "0.0.0.0"
+    PORT = 8087
+
+    tcp_server = ThreadedTCPServer((HOST, PORT), ThreadedSigmaTcpRequestHandler)
+    tcp_server.queue = multiprocessing.JoinableQueue()
 
     # Generate an SPI handler, along with its thread
     spi_handler = SpiHandler()
 
-    # Generate a TCP server, for handling requests from Sigma Studio
-    tcp_server = ThreadedTCPServer((HOST, PORT), ThreadedSigmaTcpRequestHandler)
-    tcp_server.queue = multiprocessing.JoinableQueue()
-
     with tcp_server:
-        # Base sever thread
+        # Base server thread
         # This initial thread starts one more thread for each request.
         tcp_server_thread = threading.Thread(target=tcp_server.serve_forever, name="TCPServerThread")
         tcp_server_thread.daemon = True
@@ -23,27 +23,28 @@ def main():
 
         while True:
             # Wait for a request from the TCP server
-            mode = tcp_server.queue.get()
-            tcp_server.queue.task_done()
+            mode = SigmaTCPServer.read(tcp_server)
 
             if mode == "write":
                 # Write request received
 
-                address, data = tcp_server.queue.get()
-                tcp_server.queue.task_done()
+                # Get information about write request
+                address, data = SigmaTCPServer.read(tcp_server)
 
+                # Write data to DSP
                 SpiHandler.write(spi_handler, address, data)
 
             elif mode == "read":
                 # Read request received
 
-                address, length = tcp_server.queue.get()
-                tcp_server.queue.task_done()
+                # Get information about read request
+                address, length = SigmaTCPServer.read(tcp_server)
 
+                # Extract data from DSP
                 data = SpiHandler.read(spi_handler, address, length)
-                
-                tcp_server.queue.put(data)
-                tcp_server.queue.join()
+
+                # Send read response
+                SigmaTCPServer.write(tcp_server, data)
 
 if __name__ == "__main__":
     main()
