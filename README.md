@@ -41,7 +41,7 @@ For installing, install git
 
 `sudo apt install git`,
 
-and clone this repository with 
+and clone this repository with
 
 `git clone https://github.com/elagil/sigma-dsp.git`.
 
