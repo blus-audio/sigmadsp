@@ -1,4 +1,6 @@
 import spidev
+import threading
+import multiprocessing
 import logging
 
 class SpiHandler():
@@ -12,9 +14,14 @@ class SpiHandler():
     READ = 1
 
     def __init__(self):
-        """Initialize the SpiHandler
+        """Initialize the SpiHandler thread
         """
         self._initialize_spi()
+        self.thread = threading.Thread(target=self.serve_forever)
+        self.thread.daemon = True
+        self.thread.start()
+        
+        self.queue = multiprocessing.Queue()
 
     def _initialize_spi(self, bus: int = 0, device: int = 0):
         """Initialize the SPI hardware.
@@ -40,7 +47,7 @@ class SpiHandler():
         """Handles incoming requests for writing or reading data over SPI
         """
         while True:
-            mode = self.in_pipe.recv()
+            mode = self.queue.get()
 
             if mode == "write":
                 address, data = self.in_pipe.recv()
@@ -49,7 +56,9 @@ class SpiHandler():
             if mode == "read":
                 address, length = self.in_pipe.recv()
                 data = self.read(address, length)
-                self.out_pipe.send(data)
+                
+                self.queue.put(data)
+                self.queue.join()
 
     def read(self, address: int, length: int) -> bytes:
         """Read data over the SPI port from a SigmaDSP

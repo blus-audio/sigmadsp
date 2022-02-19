@@ -133,8 +133,9 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
 
             payload_data += received_data
 
-        self.server.out_pipe.send("write")
-        self.server.out_pipe.send((address, payload_data))
+        self.server.queue.put("write")
+        self.server.queue.put((address, payload_data))
+        self.server.queue.join()
 
     def handle_read_request(self, data: bytes):
         """The READ command indicates that SigmaStudio intends to read a packet from the DSP.
@@ -152,11 +153,12 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         address = self.bytes_to_int16(data, 10)
 
         # Notify application of read request
-        self.server.out_pipe.send("read")
-        self.server.out_pipe.send((address, data_length))
+        self.server.queue.put("read")
+        self.server.queue.put((address, data_length))
+        self.server.queue.join()
 
         # Wait for payload data that goes into the read response
-        payload_data = self.server.in_pipe.recv()
+        payload_data = self.server.queue.get()
 
         # Build the read response packet, starting with length calculations ...
         total_transmit_length = ThreadedSigmaTcpRequestHandler.HEADER_LENGTH + data_length

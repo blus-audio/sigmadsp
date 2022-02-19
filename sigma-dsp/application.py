@@ -10,18 +10,7 @@ if __name__ == "__main__":
     spi_handler = SpiHandler()
 
     tcp_server = ThreadedTCPServer((HOST, PORT), ThreadedSigmaTcpRequestHandler)
-
-    app_receive_tcp, tcp_send = multiprocessing.Pipe(duplex = False)
-    tcp_receive, app_send_tcp = multiprocessing.Pipe(duplex = False)
-
-    app_receive_spi, spi_send = multiprocessing.Pipe(duplex = False)
-    spi_receive, app_send_spi = multiprocessing.Pipe(duplex = False)
-
-    tcp_server.in_pipe = tcp_receive
-    tcp_server.out_pipe = tcp_send
-
-    spi_handler.in_pipe = spi_receive
-    spi_handler.out_pipe = spi_send
+    tcp_server.queue = multiprocessing.Queue()
 
     with tcp_server:
         # Base sever thread
@@ -30,28 +19,23 @@ if __name__ == "__main__":
         tcp_server_thread.daemon = True
         tcp_server_thread.start()
 
-        spi_thread = threading.Thread(target=spi_handler.serve_forever)
-        spi_thread.daemon = True
-        spi_thread.start()
-
         while True:
-            mode = app_receive_tcp.recv()
+            mode = tcp_server.queue.get()
 
             if mode == "write":
-                address, data = app_receive_tcp.recv()
-                app_send_spi.send(mode)
-                app_send_spi.send((address, data))
+                address, data = tcp_server.queue.get()
+                spi_handler.queue.put(mode)
+                spi_handler.queue.put((address, data))
+                spi_handler.queue.join()
 
             elif mode == "read":
-                address, length = app_receive_tcp.recv()
+                address, length = tcp_server.queue.get()
 
-                app_send_spi.send(mode)
-                app_send_spi.send((address, length))
-                data = app_receive_spi.recv()
+                spi_handler.queue.put(mode)
+                spi_handler.queue.put((address, length))
+                spi_handler.queue.join()
+
+                data = spi_handler.queue.get()
                 
-                app_send_tcp.send(data)
-
-        input("Press any key to stop the Sigma TCP tcp_server.")
-        
-        tcp_server.shutdown()
-        
+                tcp_server.queue.put(data)
+                tcp_server.queue.join()
