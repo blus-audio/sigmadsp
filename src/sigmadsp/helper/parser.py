@@ -3,6 +3,9 @@ from typing import List
 
 
 class Cell:
+    adjustable_prefix = "adjustable_"
+    volume_identifier = "volume"
+
     @property
     def parameter_value(self):
         return self._parameter_value
@@ -36,11 +39,21 @@ class Cell:
         self._name = new_name
 
     @property
-    def is_adjustable_cell(self):
-        return self.name.startswith("adjustable_")
+    def is_adjustable_cell(self) -> bool:
+        """Determine, whether this is a user adjustable cell
+
+        Returns:
+            bool: True, if adjustable, False otherwise.
+        """
+        return self.name.startswith(Cell.adjustable_prefix)
 
     @property
     def is_adjustable_volume_cell(self):
+        """Determine, whether this is an adjustable volume cell
+
+        Returns:
+            bool: True, if an adjustable volume cell, False otherwise.
+        """
         try:
             self.parameter_value
 
@@ -48,57 +61,67 @@ class Cell:
             return False
 
         else: 
-            return self.is_adjustable_cell and ("volume" in self.name)
+            return self.is_adjustable_cell and (Cell.volume_identifier in self.name)
 
 
 class Parser:
     def run(self, file_name: str):
+        """Parse an input file that was exported from Sigma Studio
+
+        Args:
+            file_name (str): [description]
+        """
         self.cells = []
         self.cell: Cell = None
 
-        with open(file_name, "r") as file:
-            logging.info(f"Using parameter file path {file_name}.")
-            lines = file.readlines()
+        if not file_name.endswith(".params"):
+            logging.error("The parameter file is not a *.params file! Aborting.")
 
-            for line in lines:
-                split_line = line.split()
+        else:
+            with open(file_name, "r") as file:
+                logging.info(f"Using parameter file path {file_name}.")
+                lines = file.readlines()
+
+                for line in lines:
+                    split_line = line.split()
+                    
+                    if split_line:
+                        if split_line[0] == "Cell" and split_line[1] == "Name":
+                            self.cell = Cell()
+                            self.cells.append(self.cell)
+
+                            self.cell.name = " ".join(split_line[3:])
+
+                        elif split_line[0] == "Parameter":
+
+                            if split_line[1] == "Name":
+                                self.cell.parameter_name = " ".join(split_line[3:])
+
+                            if split_line[1] == "Address":
+                                self.cell.parameter_address = int(split_line[3])
+                                
+                            if split_line[1] == "Value":
+                                data = split_line[3]
+                                
+                                try:
+                                    self.cell.parameter_value = int(data)
+                                
+                                except ValueError:
+                                    self.cell.parameter_value = float(data)
                 
-                if split_line:
-                    if split_line[0] == "Cell" and split_line[1] == "Name":
-                        self.cell = Cell()
-                        self.cells.append(self.cell)
-
-                        self.cell.name = " ".join(split_line[3:])
-
-                    elif split_line[0] == "Parameter":
-
-                        if split_line[1] == "Name":
-                            self.cell.parameter_name = " ".join(split_line[3:])
-
-                        if split_line[1] == "Address":
-                            self.cell.parameter_address = int(split_line[3])
-                            
-                        if split_line[1] == "Value":
-                            data = split_line[3]
-                            
-                            try:
-                                self.cell.parameter_value = int(data)
-                            
-                            except ValueError:
-                                self.cell.parameter_value = float(data)
-            
-            logging.info(f"Found a total number of {len(self.cells)} cells.")
+                logging.info(f"Found a total number of {len(self.cells)} cells.")
 
     @property 
     def volume_cells(self) -> List[Cell]:
-        cells = []
+        """Returns all cells that can be used for volume adjustment.
+        These are user defined with a certain name pattern.
+
+        Returns:
+            List[Cell]: The list of adjustable volume cells
+        """
+        collected_cells = []
         for cell in self.cells:
             if cell.is_adjustable_volume_cell:
-                cells.append(cell)
+                collected_cells.append(cell)
         
-        return cells
-
-# for cell in p.cells:
-#     if cell.is_adjustable_volume_cell:
-#         print(cell.name)
-#         print(cell.parameter_address)
+        return collected_cells

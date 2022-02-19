@@ -11,17 +11,40 @@ from sigmadsp.helper.conversion import bytes_to_int8, bytes_to_int16, bytes_to_i
 from sigmadsp.helper.conversion import int8_to_bytes, int16_to_bytes, int32_to_bytes
 
 class WriteRequest():
+    """Helper class for defining a write request
+    """
     def __init__(self, address: int, data: bytes):
+        """A write request consists of a target address and data
+
+        Args:
+            address (int): The target address
+            data (bytes): The data to write
+        """
         self.address = address
         self.data = data
 
 class ReadRequest():
+    """Helper class for defining a read request
+    """
     def __init__(self, address: int, length: int):
+        """A read request consists of a read address, and a field length
+
+        Args:
+            address (int): Address to read from
+            length (int): Number of bytes to read
+        """
         self.address = address
         self.length = length
 
 class ReadResponse():
+    """Helper class for defining a read response
+    """
     def __init__(self, data: bytes):
+        """A read response only contains the data that was read from the read address
+
+        Args:
+            data (bytes): The data that was read
+        """
         self.data = data
 
 class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
@@ -153,7 +176,16 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 class SigmaTCPServer:
     """This is a helper class for easily filling the queue to the TCP server and reading from it.
     """
-    def __init__(self):
+    def __init__(self, host: str, port: int):
+        """Initialize the Sigma TCP server. Starts the main TCP worker and initializes a queue for communicating
+        with other threads.
+
+        Args:
+            host (str): Listening IP address
+            port (int): Port to listen at
+        """
+        self.host = host
+        self.port = port
         self.queue = multiprocessing.JoinableQueue()
 
         tcp_server_worker_thread = threading.Thread(target=self.tcp_server_worker, name="TCP server worker thread")
@@ -161,19 +193,30 @@ class SigmaTCPServer:
         tcp_server_worker_thread.start()
 
     def get_request(self) -> Union[ReadRequest, WriteRequest]:
+        """Get an item from the queue
+
+        Returns:
+            Union[ReadRequest, WriteRequest]: The item that was returned from the queue
+        """
         request = self.queue.get()
         self.queue.task_done()
         
         return request
 
     def put_request(self, request: ReadResponse):
+        """Put an item into the queue: blocks, until released with 'task_done()',
+        which is called by 'get_request()'.
+
+        Args:
+            request (ReadResponse): The request to put into the queue
+        """
         self.queue.put(request)
         self.queue.join()
 
     def tcp_server_worker(self):
-        HOST = "0.0.0.0"
-        PORT = 8087
-        self.tcp_server = ThreadedTCPServer((HOST, PORT), ThreadedSigmaTcpRequestHandler)
+        """The main worker for the TCP server
+        """
+        self.tcp_server = ThreadedTCPServer((self.host, self.port), ThreadedSigmaTcpRequestHandler)
         self.tcp_server.queue = multiprocessing.JoinableQueue()
 
         with self.tcp_server:

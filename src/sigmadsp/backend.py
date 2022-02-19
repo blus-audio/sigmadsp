@@ -14,47 +14,72 @@ import threading
 import logging
 import json
 import rpyc
+import sys
 
+def load_from_settings(settings: dict, key: str, default: Any) -> Any:
+    """Loads certain settings from the settings dictionary
+
+    Args:
+        settings (dict): Settings dictionary
+        key (str): The key to look for
+        default (Any): The default return value, if the key is not found
+
+    Returns:
+        Any: Setting for the key, if found, default otherwise.
+    """
+    if settings is not None:
+        try:
+            return settings[key]
+
+        except KeyError:
+            return default
+             
 
 class ConfigurationBackendService(rpyc.Service):
+    """The configuration backend service that handles the underlying TCP server and SPI handler.
+    This service also reacts to rpyc remote procedure calls, for performing actions with the DSP over SPI.
+    """
     def __init__(self, settings: dict = None, parser: Parser = None):
+        """Initialize service and start all relevant threads (TCP, SPI)
+
+        Args:
+            settings (dict, optional): The settings dictionary. Defaults to None.
+            parser (Parser, optional): The parameter file parser. Defaults to None.
+        """
         super().__init__()
 
         self.parser = parser
 
-        if settings is not None:
-            try:
-                HOST = settings["host"]
-
-            except KeyError:
-                HOST = "0.0.0.0"
-            
-            try:
-                PORT = settings["port"]
-
-            except KeyError:
-                PORT = 8087
-
-        # Generate TCP server
-        if HOST == "0.0.0.0":
-            logging.info(f"Starting a TCP server, for listening on any IP address on port {PORT}.")
+        # Load TCP server settings
+        HOST = load_from_settings(settings, "host", "0.0.0.0")
+        PORT = load_from_settings(settings, "port", 8087)
         
-        else:
-            logging.info(f"Starting a TCP server, for listening on {HOST}:{PORT}.")
-
-        # Generate an SPI handler, along with its thread
+        # Create an SPI handler, along with its thread
         self.spi_handler = SpiHandler()
 
-        # Generate a SigmaTCPServer, along with its thread
-        self.sigma_tcp_server = SigmaTCPServer()
+        # Create a SigmaTCPServer, along with its various threads
+        self.sigma_tcp_server = SigmaTCPServer(HOST, PORT)
+        logging.info(f"Sigma TCP server started on [{HOST}]:{PORT}.")
 
+        # Create the worker thread for the handler itself
         worker_thread = threading.Thread(target=self.worker, name="Worker thread")
         worker_thread.daemon = True
         worker_thread.start()
+        
+        DSP_TYPE = load_from_settings(settings, "dsp_type", "adau14xx")
+        logging.info(f"Specified DSP type is '{DSP_TYPE}'.")
 
-        self.dsp = Adau14xx(self.spi_handler)
+        if DSP_TYPE == "adau14xx":
+            self.dsp = Adau14xx(self.spi_handler)
+
+        else:
+            logging.error(f"DSP type '{DSP_TYPE}' is not known! Aborting.")
+            sys.exit(0)
 
     def worker(self):
+        """Main worker functionality. Gets requests from the TCP server component
+        and forwards them to the SPI handler.
+        """
         while True:
             request = self.sigma_tcp_server.get_request()
 
@@ -95,6 +120,7 @@ class ConfigurationBackendService(rpyc.Service):
 
 def load_settings_file(settings_file_path: str) -> Any:
     """Loads a settings file in .json format from a specified path and returns a settings dictionary.
+    If no file is provided, the default path is used for loading settings.
 
     Args:
         settings_file_path (str): The input path
@@ -119,12 +145,20 @@ def load_settings_file(settings_file_path: str) -> Any:
 
 
 def load_parameters(settings: dict) -> List[Cell]:
+    """Loads parameter cells, accoring to the parameter file path that is defined in the settings dictionary
+
+    Args:
+        settings (dict): The settings dictionary
+
+    Returns:
+        List[Cell]: The cells that were found in the parameter file
+    """
     if settings is not None:
         try:
             parameter_file_path = settings["parameter_file_path"]
 
         except KeyError:
-            logging.info("No parameter file path was specified.")
+            logging.info("No parameter file path was specified in the settings file.")
 
         else:
             parser = Parser()
@@ -132,19 +166,31 @@ def load_parameters(settings: dict) -> List[Cell]:
             return parser
 
     else:
+        logging.info("No settings file was loaded, thus no parameter cells can be loaded.")
         return None
 
 
 def launch(settings_file_path: str = None):
+    """Launches the backend application
+
+    Args:
+        settings_file_path (str, optional): Settings file for the backend application. Defaults to None.
+            If not specified, a default path is used for loading the settings.
+    """
     settings = load_settings_file(settings_file_path)
     parser = load_parameters(settings)
-    
+
+    BACKEND_PORT = load_from_settings(settings, "backend_port", 18861)
+        
+    # Create the backend service, an rpyc handler
     configuration_backend_service = ConfigurationBackendService(settings, parser)
-    t = ThreadedServer(configuration_backend_service, port=18861)
-    t.start()
+    threaded_server = ThreadedServer(configuration_backend_service, port=BACKEND_PORT)
+    threaded_server.start()
 
 
 if __name__ == "__main__":
+    """Launch the backend with default settings
+    """
     logging.basicConfig(level=logging.INFO)
     launch()
     
