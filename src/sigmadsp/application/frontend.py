@@ -18,6 +18,13 @@ def main():
         type=float,
         help="Adjust the volume by a certain value in dB (positive or negative).",
     )
+    argument_parser.add_argument(
+        "-sv",
+        "--set_volume",
+        required=False,
+        type=float,
+        help="Sets the volume to a certain value in dB (zero or lower).",
+    )
     argument_parser.add_argument("-r", "--reset", required=False, help="Soft-reset the DSP.", action="store_true")
     argument_parser.add_argument("-lp", "--load_parameters", required=False, help="Load new parameter file")
     arguments = argument_parser.parse_args()
@@ -31,6 +38,9 @@ def main():
     else:
         if arguments.adjust_volume is not None:
             sigmadsp_backend_service.root.adjust_volume(arguments.adjust_volume, "adjustable_volume_main")
+
+        if arguments.set_volume is not None:
+            sigmadsp_backend_service.root.set_volume(arguments.set_volume, "adjustable_volume_main")
 
         if arguments.load_parameters is not None:
             with open(arguments.load_parameters, "r", encoding="utf8") as parameter_file:

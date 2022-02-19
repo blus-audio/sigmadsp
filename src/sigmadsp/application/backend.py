@@ -50,7 +50,7 @@ class SigmadspSettings:
             logging.info("Settings file not found. Using default values.")
             self.settings = None
 
-        self.parameter_parser = self.load_parameters()
+        self.load_parameters()
 
     def load_parameters(self) -> List[Cell]:
         """Loads parameter cells, according to the parameter file path
@@ -63,7 +63,8 @@ class SigmadspSettings:
 
         parser = Parser()
         parser.run(parameter_file_path)
-        return parser
+
+        self.parameter_parser = parser
 
     def store_parameters(self, lines: List[str]):
         """Stores parameters to the parameter file.
@@ -197,6 +198,17 @@ class ConfigurationBackendService(rpyc.Service):
     def exposed_reset_dsp(self):
         """Soft resets the DSP"""
         self.dsp.soft_reset()
+
+    def exposed_set_volume(self, value_db: float, cell_name: str):
+        """Sets the volume of a specified volume cell
+
+        Args:
+            value_db (float): The setting in dB for the volume cell
+            cell_name (str): The name of the cell to adjust
+        """
+        for volume_cell in self.settings.parameter_parser.volume_cells:
+            if volume_cell.name == cell_name:
+                self.dsp.set_volume(value_db, volume_cell.parameter_address)
 
     def exposed_adjust_volume(self, adjustment_db: float, cell_name: str):
         """Adjusts the volume of a specified volume cell

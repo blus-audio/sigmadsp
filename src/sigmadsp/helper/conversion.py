@@ -8,6 +8,26 @@ This module includes many conversion functions that can be used for different pu
 import math
 
 
+def clamp(value: float, min_value: float, max_value: float) -> float:
+    """Clamps a value to a specified range.
+
+    Args:
+        value (float): The value to clamp.
+        min_value (float): Lower clamping boundary.
+        max_value (float): Upper clamping boundary.
+
+    Returns:
+        float: The clamped value.
+    """
+    if value >= max_value:
+        value = max_value
+
+    elif value <= min_value:
+        value = min_value
+
+    return value
+
+
 def frac_8_24_to_float(value: int) -> float:
     """Converts a value in the DSPs fractional representation to float.
     32 bit values consist of 8 integer and 24 fractional bits. They are signed.

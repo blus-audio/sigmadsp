@@ -10,6 +10,7 @@ import logging
 from sigmadsp.hardware.spi import SpiHandler
 from sigmadsp.helper.conversion import (
     bytes_to_int32,
+    clamp,
     db_to_linear,
     float_to_frac_8_24,
     frac_8_24_to_float,
@@ -64,6 +65,23 @@ class Adau14xx:
         data_register = int32_to_bytes(data_integer)
         self.spi_handler.write(address, data_register)
 
+    def set_volume(self, value_db: float, address: int):
+        """Sets the volume register at the given address to a certain value in dB.
+
+        Args:
+            value_db (float): The volume setting in dB
+            address (int): The volume adjustment register address
+        """
+        # Read current volume and apply adjustment
+        value_linear = db_to_linear(value_db)
+
+        # Clamp set volume to safe levels
+        clamp(value_linear, 0, 1)
+
+        self.set_parameter_value(value_linear, address)
+
+        logging.info("Set volume to %.2f dB.", linear_to_db(value_linear))
+
     def adjust_volume(self, adjustment_db: float, address: int):
         """Adjust the volume register at the given address by a certain value in dB.
 
@@ -76,12 +94,8 @@ class Adau14xx:
         linear_adjustment = db_to_linear(adjustment_db)
         new_volume = current_volume * linear_adjustment
 
-        # Clamp volume to safe levels
-        if new_volume >= 1:
-            new_volume = 1
-
-        elif new_volume <= 0:
-            new_volume = 0
+        # Clamp new volume to safe levels
+        clamp(new_volume, 0, 1)
 
         self.set_parameter_value(new_volume, address)
 
