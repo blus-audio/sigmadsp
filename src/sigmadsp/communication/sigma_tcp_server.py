@@ -1,7 +1,6 @@
 """This module communicates with SigmaStudio.
 
-It can receive read/write requests and return with read response
-packets.
+It can receive read/write requests and return with read response packets.
 """
 import logging
 import multiprocessing
@@ -46,8 +45,7 @@ class ReadRequest:
 class ReadResponse:
     """Helper class for defining a read response.
 
-    A read response only contains the data that was read from the read
-    address.
+    A read response only contains the data that was read from the read address.
     """
 
     data: bytes
@@ -56,16 +54,13 @@ class ReadResponse:
 class ThreadedTCPServer(socketserver.ThreadingTCPServer):
     """The threaded TCP server that is used for communicating with SigmaStudio.
 
-    It will be instantiated by SigmaTCPServer. Here, general server
-    settings can be adjusted.
+    It will be instantiated by SigmaTCPServer. Here, general server settings can be adjusted.
     """
 
     allow_reuse_address = True
 
     def __init__(self, *args, **kwargs):
-        self.queue: multiprocessing.JoinableQueue = (
-            multiprocessing.JoinableQueue()
-        )
+        self.queue: multiprocessing.JoinableQueue = multiprocessing.JoinableQueue()
 
         super().__init__(*args, **kwargs)
 
@@ -80,68 +75,68 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
     COMMAND_READ = 0x0A
     COMMAND_READ_RESPONSE = 0x0B
 
-    def handle_write_data(self, data):
-        """The WRITE command indicates that SigmaStudio intends to write a
-        packet to the DSP.
+    def handle_write_data(self, write_request: bytes):
+        """Handles requests, where SigmaStudio wants to write to the DSP.
 
-        block_safeload write    This field indicates whether the packet
-        is a block write or a safeload write channel_number This
-        indicates the channel number total_length            This
-        indicates the total length of the write packet (uint32)
-        chip_address            The address of the chip to which the
-        data has to be written payload_length          The length of the
-        data (uint32) address                 The address of the module
-        whose data is being written to the DSP (uint16) payload The
-        payload data to be written
+        Args:
+            data (bytes): The binary request from SigmaStudio.
         """
 
-        # These fields are currently unused
-        block_safeload = bytes_to_int8(data, 1)
-        channel_number = bytes_to_int8(data, 2)
-        total_length = bytes_to_int32(data, 3)
+        # This field indicates whether the packet is a block write or a safeload write.
+        # TODO: This field is currently unused.
+        block_safeload = bytes_to_int8(write_request, 1)
         del block_safeload
+
+        # This indicates the channel number.
+        # TODO: This field is currently unused.
+        channel_number = bytes_to_int8(write_request, 2)
         del channel_number
+
+        # This indicates the total length of the write packet (uint32).
+        # This field is currently unused.
+        total_length = bytes_to_int32(write_request, 3)
         del total_length
 
-        # The chip address is appended by the read/write bit.
-        # Shifting right by one bit removes it.
-        # This field is currently unused
-        chip_address = bytes_to_int8(data, 7) >> 1
+        # The address of the chip to which the data has to be written.
+        # The chip address is appended by the read/write bit: shifting right by one bit removes it.
+        # TODO: This field is currently unused.
+        chip_address = bytes_to_int8(write_request, 7) >> 1
         del chip_address
 
-        payload_length = bytes_to_int32(data, 8)
-        address = bytes_to_int16(data, 12)
+        # The length of the data (uint32).
+        total_payload_size = bytes_to_int32(write_request, 8)
 
-        missing_payload_length = payload_length
+        # The address of the module whose data is being written to the DSP (uint16).
+        address = bytes_to_int16(write_request, 12)
 
+        # The payload data to be written.
         payload_data = bytearray()
-        while missing_payload_length:
-            # Wait until the complete TCP payload was received.
-            received_data = self.request.recv(missing_payload_length)
-            missing_payload_length -= len(received_data)
 
-            payload_data += received_data
+        while total_payload_size > len(payload_data):
+            # Wait until the complete TCP payload was received.
+            payload_data.extend(self.request.recv(total_payload_size - len(payload_data)))
 
         self.server.queue.put(WriteRequest(address, payload_data))
 
-    def handle_read_request(self, data: bytes):
-        """The READ command indicates that SigmaStudio intends to read a packet
-        from the DSP.
+    def handle_read_request(self, read_request: bytes):
+        """Handles requests, where SigmaStudio wants to read from the DSP.
 
-        total_length            This indicates the total length of the
-        read packet (uint32) chip_address            The address of the
-        chip from which the data has to be read data_length The length
-        of the data (uint32) address                 The address of the
-        module whose data is being read from the DSP (uint16)
+        Args:
+            data (bytes): The binary request from SigmaStudio.
         """
 
-        # Unpack received data
-        total_length = bytes_to_int32(data, 1)
+        # This indicates the total length of the read packet (uint32)
+        total_length = bytes_to_int32(read_request, 1)
         del total_length
 
-        chip_address = bytes_to_int8(data, 5)
-        data_length = bytes_to_int32(data, 6)
-        address = bytes_to_int16(data, 10)
+        # The address of the chip from which the data has to be read
+        chip_address = bytes_to_int8(read_request, 5)
+
+        # The length of the data (uint32)
+        data_length = bytes_to_int32(read_request, 6)
+
+        # The address of the module whose data is being read from the DSP (uint16)
+        address = bytes_to_int16(read_request, 10)
 
         # Notify application of read request
         self.server.queue.put(ReadRequest(address, data_length))
@@ -153,9 +148,7 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         payload_data = read_response.data
 
         # Build the read response packet, starting with length calculations ...
-        total_transmit_length = (
-            ThreadedSigmaTcpRequestHandler.HEADER_LENGTH + data_length
-        )
+        total_transmit_length = ThreadedSigmaTcpRequestHandler.HEADER_LENGTH + data_length
         transmit_data = bytearray(total_transmit_length)
 
         # ... followed by populating the byte fields.
@@ -175,16 +168,13 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         # Reserved zero byte at pos. 13
         int16_to_bytes(0, transmit_data, 13)
 
-        transmit_data[
-            ThreadedSigmaTcpRequestHandler.HEADER_LENGTH :
-        ] = payload_data
+        transmit_data[ThreadedSigmaTcpRequestHandler.HEADER_LENGTH :] = payload_data
 
         self.request.sendall(transmit_data)
         self.server.queue.task_done()
 
     def handle(self):
-        """This method is called, when the TCP server receives new data for
-        handling.
+        """This method is called, when the TCP server receives new data for handling.
 
         It never stops, except if the connection is reset.
         """
@@ -210,12 +200,11 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
 
 
 class SigmaTCPServer:
-    """This is a helper class for easily filling the queue to the TCP server
-    and reading from it."""
+    """This is a helper class for easily filling the queue to the TCP server and reading from it."""
 
     def __init__(self, host: str, port: int):
-        """Initialize the Sigma TCP server. Starts the main TCP worker and
-        initializes a queue for communicating with other threads.
+        """Initialize the Sigma TCP server. Starts the main TCP worker and initializes a queue for communicating with
+        other threads.
 
         Args:
             host (str): Listening IP address
@@ -223,13 +212,9 @@ class SigmaTCPServer:
         """
         self.host = host
         self.port = port
-        self.queue: multiprocessing.JoinableQueue = (
-            multiprocessing.JoinableQueue()
-        )
+        self.queue: multiprocessing.JoinableQueue = multiprocessing.JoinableQueue()
 
-        tcp_server_worker_thread = threading.Thread(
-            target=self.tcp_server_worker, name="TCP server worker thread"
-        )
+        tcp_server_worker_thread = threading.Thread(target=self.tcp_server_worker, name="TCP server worker thread")
         tcp_server_worker_thread.daemon = True
         tcp_server_worker_thread.start()
 
@@ -245,8 +230,7 @@ class SigmaTCPServer:
         return request
 
     def put_request(self, request: ReadResponse):
-        """Put an item into the queue: blocks, until released with
-        'task_done()', which is called by 'get_request()'.
+        """Put an item into the queue: blocks, until released with 'task_done()', which is called by 'get_request()'.
 
         Args:
             request (ReadResponse): The request to put into the queue
@@ -256,16 +240,12 @@ class SigmaTCPServer:
 
     def tcp_server_worker(self):
         """The main worker for the TCP server."""
-        tcp_server = ThreadedTCPServer(
-            (self.host, self.port), ThreadedSigmaTcpRequestHandler
-        )
+        tcp_server = ThreadedTCPServer((self.host, self.port), ThreadedSigmaTcpRequestHandler)
 
         with tcp_server:
             # Base TCP server thread
             # This initial thread starts one more thread for each request.
-            tcp_server_thread = threading.Thread(
-                target=tcp_server.serve_forever, name="TCP server thread"
-            )
+            tcp_server_thread = threading.Thread(target=tcp_server.serve_forever, name="TCP server thread")
             tcp_server_thread.daemon = True
             tcp_server_thread.start()
 

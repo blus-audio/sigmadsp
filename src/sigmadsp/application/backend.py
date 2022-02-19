@@ -1,8 +1,7 @@
-"""This module includes the main application that provides an interface between
-the TCP server that faces SigmaStudio, and an SPI handler that controls a DSP.
+"""This module includes the main application that provides an interface between the TCP server that faces SigmaStudio,
+and an SPI handler that controls a DSP.
 
-Commands from Sigma Studio are received, and translated to SPI
-read/write requests.
+Commands from Sigma Studio are received, and translated to SPI read/write requests.
 """
 import argparse
 import logging
@@ -40,8 +39,8 @@ class SigmadspSettings:
     default_config_path = "/var/lib/sigmadsp/config.yaml"
 
     def __init__(self, config_path: str = None):
-        """Loads a config file in *.yaml format from a specified path. If no
-        file is provided, the default path is used for loading settings.
+        """Loads a config file in *.yaml format from a specified path. If no file is provided, the default path is used
+        for loading settings.
 
         Args:
             config_path (str, optional): The input path of the settings file.
@@ -57,16 +56,13 @@ class SigmadspSettings:
                 logging.info("Settings file %s was loaded.", config_path)
 
         except FileNotFoundError:
-            logging.error(
-                "Settings file not found at %s. Aborting.", config_path
-            )
+            logging.error("Settings file not found at %s. Aborting.", config_path)
             raise
 
         self.load_parameters()
 
     def load_parameters(self) -> None:
-        """Loads parameter cells, according to the parameter file path that is
-        defined in the settings object."""
+        """Loads parameter cells, according to the parameter file path that is defined in the settings object."""
         parser = Parser()
         parser.run(self.config["parameters"]["path"])
 
@@ -78,20 +74,16 @@ class SigmadspSettings:
         Args:
             lines (List[str]): [description]
         """
-        with open(
-            self.config["parameters"]["path"], "w", encoding="UTF8"
-        ) as parameter_file:
+        with open(self.config["parameters"]["path"], "w", encoding="UTF8") as parameter_file:
             parameter_file.writelines(lines)
 
         self.load_parameters()
 
 
 class BackendService(BackendServicer):
-    """The backend service that handles the underlying TCP server and SPI
-    handler.
+    """The backend service that handles the underlying TCP server and SPI handler.
 
-    This service also reacts to rpyc remote procedure calls, for
-    performing actions with the DSP over SPI.
+    This service also reacts to rpyc remote procedure calls, for performing actions with the DSP over SPI.
     """
 
     def __init__(self, settings: SigmadspSettings):
@@ -119,15 +111,11 @@ class BackendService(BackendServicer):
         )
 
         # Create the worker thread for the handler itself
-        worker_thread = threading.Thread(
-            target=self.worker, name="Worker thread"
-        )
+        worker_thread = threading.Thread(target=self.worker, name="Worker thread")
         worker_thread.daemon = True
         worker_thread.start()
 
-        logging.info(
-            "Specified DSP type is '%s'.", self.settings.config["dsp"]["type"]
-        )
+        logging.info("Specified DSP type is '%s'.", self.settings.config["dsp"]["type"])
 
         if self.settings.config["dsp"]["type"] == "adau14xx":
             self.dsp = Adau14xx(self.spi_handler)
@@ -142,8 +130,7 @@ class BackendService(BackendServicer):
     def worker(self):
         """Main worker functionality.
 
-        Gets requests from the TCP server component and forwards them to
-        the SPI handler.
+        Gets requests from the TCP server component and forwards them to the SPI handler.
         """
         while True:
             request = self.sigma_tcp_server.get_request()
@@ -192,17 +179,12 @@ class BackendService(BackendServicer):
                             volume_cell.parameter_address,
                         )
 
-                    response.message = (
-                        f"Set volume of '{request.change_volume.cell_name}' "
-                        f"to {new_volume_db:.2f} dB."
-                    )
+                    response.message = f"Set volume of '{request.change_volume.cell_name}' to {new_volume_db:.2f} dB."
 
                     break
 
         elif "load_parameters" == command:
-            self.settings.store_parameters(
-                list(request.load_parameters.content)
-            )
+            self.settings.store_parameters(list(request.load_parameters.content))
             response.message = "Loaded parameters"
 
         return response
@@ -212,9 +194,8 @@ def launch(settings: SigmadspSettings):
     """Launches the backend application.
 
     Args:
-        config_path (str, optional): Settings file for the backend application.
-            Defaults to None. If not specified, a default path is used
-            for loading the settings.
+        config_path (str, optional): Settings file for the backend application. Defaults to None.
+            If not specified, a default path is used for loading the settings.
     """
 
     # Create the backend service, a grpc service
@@ -236,9 +217,7 @@ def main():
     """Launch the backend with default settings."""
     logging.basicConfig(level=logging.INFO)
 
-    logging.info(
-        "Starting the sigmadsp backend, version %s.", sigmadsp.__version__
-    )
+    logging.info("Starting the sigmadsp backend, version %s.", sigmadsp.__version__)
 
     argument_parser = argparse.ArgumentParser()
     argument_parser.add_argument(

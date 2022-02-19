@@ -22,8 +22,7 @@ from sigmadsp.helper.conversion import (
 
 
 class Adau14xx:
-    """A class for controlling functionality of Analog Devices Sigma DSPs,
-    especially ADAU14xx series parts."""
+    """A class for controlling functionality of Analog Devices Sigma DSPs, especially ADAU14xx series parts."""
 
     # Addresses and sizes of important registers
     RESET_REGISTER = 0xF890
@@ -36,7 +35,9 @@ class Adau14xx:
         self.spi_handler = spi_handler
 
     def soft_reset(self):
-        """Soft resets the DSP by writing the reset register twice."""
+        """Soft resets the DSP."""
+
+        # Set and release the corresponding register for resetting.
         self.spi_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(0))
         self.spi_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(1))
 
@@ -44,15 +45,13 @@ class Adau14xx:
         """Gets a parameter value from a chosen register address.
 
         Args:
-            address (int): The address to look at
+            address (int): The address to look at.
 
         Returns:
-            float: Float representation of the register content
+            float: Float representation of the register content.
         """
 
-        data_register = self.spi_handler.read(
-            address, Adau14xx.FIXPOINT_REGISTER_LENGTH
-        )
+        data_register = self.spi_handler.read(address, Adau14xx.FIXPOINT_REGISTER_LENGTH)
         data_integer = bytes_to_int32(data_register)
         data_float = frac_8_24_to_float(data_integer)
         return data_float
@@ -69,8 +68,7 @@ class Adau14xx:
         self.spi_handler.write(address, data_register)
 
     def set_volume(self, value_db: float, address: int) -> float:
-        """Sets the volume register at the given address to a certain value in
-        dB.
+        """Sets the volume register at the given address to a certain value in dB.
 
         Args:
             value_db (float): The volume setting in dB
@@ -92,8 +90,7 @@ class Adau14xx:
         return linear_to_db(value_linear)
 
     def adjust_volume(self, adjustment_db: float, address: int) -> float:
-        """Adjust the volume register at the given address by a certain value
-        in dB.
+        """Adjust the volume register at the given address by a certain value in dB.
 
         Args:
             adjustment_db (float): The volume adjustment in dB

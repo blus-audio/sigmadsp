@@ -12,8 +12,7 @@ from sigmadsp.generated.backend_service.control_pb2_grpc import BackendStub
 
 
 def main():
-    """The main frontend command-line application, which controls the SigmaDSP
-    backend."""
+    """The main frontend command-line application, which controls the SigmaDSP backend."""
 
     logging.basicConfig(level=logging.INFO)
 
@@ -90,12 +89,8 @@ def main():
         control_request.change_volume.relative = False
 
     if arguments.load_parameters is not None:
-        with open(
-            arguments.load_parameters, "r", encoding="utf8"
-        ) as parameter_file:
-            control_request.load_parameters.content[
-                :
-            ] = parameter_file.readlines()
+        with open(arguments.load_parameters, "r", encoding="utf8") as parameter_file:
+            control_request.load_parameters.content[:] = parameter_file.readlines()
 
     if arguments.reset is True:
         control_request.reset_dsp = True

@@ -56,9 +56,7 @@ class SpiHandler:
         self.queue = multiprocessing.JoinableQueue()
 
         logging.info("Starting SPI handling thread.")
-        self.thread = threading.Thread(
-            target=self.serve_forever, name="SPIHandlerThread"
-        )
+        self.thread = threading.Thread(target=self.serve_forever, name="SPIHandlerThread")
         self.thread.daemon = True
         self.thread.start()
 
