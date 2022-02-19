@@ -11,4 +11,5 @@ except ConnectionRefusedError:
     logging.info("Sigmadsp backend is not running!")
 
 else:
+    c.root.reset()
     c.root.adjust_volume(-3, "adjustable_volume_main")

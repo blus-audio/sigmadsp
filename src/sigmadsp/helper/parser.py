@@ -72,9 +72,9 @@ class Parser:
                 logging.info("Using parameter file path %s.", file_path)
                 lines = file.readlines()
 
-                for line in lines:
-                    cell: Cell = None
+                cell: Cell = None
 
+                for line in lines:
                     split_line = line.split()
 
                     if split_line:

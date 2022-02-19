@@ -9,7 +9,10 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": true,
+            "sudo": true
         },
         {
             "name": "Python: run",
@@ -18,7 +21,8 @@
             "program": "run.py",
             "console": "integratedTerminal",
             "justMyCode": false,
-            "subProcess": true
+            "subProcess": true,
+            "sudo": true
         }
     ]
 }

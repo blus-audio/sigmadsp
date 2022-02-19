@@ -25,14 +25,19 @@ from sigmadsp.helper.parser import Cell, Parser
 
 
 class SigmadspSettings:
-    def __init__(self, settings_file_path: str = "/var/lib/sigmadsp/sigmadsp.json"):
+    default_settings_file_path = "/var/lib/sigmadsp/sigmadsp.json"
+
+    def __init__(self, settings_file_path: str = None):
         """Loads a settings file in .json format from a specified path.
         If no file is provided, the default path is used for loading settings.
 
         Args:
-            settings_file_path (str, optional): The input path.
-                Defaults to "/var/lib/sigmadsp/sigmadsp.json".
+            settings_file_path (str, optional): The input path of the settings file.
+                Defaults to None.
         """
+        if settings_file_path is None:
+            settings_file_path = SigmadspSettings.default_settings_file_path
+
         try:
             # Open settings file, in order to configure the application
             with open(settings_file_path, "r", encoding="utf8") as settings_file:
