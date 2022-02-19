@@ -17,13 +17,13 @@ to run on single-board computers that connect to an Analog Devices DSP via the s
 The backend service is the core application, which
 - connects to the DSP via SPI,
 - exposes a TCP interface towards SigmaStudio,
-- and provides an [rpyc](https://pypi.org/project/rpyc/) remote procedure call (RPC) interface.
+- and provides a remote procedure call (RPC) interface, based on [grpc](https://grpc.io/).
 
 With the latter, a frontend can connect to the backend service and control it remotely.
 
 ## Frontend interface
 
-The frontend interface connects to the rpyc service of the backend, allowing the user to control
+The frontend interface connects to the RPC service of the backend, allowing the user to control
 settings via a command-line interface (CLI).
 
 ## Supported chipsets
@@ -55,16 +55,10 @@ For a list of commands that can be emitted by the frontend, simply type `sigmads
 
 ## Contributing
 
-Python coding style is checked by means of [pre-commit](https://pre-commit.com/), using the following hooks:
-
-- [iSort](https://github.com/pycqa/isort)
-- [black](https://github.com/psf/black)
-- [pylint](https://github.com/PyCQA/pylint)
-- [flake8](https://github.com/PyCQA/flake8)
-
+Python coding style is checked by means of [pre-commit](https://pre-commit.com/).
 Before committing your changes, please install pre-commit
 
-`pip install pre-commit`
+`python3 -m pip install pre-commit`
 
 and install the git hooks with
 
