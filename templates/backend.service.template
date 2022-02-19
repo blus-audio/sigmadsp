@@ -1,0 +1,10 @@
+[Unit]
+Description=Sigma DSP backend
+Wants=network-online.target
+After=network.target network-online.target
+[Service]
+Type=simple
+ExecStart=$SERVICE_LOCATION -s $CONFIGURATION_FOLDER/$CONFIGURATION_FILE
+StandardOutput=journal
+[Install]
+WantedBy=multi-user.target

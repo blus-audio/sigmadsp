@@ -1,0 +1,22 @@
+# This $CONFIGURATION_FILE file contains all settings that can be changed on the $SIGMADSP_BACKEND.
+
+# The IP address and port, on which the $SIGMADSP_BACKEND listens for requests from SigmaStudio.
+host:
+  # The default value "0.0.0.0" allows listening on any address.
+  ip: "0.0.0.0"
+  port: 8087
+
+# Settings for the $SIGMADSP_BACKEND.
+backend:
+  # The port, on which the $SIGMADSP_BACKEND is reachable.
+  port: 50051
+
+parameters:
+  # The parameter file path, which contains DSP application parameters,
+  # such as cell names, addresses and other information. This parameter file is required
+  # for the backend, in order to be able to control DSP functionality at runtime, e.g. volume.
+  path: "$CONFIGURATION_FOLDER/$PARAMETER_FILE"
+
+dsp:
+  # The type of the DSP to control with the $SIGMADSP_BACKEND service.
+  type: "$DSP_TYPE"
