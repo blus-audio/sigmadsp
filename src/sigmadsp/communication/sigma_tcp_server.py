@@ -189,21 +189,21 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
 
         It never stops, except if the connection is reset.
         """
+        while True:
+            # Receive the packet header.
+            payload_data = self.receive_amount(ThreadedSigmaTcpRequestHandler.HEADER_LENGTH)
 
-        # Receive the packet header.
-        payload_data = self.receive_amount(ThreadedSigmaTcpRequestHandler.HEADER_LENGTH)
+            # The first byte of the header contains the command from SigmaStudio.
+            command = payload_data[0]
 
-        # The first byte of the header contains the command from SigmaStudio.
-        command = payload_data[0]
+            if command == ThreadedSigmaTcpRequestHandler.COMMAND_WRITE:
+                self.handle_write_data(payload_data)
 
-        if command == ThreadedSigmaTcpRequestHandler.COMMAND_WRITE:
-            self.handle_write_data(payload_data)
+            elif command == ThreadedSigmaTcpRequestHandler.COMMAND_READ:
+                self.handle_read_request(payload_data)
 
-        elif command == ThreadedSigmaTcpRequestHandler.COMMAND_READ:
-            self.handle_read_request(payload_data)
-
-        else:
-            logging.info("Received unknown command: %d", command)
+            else:
+                logging.info("Received unknown command: %d", command)
 
 
 class SigmaTCPServer:
