@@ -1,10 +1,10 @@
-#!/usr/bin/env python3
-
 import argparse
 import logging
 import rpyc
 
-if __name__ == "__main__":
+def main():
+    logging.basicConfig(level=logging.INFO)
+
     argument_parser = argparse.ArgumentParser()
     argument_parser.add_argument("-av", "--adjust_volume", required=False, type=float, help="Adjust the volume by a certain value in dB.")
     argument_parser.add_argument("-r", "--reset", required=False, help="Soft-reset the DSP.", action='store_true')
@@ -14,7 +14,7 @@ if __name__ == "__main__":
         sigmadsp_backend_service = rpyc.connect("localhost", 18861)
 
     except ConnectionRefusedError:
-        logging.info("Sigmadsp backend is not running!")
+        logging.info("Sigmadsp backend is not running! Aborting.")
 
     else:
         if arguments.adjust_volume is not None:
@@ -22,3 +22,6 @@ if __name__ == "__main__":
 
         if arguments.reset is True:
             sigmadsp_backend_service.root.reset_dsp()
+
+if __name__ == "__main__":
+    main()

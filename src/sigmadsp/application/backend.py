@@ -10,6 +10,7 @@ from sigmadsp.helper.parser import Parser, Cell
 from rpyc.utils.server import ThreadedServer
 from typing import Any, List
 
+import argparse
 import threading
 import logging
 import json
@@ -187,10 +188,16 @@ def launch(settings_file_path: str = None):
     threaded_server = ThreadedServer(configuration_backend_service, port=BACKEND_PORT)
     threaded_server.start()
 
-
-if __name__ == "__main__":
+def main():
     """Launch the backend with default settings
     """
     logging.basicConfig(level=logging.INFO)
-    launch()
+
+    argument_parser = argparse.ArgumentParser()
+    argument_parser.add_argument("-s", "--settings", required=False, help="specifies the settings file path for configuring the sigmadsp backend application")
+    arguments = argument_parser.parse_args()
+
+    launch(settings_file_path = arguments.settings)
     
+if __name__ == "__main__":
+    main()

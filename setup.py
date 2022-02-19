@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="sigmadsp",
-    version="0.0.1",
+    version="0.1.2",
     author="Adrian Figueroa",
     author_email="elagil@takanome.de",
     description="Package for controlling Sigma DSP devices over SPI, e.g. via SigmaStudio.",
@@ -17,11 +17,17 @@ setuptools.setup(
     },
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: GNU GPLv3 License",
+        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Operating System :: OS Independent",
     ],
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
     python_requires=">=3.6",
-    install_requires=["spidev"],
+    install_requires=["spidev", "rpyc", "RPi.GPIO"],
+    entry_points={
+        'console_scripts': [
+            'sigmadsp-backend=sigmadsp.application.backend:main',
+            'sigmadsp=sigmadsp.application.frontend:main',
+        ],
+    },
 )
