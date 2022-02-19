@@ -1,5 +1,4 @@
-"""Test script, for evaluating the Sigmadsp backend functionality.
-"""
+"""Test script, for evaluating the Sigmadsp backend functionality."""
 import logging
 
 import rpyc
