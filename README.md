@@ -36,41 +36,70 @@ DSP|Status|Backend settings `dsp_type`
 [ADAU146X](https://www.analog.com/media/en/technical-documentation/data-sheets/ADAU1463-1467.pdf) | Untested, register compatible with ADAU145X | `adau14xx`
 
 ## Installation
+:zap: Running the installation will overwrite your existing configuration. For upgrading, see [Upgrading](#upgrading)!
 
-For installing, install git
+For installing, please install git first, with
 
-`sudo apt install git`,
+```bash
+sudo apt install git
+```
 
-and clone this repository with
+Then, clone this repository and run the installation script, with
 
-`git clone https://github.com/elagil/sigma-dsp.git`.
-
-Then, change to the new directory with `cd sigma-dsp`, and run the installation with `./install.sh`.
+```bash
+git clone https://github.com/elagil/sigma-dsp.git
+cd sigma-dsp
+./install.sh
+```
 
 The script installs the Python package, which includes the `sigmadsp-backend` (the backend) and `sigmadsp` (the frontend) executables.
 It also sets up a system service, which runs `sigmadsp-backend` in the background.
 
+## Upgrading
+
+For upgrading, the installation procedure can be repeated, but will overwrite the current configuration file.
+
+Instead, simply run
+
+```bash
+sudo pip3 install sigmadsp --upgrade
+```
+
+Afterwards, restart the backend service for loading the new version: `sudo systemctl restart sigmadsp-backend.service`.
+
 ## Removal
 
-From within the previously cloned folder `sigma-dsp` run `./uninstall.sh`.
+From within the previously cloned repository folder `sigma-dsp` run
+
+```bash
+./uninstall.sh
+```
 
 ## Configuration
 
-Configuration of `sigmadsp` is done via a `*.yaml` file, which is specified during installation.
+Configuration of `sigmadsp` is done via a `*.yaml` file, which is created during installation. Its default path is `/var/lib/config.yaml`.
 
 ## Usage
 
-For a list of commands that can be emitted by the frontend, simply type `sigmadsp -h`.
+For a list of commands that can be emitted by the frontend, simply type 
+
+```bash
+sigmadsp -h
+```
 
 ## Contributing
 
 Python coding style is checked by means of [pre-commit](https://pre-commit.com/).
 Before committing your changes, please install pre-commit
 
-`python3 -m pip install pre-commit`
+```bash
+python3 -m pip install pre-commit
+```
 
 and install the git hooks with
 
-`pre-commit install`.
+```bash
+pre-commit install
+```
 
 Changes are then checked against the coding style toolchain when committing.
