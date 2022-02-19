@@ -10,6 +10,7 @@ class SpiHandler():
     ADDRESS_LENGTH = 2
     HEADER_LENGTH = 3
     MAX_PAYLOAD_WORDS = 1000
+    MAX_PAYLOAD_BYTES = MAX_PAYLOAD_WORDS*4
 
     WRITE = 0
     READ = 1
@@ -103,7 +104,16 @@ class SpiHandler():
 
         return bytes(spi_response[SpiHandler.HEADER_LENGTH:])
 
-    def _build_write_spi_frame(self, address: int, data: bytes):
+    def _build_write_spi_frame(self, address: int, data: bytes) -> bytearray:
+        """Builds an SPI frame that is going to be written to the DSP
+
+        Args:
+            address (int): The register address that the data is written to
+            data (bytes): The register content
+
+        Returns:
+            bytearray: The complete SPI frame buffer
+        """
         frame = bytearray(SpiHandler.HEADER_LENGTH)
         frame[0] = SpiHandler.WRITE
         frame[1:3] = address.to_bytes(SpiHandler.ADDRESS_LENGTH, "big")
@@ -126,16 +136,23 @@ class SpiHandler():
         current_data = data
 
         while remaining_data_length > 0:
-            if remaining_data_length >= SpiHandler.MAX_PAYLOAD_WORDS * 4:
+            # There is data remaining for writing
+
+            if remaining_data_length >= SpiHandler.MAX_PAYLOAD_BYTES:
                 # Packet has to be split into smaller chunks, where the write address is advanced accordingly.
-                frame = self._build_write_spi_frame(current_address, current_data[:SpiHandler.MAX_PAYLOAD_WORDS * 4])
+                # DSP register addresses are counted in words (32 bit per increment).
+
+                # Build the frame from a subset of the input data, and write it
+                frame = self._build_write_spi_frame(current_address, current_data[:SpiHandler.MAX_PAYLOAD_BYTES])
                 self.spi.writebytes(frame)
 
-                remaining_data_length -= SpiHandler.MAX_PAYLOAD_WORDS * 4
+                # Update address, data counter, and the binary data buffer
                 current_address += SpiHandler.MAX_PAYLOAD_WORDS
-                current_data = current_data[SpiHandler.MAX_PAYLOAD_WORDS * 4:]
+                remaining_data_length -= SpiHandler.MAX_PAYLOAD_BYTES
+                current_data = current_data[SpiHandler.MAX_PAYLOAD_BYTES:]
 
             else:
+                # The packet fits into one transmission.
                 frame = self._build_write_spi_frame(current_address, current_data)
                 self.spi.writebytes(frame)
                 remaining_data_length = 0
