@@ -1,11 +1,13 @@
 import setuptools
+import versioneer
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     name="sigmadsp",
-    version="0.1.2",
     author="Adrian Figueroa",
     author_email="elagil@takanome.de",
     description="Package for controlling Sigma DSP devices over SPI, e.g. via SigmaStudio.",
@@ -25,9 +27,9 @@ setuptools.setup(
     python_requires=">=3.6",
     install_requires=["spidev", "rpyc", "RPi.GPIO"],
     entry_points={
-        'console_scripts': [
-            'sigmadsp-backend=sigmadsp.application.backend:main',
-            'sigmadsp=sigmadsp.application.frontend:main',
+        "console_scripts": [
+            "sigmadsp-backend=sigmadsp.application.backend:main",
+            "sigmadsp=sigmadsp.application.frontend:main",
         ],
     },
 )
