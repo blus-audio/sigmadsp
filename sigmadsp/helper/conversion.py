@@ -1,4 +1,28 @@
-def bytes_to_int(data: bytes, offset: int, length: int = 1) -> int:
+import math
+
+def db_to_linear(value_db: float) -> float:
+    """Converts a dB-scale value (e.g. voltage) to a linear-scale value
+
+    Args:
+        value (float): Input dB value
+
+    Returns:
+        float: Output linear value
+    """
+    return 10**(value_db/20)
+
+def linear_to_db(value_linear: float) -> float:
+    """Converts a linear-scale value to a dB-scale value (e.g. voltage)
+
+    Args:
+        value_linear (float): The linear input value
+
+    Returns:
+        float: Output in dB scale
+    """
+    return 20*math.log10(value_linear)
+
+def bytes_to_int(data: bytes, offset: int = 0, length: int = 1) -> int:
     """Convertes a number of bytes to their integer representation.
     Uses "length" bytes from the "data" input, starting at "offset".
 
@@ -12,7 +36,7 @@ def bytes_to_int(data: bytes, offset: int, length: int = 1) -> int:
     """
     return int.from_bytes(data[offset:offset+length], byteorder='big')
 
-def bytes_to_int8(data: bytes, offset: int) -> int:
+def bytes_to_int8(data: bytes, offset: int = 0) -> int:
     """Converts one byte to an 8 bit integer value.
 
     Args:
@@ -24,8 +48,8 @@ def bytes_to_int8(data: bytes, offset: int) -> int:
     """
     return bytes_to_int(data, offset, length = 1)
 
-def bytes_to_int16(data: bytes, offset: int) -> int:
-    """Converts one byte to a 16 bit integer value.
+def bytes_to_int16(data: bytes, offset: int = 0) -> int:
+    """Converts two bytes to a 16 bit integer value.
 
     Args:
         data (bytes): Input bytes
@@ -36,8 +60,8 @@ def bytes_to_int16(data: bytes, offset: int) -> int:
     """
     return bytes_to_int(data, offset, length = 2)
 
-def bytes_to_int32(data: bytes, offset: int) -> int:
-    """Converts one byte to a 32 bit integer value.
+def bytes_to_int32(data: bytes, offset: int = 0) -> int:
+    """Converts four bytes to a 32 bit integer value.
 
     Args:
         data (bytes): Input bytes

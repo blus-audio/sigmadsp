@@ -1,5 +1,5 @@
 import socketserver
-from sigmadsp.helper.conversion import bytes_to_int8, bytes_to_int16, bytes_to_int32
+from sigmadsp.helper.conversion import bytes_to_int, bytes_to_int8, bytes_to_int16, bytes_to_int32
 from sigmadsp.helper.conversion import int8_to_bytes, int16_to_bytes, int32_to_bytes
 
 class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
@@ -18,16 +18,18 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         channel_number          This indicates the channel number
         total_length	        This indicates the total length of the write packet (uint32)
         chip_address	        The address of the chip to which the data has to be written
-        payload_length	            The length of the data (uint32)
+        payload_length	        The length of the data (uint32)
         address	                The address of the module whose data is being written to the DSP (uint16)
         payload	                The payload data to be written
         """
 
         block_safeload = bytes_to_int8(data, 1)
         channel_number = bytes_to_int8(data, 2)
-
         total_length = bytes_to_int32(data, 3)
-        chip_address = bytes_to_int8(data, 7)
+
+        # The chip address is appended by the read/write bit. Shifting right by one bit removes it.
+        chip_address = bytes_to_int8(data, 7) >> 1
+
         payload_length = bytes_to_int32(data, 8)
         address = bytes_to_int16(data, 12)
 
