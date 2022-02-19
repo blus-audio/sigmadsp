@@ -222,7 +222,12 @@ class ConfigurationBackendService(rpyc.Service):
                 self.dsp.adjust_volume(adjustment_db, volume_cell.parameter_address)
 
     def exposed_load_parameter_file(self, lines: List[str]):
-        """Store a new parameter file locally"""
+        """Receives a new parameter file from the frontend, and stores it locally.
+        The file is stored at the specified location, defined in the backend settings file.
+
+        Args:
+            lines (List[str]): The text lines of the parameter file.
+        """
         self.settings.store_parameters(lines)
 
     def on_connect(self, conn: rpyc.Connection):

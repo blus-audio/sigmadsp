@@ -1,7 +1,7 @@
 #!/bin/sh
-sudo apt-get update
-sudo apt-get install -y python3-pip
-sudo pip3 install sigmadsp
+
+# The name of the python package
+PYTHON_PACKAGE=sigmadsp
 
 # The name of the sigmadsp-backend service
 SIGMADSP_BACKEND=sigmadsp-backend
@@ -22,6 +22,13 @@ PARAMETER_FILE=current.params
 TEMP_FOLDER=/tmp
 
 ### Installation starts below. ###
+sudo apt-get update
+
+# Install the prerequisite pip3
+sudo apt-get install -y python3-pip
+
+# Install the package itself, along with its scripts
+sudo pip3 install $PYTHON_PACKAGE --upgrade
 
 echo "Stopping any old $SIGMADSP_BACKEND services."
 for i in $SIGMADSP_BACKEND; do
