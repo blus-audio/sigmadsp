@@ -14,7 +14,7 @@ safety_hash: str = "safety_hash"
 valid_prefix_tokens: List[str] = [adjustable_prefix, volume_prefix]
 
 
-@dataclass
+@dataclass(frozen=True)
 class Cell:
     """A cell object is a unit, which represents a cell from SigmaStudio."""
 
@@ -92,7 +92,52 @@ class Parser:
         # A list of cells, to be filled with inputs from a file.
         self.cells: List[Cell] = []
 
-    def run(self, file_path: str):
+    def extract_cell(self, cell_lines: List[str]) -> Union[Cell, None]:
+        """Reads a block of data from the paramter listing, and creates a new Cell from it.
+
+        Args:
+            cell_lines (List[str]): The lines from the listing to read from.
+
+        Returns:
+            Union[Cell, None]: The new Cell, if the data from the listing is valid, None otherwise.
+        """
+        for line in cell_lines:
+            # Assemble a cell from the information in the cell_lines
+            split_line = line.split()
+
+            if split_line:
+                if split_line[0] == "Cell" and split_line[1] == "Name":
+
+                    name = " ".join(split_line[3:])
+
+                elif split_line[0] == "Parameter":
+
+                    if split_line[1] == "Name":
+                        parameter_name = " ".join(split_line[3:])
+
+                    if split_line[1] == "Address":
+                        parameter_address = int(split_line[3])
+
+                    if split_line[1] == "Value":
+                        data = split_line[3]
+
+                        parameter_value: Union[float, int, None] = None
+
+                        try:
+                            parameter_value = int(data)
+
+                        except ValueError:
+                            parameter_value = float(data)
+
+        try:
+            # Create a new cell, based on the collected parameters
+            return Cell(name, parameter_address, parameter_name, parameter_value)
+
+        except NameError:
+            # This fails, if any of the required parameters were not extracted successfully.
+            return None
+
+    def run(self, file_path: str) -> None:
         """Parse an input file that was exported from Sigma Studio.
 
         Args:
@@ -120,38 +165,12 @@ class Parser:
                         # No more blocks to be found in the parameter file.
                         break
 
-                    for line in cell_lines:
-                        # Assemble a cell from the information in the cell_lines
-                        split_line = line.split()
+                    cell = self.extract_cell(cell_lines)
 
-                        if split_line:
-                            if split_line[0] == "Cell" and split_line[1] == "Name":
+                    if cell is None:
+                        continue
 
-                                name = " ".join(split_line[3:])
-
-                            elif split_line[0] == "Parameter":
-
-                                if split_line[1] == "Name":
-                                    parameter_name = " ".join(split_line[3:])
-
-                                if split_line[1] == "Address":
-                                    parameter_address = int(split_line[3])
-
-                                if split_line[1] == "Value":
-                                    data = split_line[3]
-
-                                    parameter_value: Union[float, int, None] = None
-
-                                    try:
-                                        parameter_value = int(data)
-
-                                    except ValueError:
-                                        parameter_value = float(data)
-
-                    # Create a new cell, based on the collected parameters
-                    cell = Cell(name, parameter_address, parameter_name, parameter_value)
-
-                    if cell not in self.cells:
+                    elif cell not in self.cells:
                         self.cells.append(cell)
 
                 logging.info("Found a total number of %d unique parameter cells.", len(self.cells))
