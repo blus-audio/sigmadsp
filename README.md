@@ -37,13 +37,22 @@ DSP|Status|Backend settings `dsp_type`
 
 ## Installation
 
-For installing, simply run
+For installing, install git
 
-`curl -sL https://raw.githubusercontent.com/elagil/sigma-dsp/main/install.sh | sh`.
+`sudo apt install git`,
+
+and clone this repository with 
+
+`git clone https://github.com/elagil/sigma-dsp.git`.
+
+Then, change to the new directory with `cd sigma-dsp`, and run the installation with `./install.sh`.
 
 The script installs the Python package, which includes the `sigmadsp-backend` (the backend) and `sigmadsp` (the frontend) executables.
-
 It also sets up a system service, which runs `sigmadsp-backend` in the background.
+
+## Removal
+
+From within the previously cloned folder `sigma-dsp` run `./uninstall.sh`.
 
 ## Configuration
 
