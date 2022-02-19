@@ -42,7 +42,7 @@ class Adau14xx:
         self.spi_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(0))
         self.spi_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(1))
 
-    def get_parameter_value(self, address: int, data_format: str = "float") -> Union[float, int, None]:
+    def get_parameter_value(self, address: int, data_format: str) -> Union[float, int, None]:
         """Gets a parameter value from a chosen register address.
 
         Args:
@@ -116,7 +116,7 @@ class Adau14xx:
             float: The new volume in dB.
         """
         # Read current volume and apply adjustment
-        current_volume = self.get_parameter_value(address)
+        current_volume = self.get_parameter_value(address, data_format="float")
 
         if not isinstance(current_volume, float):
             raise TypeError
