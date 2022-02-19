@@ -78,38 +78,42 @@ class Parser:
             logging.error("The parameter file is not a *.params file! Aborting.")
 
         else:
-            with open(file_name, "r") as file:
-                logging.info(f"Using parameter file path {file_name}.")
-                lines = file.readlines()
+            try:
+                with open(file_name, "r") as file:
+                    logging.info(f"Using parameter file path {file_name}.")
+                    lines = file.readlines()
 
-                for line in lines:
-                    split_line = line.split()
+                    for line in lines:
+                        split_line = line.split()
+                        
+                        if split_line:
+                            if split_line[0] == "Cell" and split_line[1] == "Name":
+                                self.cell = Cell()
+                                self.cells.append(self.cell)
+
+                                self.cell.name = " ".join(split_line[3:])
+
+                            elif split_line[0] == "Parameter":
+
+                                if split_line[1] == "Name":
+                                    self.cell.parameter_name = " ".join(split_line[3:])
+
+                                if split_line[1] == "Address":
+                                    self.cell.parameter_address = int(split_line[3])
+                                    
+                                if split_line[1] == "Value":
+                                    data = split_line[3]
+                                    
+                                    try:
+                                        self.cell.parameter_value = int(data)
+                                    
+                                    except ValueError:
+                                        self.cell.parameter_value = float(data)
                     
-                    if split_line:
-                        if split_line[0] == "Cell" and split_line[1] == "Name":
-                            self.cell = Cell()
-                            self.cells.append(self.cell)
+                    logging.info(f"Found a total number of {len(self.cells)} cells.")
 
-                            self.cell.name = " ".join(split_line[3:])
-
-                        elif split_line[0] == "Parameter":
-
-                            if split_line[1] == "Name":
-                                self.cell.parameter_name = " ".join(split_line[3:])
-
-                            if split_line[1] == "Address":
-                                self.cell.parameter_address = int(split_line[3])
-                                
-                            if split_line[1] == "Value":
-                                data = split_line[3]
-                                
-                                try:
-                                    self.cell.parameter_value = int(data)
-                                
-                                except ValueError:
-                                    self.cell.parameter_value = float(data)
-                
-                logging.info(f"Found a total number of {len(self.cells)} cells.")
+            except FileNotFoundError:
+                logging.info(f"Parameter file {file_name} not found.")
 
     @property 
     def volume_cells(self) -> List[Cell]:

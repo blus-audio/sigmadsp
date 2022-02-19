@@ -8,10 +8,15 @@ for i in sigmadsp; do
  sudo systemctl disable $i
 done
 
-sudo mkdir -p /var/lib/hifiberry
+sudo mkdir -p /var/lib/sigmadsp
 
-LOC=`which dsptoolkit`
-sudo mkdir ~/.dsptoolkit
+cat <<EOT >/var/lib/sigmadsp/sigmadsp.json
+{
+  "host": "0.0.0.0",
+  "parameter_file_path": "/var/lib/sigmadsp/current.params",
+  "dsp_type": "adau14xx"
+}
+EOT
 
 # Create systemd config for the TCP server
 LOC=`which sigmadsp-backend`

@@ -17,43 +17,106 @@ import json
 import rpyc
 import sys
 
-def load_from_settings(settings: dict, key: str, default: Any) -> Any:
-    """Loads certain settings from the settings dictionary
+class SigmadspSettings:
+    def __init__(self, settings_file_path: str = None):
+        """Loads a settings file in .json format from a specified path.
+        If no file is provided, the default path is used for loading settings.
 
-    Args:
-        settings (dict): Settings dictionary
-        key (str): The key to look for
-        default (Any): The default return value, if the key is not found
+        Args:
+            settings_file_path (str): The input path
+        """ 
+        if settings_file_path is None:
+            settings_file_path = "/var/lib/sigmadsp/sigmadsp.json"
 
-    Returns:
-        Any: Setting for the key, if found, default otherwise.
-    """
-    if settings is not None:
         try:
-            return settings[key]
+            # Open settings file, in order to configure the application
+            with open(settings_file_path, "r") as settings_file:
+                self.settings = json.load(settings_file)
+                logging.info(f"Settings file {settings_file_path} was loaded.")
+        
+        except FileNotFoundError:
+            logging.info("Settings file not found. Using default values.")
+            self.settings = None
 
-        except KeyError:
-            return default
+        self.parameter_parser = self.load_parameters()
+
+    def load_parameters(self) -> List[Cell]:
+        """Loads parameter cells, accoring to the parameter file path that is defined in the settings object
+
+        Returns:
+            List[Cell]: The cells that were found in the parameter file
+        """
+        parameter_file_path = self.parameter_file_path
+
+        parser = Parser()
+        parser.run(parameter_file_path)
+        return parser
+
+    def store_parameters(self, lines: List[str]):
+        with open(self.parameter_file_path, "w", encoding="UTF8") as parameter_file:
+            parameter_file.writelines(lines)
+
+        self.load_parameters()
+            
+    def get_setting(self, key: str, default_setting: Any = None) -> Any:
+        """Loads certain settings from the settings dictionary
+
+        Args:
+            key (str): The key to look for
+            default_setting (Any): The default return value, if the key is not found
+
+        Returns:
+            Any: Setting for the key, if found, default_setting otherwise.
+        """
+        setting = default_setting
+
+        if self.settings is not None:
+            try:
+                setting = self.settings[key]
+
+            except KeyError:
+                pass
+
+        return setting
              
+    @property
+    def host(self) -> str:
+        return self.get_setting("host", "0.0.0.0")
+
+    @property
+    def port(self) -> int:
+        return self.get_setting("port", 8087)
+    
+    @property
+    def backend_port(self) -> int:
+        return self.get_setting("backend_port", 18861)
+
+    @property
+    def dsp_type(self) -> str:
+        return self.get_setting("dsp_type", "adau14xx")
+
+    @property
+    def parameter_file_path(self) -> str:
+        return self.get_setting("parameter_file_path", "/var/lib/sigmadsp/current.params")
+
 
 class ConfigurationBackendService(rpyc.Service):
     """The configuration backend service that handles the underlying TCP server and SPI handler.
     This service also reacts to rpyc remote procedure calls, for performing actions with the DSP over SPI.
     """
-    def __init__(self, settings: dict = None, parser: Parser = None):
+    def __init__(self, settings: SigmadspSettings = None):
         """Initialize service and start all relevant threads (TCP, SPI)
 
         Args:
-            settings (dict, optional): The settings dictionary. Defaults to None.
-            parser (Parser, optional): The parameter file parser. Defaults to None.
+            settings (SigmadspSettings, optional): The settings object. Defaults to None.
         """
         super().__init__()
 
-        self.parser = parser
+        self.settings = settings
 
         # Load TCP server settings
-        HOST = load_from_settings(settings, "host", "0.0.0.0")
-        PORT = load_from_settings(settings, "port", 8087)
+        HOST = settings.host
+        PORT = settings.port
         
         # Create an SPI handler, along with its thread
         self.spi_handler = SpiHandler()
@@ -67,7 +130,7 @@ class ConfigurationBackendService(rpyc.Service):
         worker_thread.daemon = True
         worker_thread.start()
         
-        DSP_TYPE = load_from_settings(settings, "dsp_type", "adau14xx")
+        DSP_TYPE = settings.dsp_type
         logging.info(f"Specified DSP type is '{DSP_TYPE}'.")
 
         if DSP_TYPE == "adau14xx":
@@ -104,9 +167,14 @@ class ConfigurationBackendService(rpyc.Service):
             adjustment_db (float): The adjustment in dB for the volume cell
             cell_name (str): The name of the cell to adjust
         """
-        for volume_cell in self.parser.volume_cells:
+        for volume_cell in self.settings.parameter_parser.volume_cells:
             if volume_cell.name == cell_name:
                 self.dsp.adjust_volume(adjustment_db, volume_cell.parameter_address)
+
+    def exposed_load_parameter_file(self, lines: List[str]):
+        """Store a new parameter file locally
+        """
+        self.settings.store_parameters(lines)
 
     def on_connect(self, conn):
         # code that runs when a connection is created
@@ -119,72 +187,17 @@ class ConfigurationBackendService(rpyc.Service):
         del conn
 
 
-def load_settings_file(settings_file_path: str) -> Any:
-    """Loads a settings file in .json format from a specified path and returns a settings dictionary.
-    If no file is provided, the default path is used for loading settings.
-
-    Args:
-        settings_file_path (str): The input path
-
-    Returns:
-        Any: The settings dictionary
-    """ 
-    if settings_file_path is None:
-        settings_file_path = "/etc/sigmatcp/sigmatcp.json"
-
-    try:
-        # Open settings file, in order to configure the application
-        with open(settings_file_path, "r") as settings_file:
-            settings = json.load(settings_file)
-            logging.info(f"Settings file {settings_file_path} was loaded.")
-    
-    except FileNotFoundError:
-        logging.info("Settings file not found. Using default values.")
-        settings = None
-
-    return settings
-
-
-def load_parameters(settings: dict) -> List[Cell]:
-    """Loads parameter cells, accoring to the parameter file path that is defined in the settings dictionary
-
-    Args:
-        settings (dict): The settings dictionary
-
-    Returns:
-        List[Cell]: The cells that were found in the parameter file
-    """
-    if settings is not None:
-        try:
-            parameter_file_path = settings["parameter_file_path"]
-
-        except KeyError:
-            logging.info("No parameter file path was specified in the settings file.")
-
-        else:
-            parser = Parser()
-            parser.run(parameter_file_path)
-            return parser
-
-    else:
-        logging.info("No settings file was loaded, thus no parameter cells can be loaded.")
-        return None
-
-
-def launch(settings_file_path: str = None):
+def launch(settings: SigmadspSettings):
     """Launches the backend application
 
     Args:
         settings_file_path (str, optional): Settings file for the backend application. Defaults to None.
             If not specified, a default path is used for loading the settings.
     """
-    settings = load_settings_file(settings_file_path)
-    parser = load_parameters(settings)
-
-    BACKEND_PORT = load_from_settings(settings, "backend_port", 18861)
+    BACKEND_PORT = settings.backend_port
         
     # Create the backend service, an rpyc handler
-    configuration_backend_service = ConfigurationBackendService(settings, parser)
+    configuration_backend_service = ConfigurationBackendService(settings)
     threaded_server = ThreadedServer(configuration_backend_service, port=BACKEND_PORT)
     threaded_server.start()
 
@@ -197,7 +210,8 @@ def main():
     argument_parser.add_argument("-s", "--settings", required=False, help="specifies the settings file path for configuring the sigmadsp backend application")
     arguments = argument_parser.parse_args()
 
-    launch(settings_file_path = arguments.settings)
+    settings = SigmadspSettings(arguments.settings)
+    launch(settings)
     
 if __name__ == "__main__":
     main()
