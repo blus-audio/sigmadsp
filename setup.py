@@ -30,9 +30,9 @@ setuptools.setup(
     ),
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/elagil/sigma-dsp",
+    url="https://github.com/elagil/sigmadsp",
     project_urls={
-        "Bug Tracker": "https://github.com/elagil/sigma-dsp/issues",
+        "Bug Tracker": "https://github.com/elagil/sigmadsp/issues",
     },
     classifiers=[
         "Programming Language :: Python :: 3",
