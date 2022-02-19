@@ -1,7 +1,6 @@
 import spidev
 import threading
 import multiprocessing
-import logging
 
 class SpiHandler():
     """Handles SPI transfers from and to SigmaDSP chipsets.

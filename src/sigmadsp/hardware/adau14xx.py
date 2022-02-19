@@ -1,10 +1,15 @@
 from sigmadsp.hardware.spi import SpiHandler
-from sigmadsp.helper.conversion import bytes_to_int8, bytes_to_int16, bytes_to_int32, db_to_linear
-from sigmadsp.helper.conversion import int8_to_bytes, int16_to_bytes, int32_to_bytes, linear_to_db
+from sigmadsp.helper.conversion import int16_to_bytes, int32_to_bytes, bytes_to_int32, db_to_linear
 
 class Adau14xx:
+    """A class for controlling functionality of Analog Devices Sigma DSPs, especially ADAU14xx series parts.
+    """
+
+    # Addresses and sizes of important registers
     RESET_REGISTER = 0xF890
     RESET_REGISTER_LENGTH = 2
+
+    # All fixpoint (parameter) registers are four bytes long
     FIXPOINT_REGISTER_LENGTH = 4
 
     def __init__(self):
@@ -86,4 +91,3 @@ class Adau14xx:
             new_volume = 0
 
         self.set_parameter_value(new_volume, address)
-        
