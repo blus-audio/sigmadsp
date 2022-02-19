@@ -197,8 +197,8 @@ class BackendService(BackendServicer):
                         )
 
                     response.message = (
-                        f"Set volume of '{request.change_volume.cell_name}' ",
-                        f"to {new_volume_db:.2f} dB.",
+                        f"Set volume of '{request.change_volume.cell_name}' "
+                        f"to {new_volume_db:.2f} dB."
                     )
 
                     break
