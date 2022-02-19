@@ -1,5 +1,4 @@
-"""This module implements an SPI handler that talks to Sigma DSP devices
-"""
+"""This module implements an SPI handler that talks to Sigma DSP devices."""
 import logging
 import multiprocessing
 import threading
@@ -8,7 +7,7 @@ import spidev
 
 
 def build_spi_frame(address: int, data: bytes) -> bytearray:
-    """Builds an SPI frame that is going to be written to the DSP
+    """Builds an SPI frame that is going to be written to the DSP.
 
     Args:
         address (int): The register address that the data is written to
@@ -27,6 +26,7 @@ def build_spi_frame(address: int, data: bytes) -> bytearray:
 
 class SpiHandler:
     """Handles SPI transfers from and to SigmaDSP chipsets.
+
     Tested with ADAU145X
     """
 
@@ -50,13 +50,15 @@ class SpiHandler:
     READ = 1
 
     def __init__(self):
-        """Initialize the SpiHandler thread"""
+        """Initialize the SpiHandler thread."""
         self._initialize_spi()
 
         self.queue = multiprocessing.JoinableQueue()
 
         logging.info("Starting SPI handling thread.")
-        self.thread = threading.Thread(target=self.serve_forever, name="SPIHandlerThread")
+        self.thread = threading.Thread(
+            target=self.serve_forever, name="SPIHandlerThread"
+        )
         self.thread.daemon = True
         self.thread.start()
 
@@ -112,7 +114,7 @@ class SpiHandler:
         return data
 
     def serve_forever(self):
-        """Handles incoming requests for writing or reading data over SPI"""
+        """Handles incoming requests for writing or reading data over SPI."""
         while True:
             mode = self.queue.get()
             self.queue.task_done()
@@ -133,7 +135,7 @@ class SpiHandler:
                 self.queue.join()
 
     def _read_spi(self, address: int, length: int) -> bytes:
-        """Read data over the SPI port from a SigmaDSP
+        """Read data over the SPI port from a SigmaDSP.
 
         Args:
             address (int): Address to read from
@@ -152,7 +154,7 @@ class SpiHandler:
         return bytes(spi_response[SpiHandler.HEADER_LENGTH :])
 
     def _write_spi(self, address: int, data: bytes):
-        """Write data over the SPI port onto a SigmaDSP
+        """Write data over the SPI port onto a SigmaDSP.
 
         Args:
             address (int): Address to write to
@@ -169,11 +171,15 @@ class SpiHandler:
             # There is data remaining for writing
 
             if remaining_data_length >= SpiHandler.MAX_PAYLOAD_BYTES:
-                # Packet has to be split into smaller chunks, where the write address is advanced accordingly.
+                # Packet has to be split into smaller chunks,
+                # where the write address is advanced accordingly.
                 # DSP register addresses are counted in words (32 bit per increment).
 
                 # Build the frame from a subset of the input data, and write it
-                frame = build_spi_frame(current_address, current_data[: SpiHandler.MAX_PAYLOAD_BYTES])
+                frame = build_spi_frame(
+                    current_address,
+                    current_data[: SpiHandler.MAX_PAYLOAD_BYTES],
+                )
                 self.spi.writebytes(frame)
 
                 # Update address, data counter, and the binary data buffer

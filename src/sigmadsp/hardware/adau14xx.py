@@ -1,4 +1,5 @@
 """This module provides functionality for controlling SigmaDSP hardware, e.g.
+
 - Changing parameter register contents
 - Reading parameter registers
 - Performing soft reset
@@ -40,7 +41,7 @@ class Adau14xx:
         self.spi_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(1))
 
     def get_parameter_value(self, address: int) -> float:
-        """Gets a parameter value from a chosen register address
+        """Gets a parameter value from a chosen register address.
 
         Args:
             address (int): The address to look at
@@ -49,13 +50,15 @@ class Adau14xx:
             float: Float representation of the register content
         """
 
-        data_register = self.spi_handler.read(address, Adau14xx.FIXPOINT_REGISTER_LENGTH)
+        data_register = self.spi_handler.read(
+            address, Adau14xx.FIXPOINT_REGISTER_LENGTH
+        )
         data_integer = bytes_to_int32(data_register)
         data_float = frac_8_24_to_float(data_integer)
         return data_float
 
     def set_parameter_value(self, value: float, address: int):
-        """Sets a parameter value for a chosen register address
+        """Sets a parameter value for a chosen register address.
 
         Args:
             value (float): The value to store in the register
@@ -66,7 +69,8 @@ class Adau14xx:
         self.spi_handler.write(address, data_register)
 
     def set_volume(self, value_db: float, address: int):
-        """Sets the volume register at the given address to a certain value in dB.
+        """Sets the volume register at the given address to a certain value in
+        dB.
 
         Args:
             value_db (float): The volume setting in dB
@@ -83,7 +87,8 @@ class Adau14xx:
         logging.info("Set volume to %.2f dB.", linear_to_db(value_linear))
 
     def adjust_volume(self, adjustment_db: float, address: int):
-        """Adjust the volume register at the given address by a certain value in dB.
+        """Adjust the volume register at the given address by a certain value
+        in dB.
 
         Args:
             adjustment_db (float): The volume adjustment in dB

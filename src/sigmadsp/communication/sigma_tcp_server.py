@@ -1,5 +1,7 @@
 """This module communicates with SigmaStudio.
-It can receive read/write requests and return with read response packets.
+
+It can receive read/write requests and return with read response
+packets.
 """
 import multiprocessing
 import socketserver
@@ -20,7 +22,9 @@ from sigmadsp.helper.conversion import (
 @dataclass
 class WriteRequest:
     """Helper class for defining a write request.
-    A write request consists of a target address and data."""
+
+    A write request consists of a target address and data.
+    """
 
     address: int
     data: bytes
@@ -29,7 +33,9 @@ class WriteRequest:
 @dataclass
 class ReadRequest:
     """Helper class for defining a read request.
-    A read request consists of a read address, and a field length."""
+
+    A read request consists of a read address, and a field length.
+    """
 
     address: int
     length: int
@@ -38,15 +44,16 @@ class ReadRequest:
 @dataclass
 class ReadResponse:
     """Helper class for defining a read response.
-    A read response only contains the data that was read from the read address."""
+
+    A read response only contains the data that was read from the read
+    address.
+    """
 
     data: bytes
 
 
 class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
-    """
-    Handling class for the Sigma TCP server
-    """
+    """Handling class for the Sigma TCP server."""
 
     HEADER_LENGTH = 14
     COMMAND_WRITE = 0x09
@@ -54,15 +61,18 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
     COMMAND_READ_RESPONSE = 0x0B
 
     def handle_write_data(self, data):
-        """The WRITE command indicates that SigmaStudio intends to write a packet to the DSP.
+        """The WRITE command indicates that SigmaStudio intends to write a
+        packet to the DSP.
 
-        block_safeload write    This field indicates whether the packet is a block write or a safeload write
-        channel_number          This indicates the channel number
-        total_length	        This indicates the total length of the write packet (uint32)
-        chip_address	        The address of the chip to which the data has to be written
-        payload_length	        The length of the data (uint32)
-        address	                The address of the module whose data is being written to the DSP (uint16)
-        payload	                The payload data to be written
+        block_safeload write    This field indicates whether the packet
+        is a block write or a safeload write channel_number This
+        indicates the channel number total_length            This
+        indicates the total length of the write packet (uint32)
+        chip_address            The address of the chip to which the
+        data has to be written payload_length          The length of the
+        data (uint32) address                 The address of the module
+        whose data is being written to the DSP (uint16) payload The
+        payload data to be written
         """
 
         # These fields are currently unused
@@ -73,7 +83,8 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         del channel_number
         del total_length
 
-        # The chip address is appended by the read/write bit. Shifting right by one bit removes it.
+        # The chip address is appended by the read/write bit.
+        # Shifting right by one bit removes it.
         # This field is currently unused
         chip_address = bytes_to_int8(data, 7) >> 1
         del chip_address
@@ -94,12 +105,14 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         self.server.queue.put(WriteRequest(address, payload_data))
 
     def handle_read_request(self, data: bytes):
-        """The READ command indicates that SigmaStudio intends to read a packet from the DSP.
+        """The READ command indicates that SigmaStudio intends to read a packet
+        from the DSP.
 
-        total_length	        This indicates the total length of the read packet (uint32)
-        chip_address	        The address of the chip from which the data has to be read
-        data_length	            The length of the data (uint32)
-        address	                The address of the module whose data is being read from the DSP (uint16)
+        total_length            This indicates the total length of the
+        read packet (uint32) chip_address            The address of the
+        chip from which the data has to be read data_length The length
+        of the data (uint32) address                 The address of the
+        module whose data is being read from the DSP (uint16)
         """
 
         # Unpack received data
@@ -120,7 +133,9 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         payload_data = read_response.data
 
         # Build the read response packet, starting with length calculations ...
-        total_transmit_length = ThreadedSigmaTcpRequestHandler.HEADER_LENGTH + data_length
+        total_transmit_length = (
+            ThreadedSigmaTcpRequestHandler.HEADER_LENGTH + data_length
+        )
         transmit_data = bytearray(total_transmit_length)
 
         # ... followed by populating the byte fields.
@@ -140,14 +155,18 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         # Reserved zero byte at pos. 13
         int16_to_bytes(0, transmit_data, 13)
 
-        transmit_data[ThreadedSigmaTcpRequestHandler.HEADER_LENGTH :] = payload_data
+        transmit_data[
+            ThreadedSigmaTcpRequestHandler.HEADER_LENGTH :
+        ] = payload_data
 
         self.request.sendall(transmit_data)
         self.server.queue.task_done()
 
     def handle(self):
-        """This method is called, when the TCP server receives new data for handling. It never stops,
-        except if the connection is reset.
+        """This method is called, when the TCP server receives new data for
+        handling.
+
+        It never stops, except if the connection is reset.
         """
         while True:
             missing_header_length = ThreadedSigmaTcpRequestHandler.HEADER_LENGTH
@@ -172,7 +191,9 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     """The threaded TCP server that is used for communicating with SigmaStudio.
-    Here, general server settings can be adjusted."""
+
+    Here, general server settings can be adjusted.
+    """
 
     allow_reuse_address = True
 
@@ -183,11 +204,12 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 
 class SigmaTCPServer:
-    """This is a helper class for easily filling the queue to the TCP server and reading from it."""
+    """This is a helper class for easily filling the queue to the TCP server
+    and reading from it."""
 
     def __init__(self, host: str, port: int):
-        """Initialize the Sigma TCP server. Starts the main TCP worker and initializes a queue for communicating
-        with other threads.
+        """Initialize the Sigma TCP server. Starts the main TCP worker and
+        initializes a queue for communicating with other threads.
 
         Args:
             host (str): Listening IP address
@@ -197,12 +219,14 @@ class SigmaTCPServer:
         self.port = port
         self.queue = multiprocessing.JoinableQueue()
 
-        tcp_server_worker_thread = threading.Thread(target=self.tcp_server_worker, name="TCP server worker thread")
+        tcp_server_worker_thread = threading.Thread(
+            target=self.tcp_server_worker, name="TCP server worker thread"
+        )
         tcp_server_worker_thread.daemon = True
         tcp_server_worker_thread.start()
 
     def get_request(self) -> Union[ReadRequest, WriteRequest]:
-        """Get an item from the queue
+        """Get an item from the queue.
 
         Returns:
             Union[ReadRequest, WriteRequest]: The item that was returned from the queue
@@ -213,8 +237,8 @@ class SigmaTCPServer:
         return request
 
     def put_request(self, request: ReadResponse):
-        """Put an item into the queue: blocks, until released with 'task_done()',
-        which is called by 'get_request()'.
+        """Put an item into the queue: blocks, until released with
+        'task_done()', which is called by 'get_request()'.
 
         Args:
             request (ReadResponse): The request to put into the queue
@@ -223,13 +247,17 @@ class SigmaTCPServer:
         self.queue.join()
 
     def tcp_server_worker(self):
-        """The main worker for the TCP server"""
-        tcp_server = ThreadedTCPServer((self.host, self.port), ThreadedSigmaTcpRequestHandler)
+        """The main worker for the TCP server."""
+        tcp_server = ThreadedTCPServer(
+            (self.host, self.port), ThreadedSigmaTcpRequestHandler
+        )
 
         with tcp_server:
             # Base TCP server thread
             # This initial thread starts one more thread for each request.
-            tcp_server_thread = threading.Thread(target=tcp_server.serve_forever, name="TCP server thread")
+            tcp_server_thread = threading.Thread(
+                target=tcp_server.serve_forever, name="TCP server thread"
+            )
             tcp_server_thread.daemon = True
             tcp_server_thread.start()
 

@@ -1,5 +1,8 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
+
+exclude: (_version.py|versioneer.py|generated)
+
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.2.0
@@ -20,13 +23,18 @@ repos:
     hooks:
     -   id: black
 
+-   repo: https://github.com/myint/docformatter
+    rev: v1.3.1
+    hooks:
+    -   id: docformatter
+        args: [--in-place]
+
 -   repo: https://github.com/PyCQA/pylint
     rev: v2.12.2
     hooks:
     -   id: pylint
         args:
         - --ignore-imports=yes
-        exclude: (_version.py|versioneer.py)
 
 -   repo: https://github.com/PyCQA/flake8
     rev: 4.0.1

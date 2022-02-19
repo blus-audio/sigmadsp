@@ -1,5 +1,5 @@
-"""
-This module includes many conversion functions that can be used for different purposes
+"""This module includes many conversion functions that can be used for
+different purposes.
 
 - Conversion between linear and dB-scale values
 - Conversion from bytes-like objects of varying length to integers
@@ -29,8 +29,8 @@ def clamp(value: float, min_value: float, max_value: float) -> float:
 
 
 def frac_8_24_to_float(value: int) -> float:
-    """Converts a value in the DSPs fractional representation to float.
-    32 bit values consist of 8 integer and 24 fractional bits. They are signed.
+    """Converts a value in the DSPs fractional representation to float. 32 bit
+    values consist of 8 integer and 24 fractional bits. They are signed.
 
     Args:
         value (int): Fractional value to convert
@@ -42,8 +42,8 @@ def frac_8_24_to_float(value: int) -> float:
 
 
 def float_to_frac_8_24(value: float) -> int:
-    """Converts a float value to the DSPs fractional representation.
-    32 bit values consist of 8 integer and 24 fractional bits. They are signed.
+    """Converts a float value to the DSPs fractional representation. 32 bit
+    values consist of 8 integer and 24 fractional bits. They are signed.
 
     Args:
         value (float): Float value to convert
@@ -55,7 +55,7 @@ def float_to_frac_8_24(value: float) -> int:
 
 
 def db_to_linear(value_db: float) -> float:
-    """Converts a dB-scale value (e.g. voltage) to a linear-scale value
+    """Converts a dB-scale value (e.g. voltage) to a linear-scale value.
 
     Args:
         value (float): Input dB value
@@ -79,12 +79,13 @@ def linear_to_db(value_linear: float) -> float:
 
 
 def bytes_to_int(data: bytes, offset: int = 0, length: int = 1) -> int:
-    """Convertes a number of bytes to their integer representation.
-    Uses "length" bytes from the "data" input, starting at "offset".
+    """Convertes a number of bytes to their integer representation. Uses
+    "length" bytes from the "data" input, starting at "offset".
 
     Args:
         data (bytes): Input bytes
-        offset (int, optional): Offset in number of bytes, from the beginning of the data buffer
+        offset (int, optional): Offset in number of bytes,
+            from the beginning of the data buffer
         length (int, optional): Number of bytes to convert. Defaults to 1.
 
     Returns:
@@ -98,7 +99,8 @@ def bytes_to_int8(data: bytes, offset: int = 0) -> int:
 
     Args:
         data (bytes): Input byte
-        offset (int, optional): Offset in number of bytes, from the beginning of the data buffer
+        offset (int, optional): Offset in number of bytes,
+            from the beginning of the data buffer
 
     Returns:
         int: 8 bit integer representation of the input data stream
@@ -111,7 +113,8 @@ def bytes_to_int16(data: bytes, offset: int = 0) -> int:
 
     Args:
         data (bytes): Input bytes
-        offset (int, optional): Offset in number of bytes, from the beginning of the data buffer
+        offset (int, optional): Offset in number of bytes,
+            from the beginning of the data buffer
 
     Returns:
         int: 16 bit integer representation of the input data stream
@@ -124,7 +127,8 @@ def bytes_to_int32(data: bytes, offset: int = 0) -> int:
 
     Args:
         data (bytes): Input bytes
-        offset (int, optional): Offset in number of bytes, from the beginning of the data buffer
+        offset (int, optional): Offset in number of bytes,
+            from the beginning of the data buffer
 
     Returns:
         int: 32 bit integer representation of the input data stream
@@ -132,13 +136,17 @@ def bytes_to_int32(data: bytes, offset: int = 0) -> int:
     return bytes_to_int(data, offset, length=4)
 
 
-def int_to_bytes(value: int, buffer: bytearray = None, offset: int = 0, length: int = 1):
-    """Fill a buffer with values. If no buffer is provided, a new one is created.
+def int_to_bytes(
+    value: int, buffer: bytearray = None, offset: int = 0, length: int = 1
+):
+    """Fill a buffer with values. If no buffer is provided, a new one is
+    created.
 
     Args:
         buffer (bytearray): The buffer to fill
         value (int): The value to pack into the buffer
-        offset (int, optional): Offset in number of bytes, from the beginning of the data buffer
+        offset (int, optional): Offset in number of bytes,
+            from the beginning of the data buffer
         length (int): Number of bytes to be written
     """
     if buffer is None:
@@ -150,33 +158,39 @@ def int_to_bytes(value: int, buffer: bytearray = None, offset: int = 0, length: 
 
 
 def int8_to_bytes(value, buffer=None, offset=0):
-    """Fill a buffer with an 8 bit value (1 byte). If no buffer is provided, a new one is created.
+    """Fill a buffer with an 8 bit value (1 byte). If no buffer is provided, a
+    new one is created.
 
     Args:
         buffer (bytearray): The buffer to fill
         value (int): The value to pack into the buffer
-        offset (int, optional): Offset in number of bytes, from the beginning of the data buffer
+        offset (int, optional): Offset in number of bytes,
+            from the beginning of the data buffer
     """
     return int_to_bytes(value, buffer, offset=offset, length=1)
 
 
 def int16_to_bytes(value, buffer=None, offset=0):
-    """Fill a buffer with a 16 bit value (2 bytes). If no buffer is provided, a new one is created.
+    """Fill a buffer with a 16 bit value (2 bytes). If no buffer is provided, a
+    new one is created.
 
     Args:
         value (int): The value to pack into the buffer
         buffer (bytearray, optional): The buffer to fill
-        offset (int, optional): Offset in number of bytes, from the beginning of the data buffer
+        offset (int, optional): Offset in number of bytes,
+            from the beginning of the data buffer
     """
     return int_to_bytes(value, buffer, offset=offset, length=2)
 
 
 def int32_to_bytes(value, buffer=None, offset=0) -> bytearray:
-    """Fill a buffer with a 32 bit value (4 bytes). If no buffer is provided, a new one is created.
+    """Fill a buffer with a 32 bit value (4 bytes). If no buffer is provided, a
+    new one is created.
 
     Args:
         buffer (bytearray): The buffer to fill
         value (int): The value to pack into the buffer
-        offset (int, optional): Offset in number of bytes, from the beginning of the data buffer
+        offset (int, optional): Offset in number of bytes,
+            from the beginning of the data buffer
     """
     return int_to_bytes(value, buffer, offset=offset, length=4)

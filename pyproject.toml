@@ -10,11 +10,4 @@ build-backend = "setuptools.build_meta"
 profile = "black"
 
 [tool.black]
-line-length = 119
-
-[tool.pylint.format]
-max-line-length = 119
-
-[tool.pylint."MESSAGES CONTROL"]
-# Linter checks to disable
-disable = ["import-error"]
+line-length = 80

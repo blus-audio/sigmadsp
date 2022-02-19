@@ -1,5 +1,4 @@
-"""Installs the SigmaDSP package.
-"""
+"""Installs the SigmaDSP package."""
 
 import os
 import sys
@@ -9,7 +8,8 @@ import setuptools
 # Add current folder to path
 # This is required to import versioneer in an isolated pip build
 # Prepending allows not to break on a non-isolated build when versioneer
-# is already installed (c.f. https://github.com/scikit-build/cmake-python-distributions/issues/171)
+# is already installed.
+# (c.f. https://github.com/scikit-build/cmake-python-distributions/issues/171)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -24,7 +24,10 @@ setuptools.setup(
     name="sigmadsp",
     author="Adrian Figueroa",
     author_email="elagil@takanome.de",
-    description="Package for controlling Sigma DSP devices over SPI, e.g. via SigmaStudio.",
+    description=(
+        "Package for controlling Sigma DSP devices over SPI, ",
+        "e.g. via SigmaStudio.",
+    ),
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/elagil/sigma-dsp",

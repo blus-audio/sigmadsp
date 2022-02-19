@@ -1,5 +1,5 @@
-"""A module that parses SigmaStudio project files and extracts adjustable cells
-"""
+"""A module that parses SigmaStudio project files and extracts adjustable
+cells."""
 import logging
 from typing import List, Union
 
@@ -44,20 +44,23 @@ class Cell:
             bool: True, if an adjustable volume cell, False otherwise.
         """
         if self.parameter_value is not None:
-            return self.is_adjustable_cell and (Cell.volume_identifier in self.name)
+            return self.is_adjustable_cell and (
+                Cell.volume_identifier in self.name
+            )
 
         return False
 
 
 class Parser:
-    """Parses a parameter input file from Sigma Studio and detects cells in it."""
+    """Parses a parameter input file from Sigma Studio and detects cells in
+    it."""
 
     def __init__(self):
         # A list of cells, to be filled with inputs from a file.
         self.cells: List[Cell] = []
 
     def run(self, file_path: str):
-        """Parse an input file that was exported from Sigma Studio
+        """Parse an input file that was exported from Sigma Studio.
 
         Args:
             file_path (str): The path to the input file
@@ -65,7 +68,9 @@ class Parser:
         self.cells.clear()
 
         if not file_path.endswith(".params"):
-            logging.error("The parameter file is not a *.params file! Aborting.")
+            logging.error(
+                "The parameter file is not a *.params file! Aborting."
+            )
             return
 
         # Proceed with opening the file
@@ -102,15 +107,17 @@ class Parser:
                                 except ValueError:
                                     cell.parameter_value = float(data)
 
-                logging.info("Found a total number of %d cells.", len(self.cells))
+                logging.info(
+                    "Found a total number of %d cells.", len(self.cells)
+                )
 
         except FileNotFoundError:
             logging.info("Parameter file %s not found.", file_path)
 
     @property
     def volume_cells(self) -> List[Cell]:
-        """Returns all cells that can be used for volume adjustment.
-        These are user defined with a certain name pattern.
+        """Returns all cells that can be used for volume adjustment. These are
+        user defined with a certain name pattern.
 
         Returns:
             List[Cell]: The list of adjustable volume cells
