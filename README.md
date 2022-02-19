@@ -38,17 +38,12 @@ DSP|Status|Backend settings `dsp_type`
 ## Installation
 :zap: **Running the installation will overwrite your existing configuration.** For upgrading, see [Upgrading](#upgrading)!
 
-For installing, please install git first, with
+For installing, please install git first, then clone this repository and run the installation script.
 
 ```bash
-sudo apt install git
-```
-
-Then, clone this repository and run the installation script, with
-
-```bash
-git clone https://github.com/elagil/sigma-dsp.git
-cd sigma-dsp
+sudo apt install git &&
+git clone https://github.com/elagil/sigma-dsp.git &&
+cd sigma-dsp &&
 ./install.sh
 ```
 
@@ -59,13 +54,13 @@ It also sets up a system service, which runs `sigmadsp-backend` in the backgroun
 
 For upgrading, the installation procedure can be repeated, but will overwrite the current configuration file.
 
-Instead, simply run
+Instead, simply upgrade the Python package and restart the backend service:
 
 ```bash
-sudo pip3 install sigmadsp --upgrade
+sudo pip3 install sigmadsp --upgrade &&
+sudo systemctl restart sigmadsp-backend.service
 ```
 
-Afterwards, restart the backend service for loading the new version: `sudo systemctl restart sigmadsp-backend.service`.
 
 ## Removal
 
