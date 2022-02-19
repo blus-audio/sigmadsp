@@ -1,3 +1,10 @@
+"""This module provides functionality for controlling SigmaDSP hardware, e.g.
+- Changing parameter register contents
+- Reading parameter registers
+- Performing soft reset
+
+For this, it uses the SpiHandler module, to interface to the DSP.
+"""
 from sigmadsp.hardware.spi import SpiHandler
 from sigmadsp.helper.conversion import int16_to_bytes, int32_to_bytes, bytes_to_int32, db_to_linear
 

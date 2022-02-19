@@ -4,10 +4,10 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="sigmadsp-elagil",
+    name="sigmadsp",
     version="0.0.1",
     author="Adrian Figueroa",
-    author_email="x@takanome.de",
+    author_email="elagil@takanome.de",
     description="Package for controlling Sigma DSP devices over SPI, e.g. via SigmaStudio.",
     long_description=long_description,
     long_description_content_type="text/markdown",

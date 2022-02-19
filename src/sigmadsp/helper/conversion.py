@@ -1,3 +1,10 @@
+"""
+This module includes many conversion functions that can be used for different purposes
+
+- Conversion between linear and dB-scale values
+- Conversion from bytes-like objects of varying length to integers
+- Conversion from integers to bytes-like objects of specified length
+"""
 import math
 
 def db_to_linear(value_db: float) -> float:

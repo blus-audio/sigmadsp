@@ -1,5 +1,8 @@
+"""This module communicates with SigmaStudio.
+It can receive read/write requests and return with read response packets.
+"""
 import socketserver
-from sigmadsp.helper.conversion import bytes_to_int, bytes_to_int8, bytes_to_int16, bytes_to_int32
+from sigmadsp.helper.conversion import bytes_to_int8, bytes_to_int16, bytes_to_int32
 from sigmadsp.helper.conversion import int8_to_bytes, int16_to_bytes, int32_to_bytes
 
 class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
@@ -23,12 +26,18 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         payload	                The payload data to be written
         """
 
+        # These fields are currently unused
         block_safeload = bytes_to_int8(data, 1)
         channel_number = bytes_to_int8(data, 2)
         total_length = bytes_to_int32(data, 3)
+        del block_safeload
+        del channel_number
+        del total_length
 
         # The chip address is appended by the read/write bit. Shifting right by one bit removes it.
+        # This field is currently unused
         chip_address = bytes_to_int8(data, 7) >> 1
+        del chip_address
 
         payload_length = bytes_to_int32(data, 8)
         address = bytes_to_int16(data, 12)
@@ -58,6 +67,8 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
 
         # Unpack received data
         total_length = bytes_to_int32(data, 1)
+        del total_length
+
         chip_address = bytes_to_int8(data, 5)
         data_length = bytes_to_int32(data, 6)
         address = bytes_to_int16(data, 10)
@@ -122,15 +133,33 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 
 class SigmaTCPServer:
+    """This is a helper class for easily filling the queue to the TCP server and reading from it.
+    """
     def __init__(self, tcp_server: ThreadedTCPServer):
         self.tcp_server = tcp_server
 
-    def write(self, data):
+    def write(self, data: object):
+        """Write data to the queue of the TCP server
+
+        Args:
+            data (object): The data object to put into the queue
+        """
         self.tcp_server.queue.put(data)
+
+        # Join the queue, so that the TCP server has a chance to read and process
+        # the data. Otherwise, a "read" that immediately follows would result in a race condition.
         self.tcp_server.queue.join()
 
-    def read(self):
+    def read(self) -> object:
+        """Reads data from the queue of the TCP server
+
+        Returns:
+            object: The object that was found in the queue
+        """
         data = self.tcp_server.queue.get()
+
+        # Count down the number of open tasks on the queue. Required, as the "write" command
+        # joins the queue.
         self.tcp_server.queue.task_done()
 
         return data

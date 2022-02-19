@@ -1,3 +1,5 @@
+"""This module implements an SPI handler that talks to Sigma DSP devices
+"""
 import spidev
 import threading
 import multiprocessing
@@ -6,10 +8,21 @@ class SpiHandler():
     """Handles SPI transfers from and to SigmaDSP chipsets.
     Tested with ADAU145X
     """
+    # Length of addresses (in bytes) for accessing registers
     ADDRESS_LENGTH = 2
+
+    # Length of the SPI header for communicating with SigmaDSP chipsets
     HEADER_LENGTH = 3
-    MAX_PAYLOAD_WORDS = 1000
-    MAX_PAYLOAD_BYTES = MAX_PAYLOAD_WORDS*4
+
+    # Maximum number of bytes per SPI transfer
+    MAX_SPI_BYTES = 4096
+
+    # Maximum number of words (32 bit) that can be transferred with the
+    # maximum number of allowed bytes per SPI transfer
+    MAX_PAYLOAD_WORDS = int((MAX_SPI_BYTES - HEADER_LENGTH) / 4)
+
+    # Derive maximum payload (bytes) from number of maximum words
+    MAX_PAYLOAD_BYTES = MAX_PAYLOAD_WORDS * 4
 
     WRITE = 0
     READ = 1
@@ -39,7 +52,8 @@ class SpiHandler():
         self.spi.open(bus, device)
 
         # The SigmaDSP allows a maximum SPI transfer speed of 20 MHz.
-        self.spi.max_speed_hz = 1000000
+        # Raspberry Pi hardware allows binary steps (1 MHz, 2 MHz, ...)
+        self.spi.max_speed_hz = 16000000
 
         # The SigmaDSP uses SPI mode 0 with 8 bits per word. Do not change.
         self.spi.mode = 0

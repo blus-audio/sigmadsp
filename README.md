@@ -1,1 +1,2 @@
-# sigma-dsp
+# Analog Devices Sigma DSP control software
+
