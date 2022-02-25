@@ -52,6 +52,7 @@ class ThreadedTCPServer(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
 
     def __init__(self, *args, **kwargs):
+        """Initialize the ThreadedTCPServer."""
         self.queue: multiprocessing.JoinableQueue = multiprocessing.JoinableQueue()
 
         super().__init__(*args, **kwargs)
@@ -96,12 +97,11 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         return payload_data
 
     def handle_write_data(self, packet_header: bytes):
-        """Handles requests, where SigmaStudio wants to write to the DSP.
+        """Handle requests, where SigmaStudio wants to write to the DSP.
 
         Args:
-            data (bytes): The binary request from SigmaStudio.
+            packet_header (bytes): The binary request header, as received from SigmaStudio.
         """
-
         # This field indicates whether the packet is a block write or a safeload write.
         # TODO: This field is currently unused.
         block_safeload = bytes_to_int8(packet_header, 1)
@@ -134,12 +134,11 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         self.server.queue.put(WriteRequest(address, payload_data))
 
     def handle_read_request(self, packet_header: bytes):
-        """Handles requests, where SigmaStudio wants to read from the DSP.
+        """Handle requests, where SigmaStudio wants to read from the DSP.
 
         Args:
-            data (bytes): The binary request from SigmaStudio.
+            packet_header (bytes): The binary request header, as received from SigmaStudio.
         """
-
         # This indicates the total length of the read packet (uint32)
         total_length = bytes_to_int32(packet_header, 1)
         del total_length
@@ -189,7 +188,7 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         self.server.queue.task_done()
 
     def handle(self):
-        """This method is called, when the TCP server receives new data for handling.
+        """Call, when the TCP server receives new data for handling.
 
         It never stops, except if the connection is reset.
         """
@@ -218,8 +217,9 @@ class SigmaTCPServer:
     """This is a helper class for easily filling the queue to the TCP server and reading from it."""
 
     def __init__(self, host: str, port: int):
-        """Initialize the Sigma TCP server. Starts the main TCP worker and initializes a queue for communicating with
-        other threads.
+        """Initialize the Sigma TCP server.
+
+        Starts the main TCP worker and initializes a queue for communicating to other threads.
 
         Args:
             host (str): Listening IP address

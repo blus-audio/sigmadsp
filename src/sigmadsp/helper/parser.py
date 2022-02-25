@@ -32,7 +32,7 @@ class Cell:
 
     @property
     def full_name_tokens(self) -> List[str]:
-        """The separated full name, where the separator string is removed.
+        """Extract the separated full name, where the separator string is removed.
 
         For example 'adjustable_volume_main_left' is converted to ['adjustable', 'volume', 'main', 'left']
 
@@ -43,7 +43,7 @@ class Cell:
 
     @property
     def name_tokens(self) -> List[str]:
-        """Returns the name tokens of the cell without prefix tokens.
+        """Return the name tokens of the cell without prefix tokens.
 
         For example ['main', 'left'] for a full cell name 'adjustable_volume_main_left'.
 
@@ -57,7 +57,7 @@ class Cell:
 
     @property
     def prefix_tokens(self) -> List[str]:
-        """Returns only the prefix tokens of the cell.
+        """Return only the prefix tokens of the cell.
 
         For example ['adjustable', 'volume'] for a full cell name 'adjustable_volume_main_left'.
 
@@ -71,29 +71,44 @@ class Cell:
             return []
 
     @property
-    def is_adjustable(self):
+    def is_adjustable(self) -> bool:
+        """Determine, whether the cell is adjustable.
+
+        Returns:
+            bool: True, if adjustable, False otherwise.
+        """
         return adjustable_prefix in self.prefix_tokens
 
     @property
-    def is_safety_hash(self):
+    def is_safety_hash(self) -> bool:
+        """Determine, whether the cell contains a safety hash.
+
+        Returns:
+            bool: True, if it does, False otherwise.
+        """
         return self.full_name == safety_hash
 
     @property
-    def is_volume_cell(self):
+    def is_volume_cell(self) -> bool:
+        """Determine, whether the cell is an adjustable volume cell.
+
+        Returns:
+            bool: True, if it is an adjustable volume cell, False otherwise.
+        """
         return (
             self.is_adjustable and (volume_prefix in self.prefix_tokens) and (target_parameter in self.parameter_name)
         )
 
 
 class Parser:
-    """Parses a parameter input file from Sigma Studio and detects cells in it."""
+    """Parse a parameter input file from Sigma Studio and detects cells in it."""
 
     def __init__(self):
-        # A list of cells, to be filled with inputs from a file.
+        """Initialize the parameter file parser with an empty list of cells."""
         self.cells: List[Cell] = []
 
     def extract_cell(self, cell_lines: List[str]) -> Union[Cell, None]:
-        """Reads a block of data from the paramter listing, and creates a new Cell from it.
+        """Read a block of data from the parameter listing, and creates a new Cell from it.
 
         Args:
             cell_lines (List[str]): The lines from the listing to read from.
@@ -180,7 +195,7 @@ class Parser:
 
     @property
     def safety_hash_cell(self) -> Union[Cell, None]:
-        """Finds and returns the safety hash cell, if it exists.
+        """Find and return the safety hash cell, if it exists.
 
         Returns:
             Cell: The safety hash cell.
@@ -196,7 +211,7 @@ class Parser:
 
     @property
     def volume_cells(self) -> List[Cell]:
-        """Returns all cells that can be used for volume adjustment. These are user defined with a certain name pattern.
+        """Return all cells that can be used for volume adjustment. These are user defined with a certain name pattern.
 
         Returns:
             List[Cell]: The list of adjustable volume cells
@@ -204,7 +219,7 @@ class Parser:
         return [cell for cell in self.cells if cell.is_volume_cell]
 
     def get_matching_cells_by_name_tokens(self, all_cells: List[Cell], name_tokens: List[str]) -> List[Cell]:
-        """Finds cells in a list of cells, whose names match the specified name tokens.
+        """Find cells in a list of cells, whose names match the specified name tokens.
 
         Args:
             all_cells (List[Cell]): The list of cells to parse.

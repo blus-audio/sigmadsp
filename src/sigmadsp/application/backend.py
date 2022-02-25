@@ -1,4 +1,6 @@
-"""This module includes the main application that provides an interface between the TCP server that faces SigmaStudio,
+"""The backend application of sigmadsp.
+
+This module includes the main application that provides an interface between the TCP server that faces SigmaStudio,
 and an SPI handler that controls a DSP.
 
 Commands from Sigma Studio are received, and translated to SPI read/write requests.
@@ -40,8 +42,9 @@ class SigmadspSettings:
     default_config_path = "/var/lib/sigmadsp/config.yaml"
 
     def __init__(self, config_path: str = None):
-        """Loads a config file in *.yaml format from a specified path. If no file is provided, the default path is used
-        for loading settings.
+        """Load a config file in *.yaml format from a specified path.
+
+        If no file is provided, the default path is used for loading settings.
 
         Args:
             config_path (str, optional): The input path of the settings file.
@@ -63,14 +66,14 @@ class SigmadspSettings:
         self.load_parameters()
 
     def load_parameters(self) -> None:
-        """Loads parameter cells, according to the parameter file path that is defined in the settings object."""
+        """Load parameter cells, according to the parameter file path that is defined in the settings object."""
         parser = Parser()
         parser.run(self.config["parameters"]["path"])
 
         self.parameter_parser = parser
 
     def store_parameters(self, lines: List[str]):
-        """Stores parameters to the parameter file.
+        """Store parameters to the parameter file.
 
         Args:
             lines (List[str]): [description]
@@ -88,7 +91,7 @@ class BackendService(BackendServicer):
     """
 
     def __init__(self, settings: SigmadspSettings):
-        """Initialize service and start all relevant threads (TCP, SPI)
+        """Initialize service and start all relevant threads (TCP, SPI).
 
         Args:
             settings (SigmadspSettings): The settings object.
@@ -134,7 +137,7 @@ class BackendService(BackendServicer):
         self.safety_check()
 
     def safety_check(self) -> None:
-        """Checks a hash cell within the DSP's memory against a hash value from the parameter file.
+        """Check a hash cell within the DSP's memory against a hash value from the parameter file.
 
         Only if they match, configuration of DSP parameters is allowed. Other operations (e.g. reset, or
         loading a new parameter file) are still allowed, even in a locked configuration state.
@@ -262,13 +265,11 @@ class BackendService(BackendServicer):
 
 
 def launch(settings: SigmadspSettings):
-    """Launches the backend application.
+    """Launch the backend application.
 
     Args:
-        config_path (str, optional): Settings file for the backend application. Defaults to None.
-            If not specified, a default path is used for loading the settings.
+        settings (SigmadspSettings): Settings object for the backend application.
     """
-
     # Create the backend service, a grpc service
     grpc_server = grpc.server(ThreadPoolExecutor(max_workers=10))
 

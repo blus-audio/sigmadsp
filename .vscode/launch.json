@@ -1,11 +1,8 @@
 {
-    // Verwendet IntelliSense zum Ermitteln möglicher Attribute.
-    // Zeigen Sie auf vorhandene Attribute, um die zugehörigen Beschreibungen anzuzeigen.
-    // Weitere Informationen finden Sie unter https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Aktuelle Datei",
+            "name": "Python: Current file",
             "type": "python",
             "request": "launch",
             "program": "${file}",
@@ -14,15 +11,5 @@
             "subProcess": true,
             "sudo": true
         },
-        {
-            "name": "Python: run",
-            "type": "python",
-            "request": "launch",
-            "program": "run.py",
-            "console": "integratedTerminal",
-            "justMyCode": false,
-            "subProcess": true,
-            "sudo": true
-        }
     ]
 }

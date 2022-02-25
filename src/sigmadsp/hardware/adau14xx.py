@@ -41,14 +41,15 @@ class Adau14xx:
         self.spi_handler = spi_handler
 
     def soft_reset(self):
-        """Soft resets the DSP."""
+        """Soft reset the DSP.
 
-        # Set and release the corresponding register for resetting.
+        Set and release the corresponding register for resetting.
+        """
         self.spi_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(0))
         self.spi_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(1))
 
     def get_parameter_value(self, address: int, data_format: str) -> Union[float, int, None]:
-        """Gets a parameter value from a chosen register address.
+        """Get a parameter value from a chosen register address.
 
         Args:
             address (int): The address to look at.
@@ -57,7 +58,6 @@ class Adau14xx:
         Returns:
             Union[float, int, None]: Representation of the register content in the specified format.
         """
-
         data_register = self.spi_handler.read(address, Adau14xx.FIXPOINT_REGISTER_LENGTH)
         data_integer = bytes_to_int32(data_register)
 
@@ -71,7 +71,7 @@ class Adau14xx:
             return None
 
     def set_parameter_value(self, value: Union[float, int], address: int) -> None:
-        """Sets a parameter value for a chosen register address.
+        """Set a parameter value for a chosen register address.
 
         Args:
             value (float): The value to store in the register
@@ -89,7 +89,7 @@ class Adau14xx:
             self.spi_handler.write(address, data_register)
 
     def set_volume(self, value_db: float, address: int) -> float:
-        """Sets the volume register at the given address to a certain value in dB.
+        """Set the volume register at the given address to a certain value in dB.
 
         Args:
             value_db (float): The volume setting in dB

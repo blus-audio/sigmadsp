@@ -7,7 +7,7 @@ import spidev
 
 
 def build_spi_frame(address: int, data: bytes) -> bytearray:
-    """Builds an SPI frame that is going to be written to the DSP.
+    """Build an SPI frame that is later written to the DSP.
 
     Args:
         address (int): The register address that the data is written to
@@ -25,7 +25,7 @@ def build_spi_frame(address: int, data: bytes) -> bytearray:
 
 
 class SpiHandler:
-    """Handles SPI transfers from and to SigmaDSP chipsets.
+    """Handle SPI transfers from and to SigmaDSP chipsets.
 
     Tested with ADAU145X
     """
@@ -112,7 +112,7 @@ class SpiHandler:
         return data
 
     def serve_forever(self):
-        """Handles incoming requests for writing or reading data over SPI."""
+        """Handle incoming requests for writing or reading data over SPI."""
         while True:
             mode = self.queue.get()
             self.queue.task_done()

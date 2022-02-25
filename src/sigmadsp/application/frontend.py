@@ -17,7 +17,6 @@ from sigmadsp.generated.backend_service.control_pb2_grpc import BackendStub
 
 def main():
     """The main frontend command-line application, which controls the SigmaDSP backend."""
-
     logging.basicConfig(level=logging.INFO)
 
     argument_parser = argparse.ArgumentParser()

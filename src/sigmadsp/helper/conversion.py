@@ -28,7 +28,7 @@ def clamp(value: float, min_value: float, max_value: float) -> float:
 
 
 def frac_8_24_to_float(value: int) -> float:
-    """Converts a value in the DSPs fractional representation to float.
+    """Convert a value in the DSPs fractional representation to float.
 
     32 bit values consist of 8 integer and 24 fractional bits and are signed.
 
@@ -42,7 +42,7 @@ def frac_8_24_to_float(value: int) -> float:
 
 
 def float_to_frac_8_24(value: float) -> int:
-    """Converts a float value to the DSPs fractional representation.
+    """Convert a float value to the DSPs fractional representation.
 
     32 bit values consist of 8 integer and 24 fractional bits and are signed.
 
@@ -56,7 +56,7 @@ def float_to_frac_8_24(value: float) -> int:
 
 
 def db_to_linear(value_db: float) -> float:
-    """Converts a dB-scale value (e.g. voltage) to a linear-scale value.
+    """Convert a dB-scale value (e.g. voltage) to a linear-scale value.
 
     Args:
         value (float): Input dB value
@@ -68,7 +68,7 @@ def db_to_linear(value_db: float) -> float:
 
 
 def linear_to_db(value_linear: float) -> float:
-    """Converts a linear-scale value to a dB-scale value (e.g. voltage)
+    """Convert a linear-scale value to a dB-scale value (e.g. voltage).
 
     Args:
         value_linear (float): The linear input value
@@ -80,7 +80,7 @@ def linear_to_db(value_linear: float) -> float:
 
 
 def bytes_to_int(data: bytes, offset: int = 0, length: int = 1) -> int:
-    """Convertes a number of bytes to their integer representation.
+    """Convert a number of bytes to their integer representation.
 
     Uses "length" bytes from the "data" input, starting at "offset".
 
@@ -96,7 +96,7 @@ def bytes_to_int(data: bytes, offset: int = 0, length: int = 1) -> int:
 
 
 def bytes_to_int8(data: bytes, offset: int = 0) -> int:
-    """Converts one byte to an 8 bit integer value.
+    """Convert one byte to an 8 bit integer value.
 
     Args:
         data (bytes): Input byte
@@ -109,7 +109,7 @@ def bytes_to_int8(data: bytes, offset: int = 0) -> int:
 
 
 def bytes_to_int16(data: bytes, offset: int = 0) -> int:
-    """Converts two bytes to a 16 bit integer value.
+    """Convert two bytes to a 16 bit integer value.
 
     Args:
         data (bytes): Input bytes
@@ -122,7 +122,7 @@ def bytes_to_int16(data: bytes, offset: int = 0) -> int:
 
 
 def bytes_to_int32(data: bytes, offset: int = 0) -> int:
-    """Converts four bytes to a 32 bit integer value.
+    """Convert four bytes to a 32 bit integer value.
 
     Args:
         data (bytes): Input bytes
