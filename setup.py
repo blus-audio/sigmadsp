@@ -1,5 +1,4 @@
 """Installs the SigmaDSP package."""
-
 import os
 import sys
 
@@ -11,7 +10,6 @@ import setuptools
 # is already installed.
 # (c.f. https://github.com/scikit-build/cmake-python-distributions/issues/171)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
 
 import versioneer  # noqa: E402 # pylint: disable=wrong-import-position
 
