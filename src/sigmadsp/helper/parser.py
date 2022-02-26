@@ -2,33 +2,43 @@
 import logging
 from dataclasses import dataclass
 from itertools import dropwhile, takewhile
-from typing import List, Union
-
-prefix_separator: str = "_"
-
-adjustable_prefix: str = "adjustable"
-target_parameter: str = "target"
-volume_prefix: str = "volume"
-safety_hash: str = "safety_hash"
-
-valid_prefix_tokens: List[str] = [adjustable_prefix, volume_prefix]
+from typing import ClassVar, List, Union
 
 
 @dataclass(frozen=True)
 class Cell:
     """A cell object is a unit, which represents a cell from SigmaStudio."""
 
-    # The full name of the cell (e.g. 'adjustable_volume_main_left')
+    # The full name of the cell (e.g. 'adjustable_volume_main_left').
     full_name: str
 
-    # The register address of the parameter
+    # The register address of the parameter.
     parameter_address: int
 
-    # The name of the parameter, as defined in SigmaStudio
+    # The name of the parameter, as defined in SigmaStudio.
     parameter_name: str
 
-    # The value of the parameter, if applicable
+    # The value of the parameter, if applicable.
     parameter_value: Union[int, float, None] = None
+
+    # This string separates prefixes within a cell name.
+    PREFIX_SEPARATOR: ClassVar[str] = "_"
+
+    # The prefix that marks a cell as adjustable.
+    ADJUSTABLE_PREFIX: ClassVar[str] = "adjustable"
+
+    # If a parameter carries this description in its name, it is a register that can be adjusted externally.
+    # This is in contrast to parameters that are marked with "alpha".
+    TARGET_PARAMETER: ClassVar[str] = "target"
+
+    # The cell name prefix for cells that adjust volume.
+    VOLUME_PREFIX: ClassVar[str] = "volume"
+
+    # The cell name for a safety hash.
+    SAFETY_HASH: ClassVar[str] = "safety_hash"
+
+    # A complete list of valid prefixes, which are understood by the parser.
+    VALID_PREFIX_TOKENS: ClassVar[List[str]] = [ADJUSTABLE_PREFIX, VOLUME_PREFIX]
 
     @property
     def full_name_tokens(self) -> List[str]:
@@ -39,7 +49,7 @@ class Cell:
         Returns:
             List[str]: The list of tokens in the full name.
         """
-        return self.full_name.split(prefix_separator)
+        return self.full_name.split(Cell.PREFIX_SEPARATOR)
 
     @property
     def name_tokens(self) -> List[str]:
@@ -64,8 +74,8 @@ class Cell:
         Returns:
             Union[List[str], None]: The list of tokens, if they are valid prefixes, None otherwise.
         """
-        if prefix_separator in self.full_name:
-            return [prefix for prefix in self.full_name_tokens if prefix in valid_prefix_tokens]
+        if Cell.PREFIX_SEPARATOR in self.full_name:
+            return [prefix for prefix in self.full_name_tokens if prefix in Cell.VALID_PREFIX_TOKENS]
 
         else:
             return []
@@ -77,7 +87,7 @@ class Cell:
         Returns:
             bool: True, if adjustable, False otherwise.
         """
-        return adjustable_prefix in self.prefix_tokens
+        return Cell.ADJUSTABLE_PREFIX in self.prefix_tokens
 
     @property
     def is_safety_hash(self) -> bool:
@@ -86,7 +96,7 @@ class Cell:
         Returns:
             bool: True, if it does, False otherwise.
         """
-        return self.full_name == safety_hash
+        return self.full_name == Cell.SAFETY_HASH
 
     @property
     def is_volume_cell(self) -> bool:
@@ -96,7 +106,9 @@ class Cell:
             bool: True, if it is an adjustable volume cell, False otherwise.
         """
         return (
-            self.is_adjustable and (volume_prefix in self.prefix_tokens) and (target_parameter in self.parameter_name)
+            self.is_adjustable
+            and (Cell.VOLUME_PREFIX in self.prefix_tokens)
+            and (Cell.TARGET_PARAMETER in self.parameter_name)
         )
 
 
