@@ -3,12 +3,11 @@
 It can receive read/write requests and return with read response packets.
 """
 import logging
-import multiprocessing
 import socket
 import socketserver
 import threading
 from dataclasses import dataclass
-from typing import Union
+from multiprocessing import Pipe
 
 from sigmadsp.helper.conversion import (
     bytes_to_int8,
@@ -46,20 +45,22 @@ class ReadResponse:
 class ThreadedTCPServer(socketserver.ThreadingTCPServer):
     """The threaded TCP server that is used for communicating with SigmaStudio.
 
-    It will be instantiated by SigmaTCPServer. Here, general server settings can be adjusted.
+    It will be instantiated by SigmaStudioInterface. General server settings can be adjusted below.
     """
 
     allow_reuse_address = True
 
     def __init__(self, *args, **kwargs):
         """Initialize the ThreadedTCPServer."""
-        self.queue: multiprocessing.JoinableQueue = multiprocessing.JoinableQueue()
+
+        # Generate a Pipe for communicating with the TCP server worker thread.
+        self.pipe_end_owner, self.pipe_end_user = Pipe()
 
         super().__init__(*args, **kwargs)
 
 
-class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
-    """Handling class for the Sigma TCP server."""
+class SigmaStudioRequestHandler(socketserver.BaseRequestHandler):
+    """Request handler for messages from SigmaStudio."""
 
     request: socket.socket
     server: ThreadedTCPServer
@@ -131,7 +132,7 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
 
         payload_data = self.receive_amount(total_payload_size)
 
-        self.server.queue.put(WriteRequest(address, payload_data))
+        self.server.pipe_end_owner.send(WriteRequest(address, payload_data))
 
     def handle_read_request(self, packet_header: bytes):
         """Handle requests, where SigmaStudio wants to read from the DSP.
@@ -153,21 +154,20 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         address = bytes_to_int16(packet_header, 10)
 
         # Notify application of read request
-        self.server.queue.put(ReadRequest(address, data_length))
-        self.server.queue.join()
+        self.server.pipe_end_owner.send(ReadRequest(address, data_length))
 
         # Wait for payload data that goes into the read response
-        read_response = self.server.queue.get()
+        read_response = self.server.pipe_end_owner.recv()
 
         payload_data = read_response.data
 
         # Build the read response packet, starting with length calculations ...
-        total_transmit_length = ThreadedSigmaTcpRequestHandler.HEADER_LENGTH + data_length
+        total_transmit_length = SigmaStudioRequestHandler.HEADER_LENGTH + data_length
         transmit_data = bytearray(total_transmit_length)
 
         # ... followed by populating the byte fields.
         int8_to_bytes(
-            ThreadedSigmaTcpRequestHandler.COMMAND_READ_RESPONSE,
+            SigmaStudioRequestHandler.COMMAND_READ_RESPONSE,
             transmit_data,
             0,
         )
@@ -182,10 +182,9 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         # Reserved zero byte at pos. 13
         int16_to_bytes(0, transmit_data, 13)
 
-        transmit_data[ThreadedSigmaTcpRequestHandler.HEADER_LENGTH :] = payload_data
+        transmit_data[SigmaStudioRequestHandler.HEADER_LENGTH :] = payload_data
 
         self.request.sendall(transmit_data)
-        self.server.queue.task_done()
 
     def handle(self):
         """Call, when the TCP server receives new data for handling.
@@ -195,15 +194,15 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
         while True:
             try:
                 # Receive the packet header in the beginning.
-                packet_header = self.receive_amount(ThreadedSigmaTcpRequestHandler.HEADER_LENGTH)
+                packet_header = self.receive_amount(SigmaStudioRequestHandler.HEADER_LENGTH)
 
                 # The first byte of the header contains the command from SigmaStudio.
                 command = packet_header[0]
 
-                if command == ThreadedSigmaTcpRequestHandler.COMMAND_WRITE:
+                if command == SigmaStudioRequestHandler.COMMAND_WRITE:
                     self.handle_write_data(packet_header)
 
-                elif command == ThreadedSigmaTcpRequestHandler.COMMAND_READ:
+                elif command == SigmaStudioRequestHandler.COMMAND_READ:
                     self.handle_read_request(packet_header)
 
                 else:
@@ -213,13 +212,16 @@ class ThreadedSigmaTcpRequestHandler(socketserver.BaseRequestHandler):
                 break
 
 
-class SigmaTCPServer:
-    """This is a helper class for easily filling the queue to the TCP server and reading from it."""
+class SigmaStudioInterface:
+    """This is an interface class for communicating with SigmaStudio.
+
+    It creates a TCP server, which SigmaStudio talks to.
+    """
 
     def __init__(self, host: str, port: int):
-        """Initialize the Sigma TCP server.
+        """Initialize the SigmaStudio interface.
 
-        Starts the main TCP worker and initializes a queue for communicating to other threads.
+        Starts the main TCP worker and initializes a pipe for communicating with the sigmadsp backend.
 
         Args:
             host (str): Listening IP address
@@ -227,35 +229,17 @@ class SigmaTCPServer:
         """
         self.host = host
         self.port = port
-        self.queue: multiprocessing.JoinableQueue = multiprocessing.JoinableQueue()
+
+        # Generate a Pipe for communicating with the TCP server worker thread within this class.
+        self.pipe_end_owner, self.pipe_end_user = Pipe()
 
         tcp_server_worker_thread = threading.Thread(target=self.tcp_server_worker, name="TCP server worker thread")
         tcp_server_worker_thread.daemon = True
         tcp_server_worker_thread.start()
 
-    def get_request(self) -> Union[ReadRequest, WriteRequest]:
-        """Get an item from the queue.
-
-        Returns:
-            Union[ReadRequest, WriteRequest]: The item that was returned from the queue
-        """
-        request = self.queue.get()
-        self.queue.task_done()
-
-        return request
-
-    def put_request(self, request: ReadResponse):
-        """Put an item into the queue: blocks, until released with 'task_done()', which is called by 'get_request()'.
-
-        Args:
-            request (ReadResponse): The request to put into the queue
-        """
-        self.queue.put(request)
-        self.queue.join()
-
     def tcp_server_worker(self):
         """The main worker for the TCP server."""
-        tcp_server = ThreadedTCPServer((self.host, self.port), ThreadedSigmaTcpRequestHandler)
+        tcp_server = ThreadedTCPServer((self.host, self.port), SigmaStudioRequestHandler)
 
         with tcp_server:
             # Base TCP server thread
@@ -266,22 +250,17 @@ class SigmaTCPServer:
 
             while True:
                 # Wait for a request from the TCP server
-                request = tcp_server.queue.get()
-                tcp_server.queue.task_done()
+                request = tcp_server.pipe_end_user.recv()
 
                 if isinstance(request, WriteRequest):
                     # Write request received, don't do anything else
-                    self.queue.put(request)
-                    self.queue.join()
+                    self.pipe_end_owner.send(request)
 
                 elif isinstance(request, ReadRequest):
                     # Read request received, wait for data to send to PC application
-                    self.queue.put(request)
-                    self.queue.join()
+                    self.pipe_end_owner.send(request)
 
-                    read_response = self.queue.get()
-                    self.queue.task_done()
+                    read_response = self.pipe_end_owner.recv()
 
                     # Send read response
-                    tcp_server.queue.put(read_response)
-                    tcp_server.queue.join()
+                    tcp_server.pipe_end_user.send(read_response)

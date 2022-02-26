@@ -19,7 +19,7 @@ import sigmadsp
 from sigmadsp.communication.sigma_tcp_server import (
     ReadRequest,
     ReadResponse,
-    SigmaTCPServer,
+    SigmaStudioInterface,
     WriteRequest,
 )
 from sigmadsp.generated.backend_service.control_pb2 import (
@@ -107,7 +107,7 @@ class BackendService(BackendServicer):
         self.spi_handler = SpiHandler()
 
         # Create a SigmaTCPServer, along with its various threads
-        self.sigma_tcp_server = SigmaTCPServer(
+        self.sigma_tcp_server = SigmaStudioInterface(
             self.settings.config["host"]["ip"],
             self.settings.config["host"]["port"],
         )
@@ -165,7 +165,7 @@ class BackendService(BackendServicer):
         Gets requests from the TCP server component and forwards them to the SPI handler.
         """
         while True:
-            request = self.sigma_tcp_server.get_request()
+            request = self.sigma_tcp_server.pipe_end_user.recv()
 
             if isinstance(request, WriteRequest):
                 self.spi_handler.write(request.address, request.data)
@@ -173,7 +173,7 @@ class BackendService(BackendServicer):
             elif isinstance(request, ReadRequest):
                 payload = self.spi_handler.read(request.address, request.length)
 
-                self.sigma_tcp_server.put_request(ReadResponse(payload))
+                self.sigma_tcp_server.pipe_end_user.send(ReadResponse(payload))
 
     def control_parameter(self, request: ControlParameterRequest, context):
         """Main backend entry point for control messages that change or read parameters.

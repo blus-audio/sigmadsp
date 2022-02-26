@@ -1,7 +1,7 @@
 """This module implements an SPI handler that talks to Sigma DSP devices."""
 import logging
-import multiprocessing
 import threading
+from multiprocessing import Pipe
 
 import spidev
 
@@ -53,7 +53,8 @@ class SpiHandler:
         """Initialize the SpiHandler thread."""
         self._initialize_spi()
 
-        self.queue = multiprocessing.JoinableQueue()
+        # Generate a Pipe, for communicating with the SPI handler thread within this class.
+        self.pipe_end_owner, self.pipe_end_user = Pipe()
 
         logging.info("Starting SPI handling thread.")
         self.thread = threading.Thread(target=self.serve_forever, name="SPI handler thread")
@@ -82,18 +83,17 @@ class SpiHandler:
         self.spi.bits_per_word = 8
 
     def write(self, address: int, data: bytes):
-        """Write data over the SPI interface via the queue to the SPI thread.
+        """Write data over the SPI interface via the pipe to the SPI thread.
 
         Args:
             address (int): DSP register address to write to
             data (bytes): Binary data to write
         """
-        self.queue.put("write")
-        self.queue.put((address, data))
-        self.queue.join()
+        self.pipe_end_owner.send("write")
+        self.pipe_end_owner.send((address, data))
 
     def read(self, address: int, length: int) -> bytes:
-        """Read data from the SPI interface via the queue to the SPI thread.
+        """Read data from the SPI interface via the pipe to the SPI thread.
 
         Args:
             address (int): DSP register address to read from
@@ -102,35 +102,26 @@ class SpiHandler:
         Returns:
             bytes: Register content
         """
-        self.queue.put("read")
-        self.queue.put((address, length))
-        self.queue.join()
+        self.pipe_end_owner.send("read")
+        self.pipe_end_owner.send((address, length))
 
-        data = self.queue.get()
-        self.queue.task_done()
+        data = self.pipe_end_owner.recv()
 
         return data
 
     def serve_forever(self):
         """Handle incoming requests for writing or reading data over SPI."""
         while True:
-            mode = self.queue.get()
-            self.queue.task_done()
+            mode = self.pipe_end_user.recv()
 
             if mode == "write":
-                address, data = self.queue.get()
-                self.queue.task_done()
-
+                address, data = self.pipe_end_user.recv()
                 self._write_spi(address, data)
 
             elif mode == "read":
-                address, length = self.queue.get()
-                self.queue.task_done()
-
+                address, length = self.pipe_end_user.recv()
                 data = self._read_spi(address, length)
-
-                self.queue.put(data)
-                self.queue.join()
+                self.pipe_end_user.send(data)
 
     def _read_spi(self, address: int, length: int) -> bytes:
         """Read data over the SPI port from a SigmaDSP.
