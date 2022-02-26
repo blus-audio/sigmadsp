@@ -20,3 +20,10 @@ parameters:
 dsp:
   # The type of the DSP to control with the $SIGMADSP_BACKEND service.
   type: "$DSP_TYPE"
+
+  pin:
+    # The pin number, connected to the DSP, used for a hardware reset.
+    reset: 17
+
+    # The pin number, connected to the DSP self-boot pin, enabling it to load its application from external flash.
+    self_boot: 22
