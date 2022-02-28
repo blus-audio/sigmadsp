@@ -51,9 +51,7 @@ class ThreadedTCPServer(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
 
     def __init__(self, *args, **kwargs):
-        """Initialize the ThreadedTCPServer."""
-
-        # Generate a Pipe for communicating with the TCP server worker thread.
+        """Initialize the ThreadedTCPServer with a Pipe for communicating with the TCP server worker thread."""
         self.pipe_end_owner, self.pipe_end_user = Pipe()
 
         super().__init__(*args, **kwargs)
