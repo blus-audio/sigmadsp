@@ -1,15 +1,16 @@
 {
-    "python.linting.enabled": true,
-    "python.linting.pylintEnabled": true,
-    "python.formatting.provider": "black",
     "editor.formatOnSave": true,
+    "files.insertFinalNewline": true,
+    "[python]": {
+        "editor.formatOnSave": false
+    },
     "editor.rulers": [
         80,
         120
     ],
-    "[python]": {
-        "editor.codeActionsOnSave": {
-            "source.organizeImports": true,
-        }
-    }
+    "triggerTaskOnSave.tasks": {
+        "pre-commit: current": [
+            "**/src/**",
+        ],
+    },
 }

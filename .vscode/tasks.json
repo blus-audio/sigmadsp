@@ -1,0 +1,136 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "presentation": {
+        "reveal": "never",
+        "echo": false,
+        "clear": true,
+        "panel": "dedicated",
+        "revealProblems": "onProblem"
+    },
+    "problemMatcher": [
+        {
+            "owner": "black",
+            "source": "black",
+            "fileLocation": [
+                "relative",
+                "${workspaceFolder}"
+            ],
+            "pattern": {
+                // Example: error: cannot format path/to/file: Cannot parse: 73:15: ;
+                "regexp": "^(error|warning):\\s+cannot format\\s+(.*):\\s+(.*):\\s+(\\d+):(\\d+):\\s+(.*)$",
+                "severity": 1,
+                "file": 2,
+                "message": 3,
+                "line": 4,
+                "column": 5
+            }
+        },
+        {
+            "owner": "flake8",
+            "source": "flake8",
+            "severity": "warning",
+            "fileLocation": [
+                "relative",
+                "${workspaceFolder}"
+            ],
+            "pattern": {
+                // Example: path/to/file:73:9: F841 local variable 'input' is assigned to but never used
+                "regexp": "^(.*):(\\d+):(\\d+):\\s+(F\\d+)\\s(.*)$",
+                "file": 1,
+                "line": 2,
+                "column": 3,
+                "code": 4,
+                "message": 5
+            }
+        },
+        {
+            "owner": "pydocstyle",
+            "source": "pydocstyle",
+            "severity": "warning",
+            "fileLocation": [
+                "relative",
+                "${workspaceFolder}"
+            ],
+            "pattern": [
+                // Example: path/to/file:72 in public method `test_wrong`:
+                //              D102: Missing docstring in public method
+                {
+                    "regexp": "^(.*):(\\d+)\\s+(.*):$",
+                    "file": 1,
+                    "line": 2
+                },
+                {
+                    "regexp": "^\\s*(\\w+):\\s+(.*)$",
+                    "code": 1,
+                    "message": 2
+                }
+            ]
+        },
+        {
+            "owner": "pylint",
+            "source": "pylint",
+            "severity": "warning",
+            "fileLocation": [
+                "relative",
+                "${workspaceFolder}"
+            ],
+            "pattern": {
+                // Example: path/to/file:72:25: W0622: Redefining built-in 'input' (redefined-builtin)
+                "regexp": "^(.*):(\\d+):(\\d+):\\s+(\\w+):\\s(.*)$",
+                "file": 1,
+                "line": 2,
+                "column": 3,
+                "code": 4,
+                "message": 5
+            }
+        },
+        {
+            "owner": "mypy",
+            "source": "mypy",
+            "fileLocation": [
+                "relative",
+                "${workspaceFolder}"
+            ],
+            "pattern": {
+                // Example: path/to/file:72: error: Missing return statement
+                "regexp": "^(.*):(\\d+):\\s+(\\S*):\\s+(.*)$",
+                "file": 1,
+                "line": 2,
+                "severity": 3,
+                "message": 4
+            }
+        },
+        {
+            "owner": "codespell",
+            "source": "codespell",
+            "severity": "warning",
+            "fileLocation": [
+                "relative",
+                "${workspaceFolder}"
+            ],
+            "pattern": {
+                // Example: path/to/file:73: wrong ==> correct
+                "regexp": "^(.*):(\\d+):\\s+(.*)$",
+                "file": 1,
+                "line": 2,
+                "message": 3
+            }
+        }
+    ],
+    "tasks": [
+        {
+            // Run pre-commit on the current file.
+            "label": "pre-commit: current",
+            "type": "shell",
+            "command": "pre-commit run --file ${file}",
+        },
+        {
+            // Run pre-commit on all changed files.
+            "label": "pre-commit: all",
+            "type": "shell",
+            "command": "pre-commit run --all-files",
+        },
+    ]
+}
