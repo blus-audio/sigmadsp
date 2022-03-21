@@ -8,9 +8,6 @@
         80,
         120
     ],
-    "triggerTaskOnSave.tasks": {
-        "pre-commit: current": [
-            "**/src/**",
-        ],
-    },
+    "pre-commit-helper.fileMatcher": "^(.*)\\.py$",
+    "pre-commit-helper.runOnSave": "all hooks",
 }
