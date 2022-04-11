@@ -15,6 +15,10 @@ class Pin:
     name: str
     number: int
 
+    def __post_init__(self):
+        """Initialize the generic device, based on the configured parameters."""
+        self.control = gpiozero.GPIODevice(self.number)
+
 
 @dataclass
 class InputPin(Pin):
@@ -52,8 +56,7 @@ class Dsp:
             spi_handler (SpiHandler): The SpiHandler that communicates with the DSP.
         """
         self.config = config
-        self.input_pins: List[InputPin] = []
-        self.output_pins: List[OutputPin] = []
+        self.pins: List[Pin] = []
         self.parse_config()
 
         self.spi_handler = spi_handler
@@ -61,10 +64,12 @@ class Dsp:
 
     def parse_config(self):
         """Parse the configuration file and extract relevant information."""
-        for pin_definition in self.config["pins"]:
-            if self.config["mode"] == "output":
+        for pin_definition_key in self.config["dsp"]["pins"]:
+            pin_definition = self.config["dsp"]["pins"][pin_definition_key]
+
+            if pin_definition["mode"] == "output":
                 output_pin = OutputPin(
-                    pin_definition,
+                    pin_definition_key,
                     pin_definition["number"],
                     pin_definition["initial_state"],
                     pin_definition["active_high"],
@@ -72,7 +77,18 @@ class Dsp:
 
                 self.add_pin(output_pin)
 
-    def get_pin_by_name(self, name: str) -> Union[OutputPin, None]:
+            elif pin_definition["mode"] == "input":
+                input_in = InputPin(
+                    pin_definition_key,
+                    pin_definition["number"],
+                    pin_definition["pull_up"],
+                    pin_definition["active_state"],
+                    pin_definition["bounce_time"],
+                )
+
+                self.add_pin(input_in)
+
+    def get_pin_by_name(self, name: str) -> Union[Pin, None]:
         """Get a pin by its name.
 
         Args:
@@ -81,13 +97,13 @@ class Dsp:
         Returns:
             Union[Pin, None]: The pin, if one matches, None otherwise.
         """
-        for pin in self.output_pins:
+        for pin in self.pins:
             if pin.name == name:
                 return pin
 
         return None
 
-    def has_pin(self, pin: OutputPin) -> bool:
+    def has_pin(self, pin: Pin) -> bool:
         """Check, if a pin is known in the list of pins.
 
         Args:
@@ -98,14 +114,14 @@ class Dsp:
         """
         return bool(self.get_pin_by_name(pin.name) is not None)
 
-    def add_pin(self, pin: OutputPin):
+    def add_pin(self, pin: Pin):
         """Add a pin to the list of pins, if it doesn't exist yet.
 
         Args:
             pin (Pin): The pin to add.
         """
-        if not self.has_pin:
-            self.add_pin(pin)
+        if not self.has_pin(pin):
+            self.pins.append(pin)
 
     def remove_pin_by_name(self, name: str):
         """Remove a pin, based on its name.
@@ -116,7 +132,7 @@ class Dsp:
         pin = self.get_pin_by_name(name)
 
         if pin:
-            self.output_pins.remove(pin)
+            self.pins.remove(pin)
 
     def hard_reset(self, delay: float = 0):
         """Hard reset the DSP.
@@ -128,6 +144,6 @@ class Dsp:
         if not pin:
             return
 
-        pin.control.off()
-        time.sleep(delay)
         pin.control.on()
+        time.sleep(delay)
+        pin.control.off()

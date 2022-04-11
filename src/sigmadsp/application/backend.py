@@ -248,6 +248,10 @@ class BackendService(BackendServicer):
             self.dsp.soft_reset()
             response.message = "Reset DSP."
 
+        elif "hard_reset_dsp" == command:
+            self.dsp.hard_reset()
+            response.message = "Hard-reset DSP."
+
         elif "load_parameters" == command:
             self.settings.store_parameters(list(request.load_parameters.content))
 
