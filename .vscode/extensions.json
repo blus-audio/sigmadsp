@@ -1,8 +1,8 @@
 {
     "recommendations": [
-        "gruntfuggly.triggertaskonsave",
         "njpwerner.autodocstring",
         "ms-python.python",
         "ms-python.vscode-pylance",
+        "elagil.pre-commit-helper",
     ]
 }
