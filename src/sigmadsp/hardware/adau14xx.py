@@ -7,7 +7,10 @@
 For this, it uses the SpiHandler module, to interface to the DSP.
 """
 import logging
+import time
 from typing import Union
+
+import gpiozero
 
 from sigmadsp.hardware.spi import SpiHandler
 from sigmadsp.helper.conversion import (
@@ -39,6 +42,19 @@ class Adau14xx:
             spi_handler (SpiHandler): The SpiHandler that communicates with the DSP.
         """
         self.spi_handler = spi_handler
+        self.hard_reset()
+
+    def hard_reset(self):
+        """Hard reset the DSP.
+
+        Set and release the corresponding pin for resetting.
+        """
+        reset_pin = gpiozero.DigitalOutputDevice(17)
+        self_boot_pin = gpiozero.DigitalOutputDevice(22)
+
+        self_boot_pin.on()
+        reset_pin.off()
+        reset_pin.on()
 
     def soft_reset(self):
         """Soft reset the DSP.
