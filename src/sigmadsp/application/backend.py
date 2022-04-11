@@ -125,7 +125,7 @@ class BackendService(BackendServicer):
         logging.info("Specified DSP type is '%s'.", self.settings.config["dsp"]["type"])
 
         if self.settings.config["dsp"]["type"] == "adau14xx":
-            self.dsp = Adau14xx(self.spi_handler)
+            self.dsp = Adau14xx(self.settings.config, self.spi_handler)
 
         else:
             logging.error(
