@@ -21,7 +21,8 @@ message LoadParameters {
 message ControlRequest {
   oneof command {
     bool reset_dsp = 1;
-    LoadParameters load_parameters = 2;
+    bool hard_reset_dsp = 2;
+    LoadParameters load_parameters = 3;
   }
 }
 

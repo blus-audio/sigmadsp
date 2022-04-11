@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\rcontrol.proto\x12\x18sigmadsp.backend_service\"D\n\x0c\x43hangeVolume\x12\x13\n\x0bname_tokens\x18\x01 \x03(\t\x12\r\n\x05value\x18\x02 \x01(\x01\x12\x10\n\x08relative\x18\x03 \x01(\x08\"e\n\x17\x43ontrolParameterRequest\x12?\n\rchange_volume\x18\x01 \x01(\x0b\x32&.sigmadsp.backend_service.ChangeVolumeH\x00\x42\t\n\x07\x63ommand\"!\n\x0eLoadParameters\x12\x0f\n\x07\x63ontent\x18\x01 \x03(\t\"u\n\x0e\x43ontrolRequest\x12\x13\n\treset_dsp\x18\x01 \x01(\x08H\x00\x12\x43\n\x0fload_parameters\x18\x02 \x01(\x0b\x32(.sigmadsp.backend_service.LoadParametersH\x00\x42\t\n\x07\x63ommand\"3\n\x0f\x43ontrolResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t2\xdc\x01\n\x07\x42\x61\x63kend\x12^\n\x07\x63ontrol\x12(.sigmadsp.backend_service.ControlRequest\x1a).sigmadsp.backend_service.ControlResponse\x12q\n\x11\x63ontrol_parameter\x12\x31.sigmadsp.backend_service.ControlParameterRequest\x1a).sigmadsp.backend_service.ControlResponseb\x06proto3'
+  serialized_pb=b'\n\rcontrol.proto\x12\x18sigmadsp.backend_service\"D\n\x0c\x43hangeVolume\x12\x13\n\x0bname_tokens\x18\x01 \x03(\t\x12\r\n\x05value\x18\x02 \x01(\x01\x12\x10\n\x08relative\x18\x03 \x01(\x08\"e\n\x17\x43ontrolParameterRequest\x12?\n\rchange_volume\x18\x01 \x01(\x0b\x32&.sigmadsp.backend_service.ChangeVolumeH\x00\x42\t\n\x07\x63ommand\"!\n\x0eLoadParameters\x12\x0f\n\x07\x63ontent\x18\x01 \x03(\t\"\x8f\x01\n\x0e\x43ontrolRequest\x12\x13\n\treset_dsp\x18\x01 \x01(\x08H\x00\x12\x18\n\x0ehard_reset_dsp\x18\x02 \x01(\x08H\x00\x12\x43\n\x0fload_parameters\x18\x03 \x01(\x0b\x32(.sigmadsp.backend_service.LoadParametersH\x00\x42\t\n\x07\x63ommand\"3\n\x0f\x43ontrolResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t2\xdc\x01\n\x07\x42\x61\x63kend\x12^\n\x07\x63ontrol\x12(.sigmadsp.backend_service.ControlRequest\x1a).sigmadsp.backend_service.ControlResponse\x12q\n\x11\x63ontrol_parameter\x12\x31.sigmadsp.backend_service.ControlParameterRequest\x1a).sigmadsp.backend_service.ControlResponseb\x06proto3'
 )
 
 
@@ -156,8 +156,15 @@ _CONTROLREQUEST = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='load_parameters', full_name='sigmadsp.backend_service.ControlRequest.load_parameters', index=1,
-      number=2, type=11, cpp_type=10, label=1,
+      name='hard_reset_dsp', full_name='sigmadsp.backend_service.ControlRequest.hard_reset_dsp', index=1,
+      number=2, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='load_parameters', full_name='sigmadsp.backend_service.ControlRequest.load_parameters', index=2,
+      number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -179,8 +186,8 @@ _CONTROLREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=251,
-  serialized_end=368,
+  serialized_start=252,
+  serialized_end=395,
 )
 
 
@@ -218,8 +225,8 @@ _CONTROLRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=370,
-  serialized_end=421,
+  serialized_start=397,
+  serialized_end=448,
 )
 
 _CONTROLPARAMETERREQUEST.fields_by_name['change_volume'].message_type = _CHANGEVOLUME
@@ -230,6 +237,9 @@ _CONTROLREQUEST.fields_by_name['load_parameters'].message_type = _LOADPARAMETERS
 _CONTROLREQUEST.oneofs_by_name['command'].fields.append(
   _CONTROLREQUEST.fields_by_name['reset_dsp'])
 _CONTROLREQUEST.fields_by_name['reset_dsp'].containing_oneof = _CONTROLREQUEST.oneofs_by_name['command']
+_CONTROLREQUEST.oneofs_by_name['command'].fields.append(
+  _CONTROLREQUEST.fields_by_name['hard_reset_dsp'])
+_CONTROLREQUEST.fields_by_name['hard_reset_dsp'].containing_oneof = _CONTROLREQUEST.oneofs_by_name['command']
 _CONTROLREQUEST.oneofs_by_name['command'].fields.append(
   _CONTROLREQUEST.fields_by_name['load_parameters'])
 _CONTROLREQUEST.fields_by_name['load_parameters'].containing_oneof = _CONTROLREQUEST.oneofs_by_name['command']
@@ -284,8 +294,8 @@ _BACKEND = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=424,
-  serialized_end=644,
+  serialized_start=451,
+  serialized_end=671,
   methods=[
   _descriptor.MethodDescriptor(
     name='control',
