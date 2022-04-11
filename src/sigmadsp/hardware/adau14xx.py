@@ -9,7 +9,7 @@ For this, it uses the SpiHandler module, to interface to the DSP.
 import logging
 from typing import Union
 
-from sigmadsp.hardware.spi import SpiHandler
+from sigmadsp.hardware.dsp import Dsp
 from sigmadsp.helper.conversion import (
     bytes_to_int32,
     clamp,
@@ -22,7 +22,7 @@ from sigmadsp.helper.conversion import (
 )
 
 
-class Adau14xx:
+class Adau14xx(Dsp):
     """A class for controlling functionality of Analog Devices Sigma DSPs, especially ADAU14xx series parts."""
 
     # Addresses and sizes of important registers
@@ -31,14 +31,6 @@ class Adau14xx:
 
     # All fixpoint (parameter) registers are four bytes long
     FIXPOINT_REGISTER_LENGTH = 4
-
-    def __init__(self, spi_handler: SpiHandler):
-        """Initialize the DSP with an SpiHandler that talks to it.
-
-        Args:
-            spi_handler (SpiHandler): The SpiHandler that communicates with the DSP.
-        """
-        self.spi_handler = spi_handler
 
     def soft_reset(self):
         """Soft reset the DSP.

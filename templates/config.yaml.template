@@ -21,9 +21,17 @@ dsp:
   # The type of the DSP to control with the $SIGMADSP_BACKEND service.
   type: "$DSP_TYPE"
 
-  pin:
-    # The pin number, connected to the DSP, used for a hardware reset.
-    reset: 17
+  pins:
+    # The DSP's hardware reset pin.
+    reset:
+      number: 17
+      active_high: false
+      initial_state: true
+      mode: "output"
 
-    # The pin number, connected to the DSP self-boot pin, enabling it to load its application from external flash.
-    self_boot: 22
+    # The self-boot pin, enabling the DSP to load its application from external flash when set.
+    self_boot:
+      number: 22
+      active_high: true
+      initial_state: true
+      mode: "output"

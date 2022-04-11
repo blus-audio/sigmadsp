@@ -62,6 +62,14 @@ def main():
     )
 
     argument_parser.add_argument(
+        "-R",
+        "--hard-reset",
+        required=False,
+        help="hard-reset the DSP.",
+        action="store_true",
+    )
+
+    argument_parser.add_argument(
         "-lp",
         "--load_parameters",
         required=False,
@@ -108,6 +116,11 @@ def main():
 
         if arguments.reset is True:
             control_request.reset_dsp = True
+
+            response = stub.control(control_request)
+
+        if arguments.hard_reset is True:
+            control_request.hard_reset_dsp = True
 
             response = stub.control(control_request)
 

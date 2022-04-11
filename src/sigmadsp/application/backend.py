@@ -125,7 +125,7 @@ class BackendService(BackendServicer):
         logging.info("Specified DSP type is '%s'.", self.settings.config["dsp"]["type"])
 
         if self.settings.config["dsp"]["type"] == "adau14xx":
-            self.dsp = Adau14xx(self.spi_handler)
+            self.dsp = Adau14xx(self.settings.config, self.spi_handler)
 
         else:
             logging.error(
@@ -247,6 +247,10 @@ class BackendService(BackendServicer):
         if "reset_dsp" == command:
             self.dsp.soft_reset()
             response.message = "Reset DSP."
+
+        elif "hard_reset_dsp" == command:
+            self.dsp.hard_reset()
+            response.message = "Hard-reset DSP."
 
         elif "load_parameters" == command:
             self.settings.store_parameters(list(request.load_parameters.content))
