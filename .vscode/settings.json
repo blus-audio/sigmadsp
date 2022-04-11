@@ -8,6 +8,6 @@
         80,
         120
     ],
-    "pre-commit-helper.fileMatcher": "^(.*)\\.py$",
+    "pre-commit-helper.runOnSaveRegex": "^(.*)\\.py$",
     "pre-commit-helper.runOnSave": "all hooks",
 }
