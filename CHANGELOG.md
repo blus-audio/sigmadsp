@@ -8,9 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.4.0] - 2022-04-11
 ### Added
-- Introduce DSP pin definitions to the configuration file.
-- Enable hardware pin control (e.g. for a DSP hard reset)
+- DSP pin definitions to the configuration file
+- hardware pin control (e.g. for a DSP hard reset)
 
 ## [1.3.4] - 2022-04-11
 ### Added
-- Initial release, upon which to base this changelog.
+- initial release, upon which to base this changelog.
