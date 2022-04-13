@@ -7,6 +7,7 @@ from typing import ClassVar, List, Union
 # A logger for this module
 logger = logging.getLogger(__name__)
 
+
 @dataclass(frozen=True)
 class Cell:
     """A cell object is a unit, which represents a cell from SigmaStudio."""

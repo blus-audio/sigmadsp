@@ -8,6 +8,7 @@ import spidev
 # A logger for this module
 logger = logging.getLogger(__name__)
 
+
 def build_spi_frame(address: int, data: bytes) -> bytearray:
     """Build an SPI frame that is later written to the DSP.
 

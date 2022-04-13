@@ -38,6 +38,7 @@ from sigmadsp.helper.parser import Parser
 # A logger for this module
 logger = logging.getLogger(__name__)
 
+
 class SigmadspSettings:
     """This class holds and manages settings for the SigmaDSP application."""
 
@@ -99,8 +100,6 @@ class BackendService(BackendServicer):
             settings (SigmadspSettings): The settings object.
         """
         super().__init__()
-
-        logger = logging.getLogger(__name__)
 
         # If configuration_unlocked is False, no DSP parameters can be changed.
         self.configuration_unlocked: bool = False

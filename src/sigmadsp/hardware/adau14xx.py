@@ -24,6 +24,7 @@ from sigmadsp.helper.conversion import (
 # A logger for this module
 logger = logging.getLogger(__name__)
 
+
 class Adau14xx(Dsp):
     """A class for controlling functionality of Analog Devices Sigma DSPs, especially ADAU14xx series parts."""
 

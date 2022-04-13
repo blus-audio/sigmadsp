@@ -1,14 +1,16 @@
 """General definitions for interfacing DSPs."""
+import logging
 import time
 from dataclasses import dataclass
 from typing import List, Union
-import logging
+
 import gpiozero
 
 from sigmadsp.hardware.spi import SpiHandler
 
 # A logger for this module
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class Pin:
@@ -90,7 +92,7 @@ class Dsp:
                     )
 
                     self.add_pin(input_pin)
-        
+
         except (KeyError, TypeError):
             logger.info("No DSP pin definitions were found in the configuration file.")
 
