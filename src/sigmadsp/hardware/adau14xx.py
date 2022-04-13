@@ -21,6 +21,8 @@ from sigmadsp.helper.conversion import (
     linear_to_db,
 )
 
+# A logger for this module
+logger = logging.getLogger(__name__)
 
 class Adau14xx(Dsp):
     """A class for controlling functionality of Analog Devices Sigma DSPs, especially ADAU14xx series parts."""
@@ -98,7 +100,7 @@ class Adau14xx(Dsp):
 
         self.set_parameter_value(value_linear, address)
 
-        logging.info("Set volume to %.2f dB.", linear_to_db(value_linear))
+        logger.info("Set volume to %.2f dB.", linear_to_db(value_linear))
 
         return linear_to_db(value_linear)
 
@@ -126,7 +128,7 @@ class Adau14xx(Dsp):
 
         self.set_parameter_value(new_volume, address)
 
-        logging.info(
+        logger.info(
             "Adjusted volume from %.2f dB to %.2f dB.",
             linear_to_db(current_volume),
             linear_to_db(new_volume),

@@ -5,6 +5,8 @@ from multiprocessing import Pipe
 
 import spidev
 
+# A logger for this module
+logger = logging.getLogger(__name__)
 
 def build_spi_frame(address: int, data: bytes) -> bytearray:
     """Build an SPI frame that is later written to the DSP.
@@ -56,7 +58,7 @@ class SpiHandler:
         # Generate a Pipe, for communicating with the SPI handler thread within this class.
         self.pipe_end_owner, self.pipe_end_user = Pipe()
 
-        logging.info("Starting SPI handling thread.")
+        logger.info("Starting SPI handling thread.")
         self.thread = threading.Thread(target=self.serve_forever, name="SPI handler thread")
         self.thread.daemon = True
         self.thread.start()

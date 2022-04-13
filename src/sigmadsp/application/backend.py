@@ -35,6 +35,8 @@ from sigmadsp.hardware.adau14xx import Adau14xx
 from sigmadsp.hardware.spi import SpiHandler
 from sigmadsp.helper.parser import Parser
 
+# A logger for this module
+logger = logging.getLogger(__name__)
 
 class SigmadspSettings:
     """This class holds and manages settings for the SigmaDSP application."""
@@ -57,10 +59,10 @@ class SigmadspSettings:
             # Open settings file, in order to configure the application
             with open(config_path, "r", encoding="utf8") as settings_file:
                 self.config = yaml.safe_load(settings_file)
-                logging.info("Settings file %s was loaded.", config_path)
+                logger.info("Settings file %s was loaded.", config_path)
 
         except FileNotFoundError:
-            logging.error("Settings file not found at %s. Aborting.", config_path)
+            logger.error("Settings file not found at %s. Aborting.", config_path)
             raise
 
         self.load_parameters()
@@ -98,6 +100,8 @@ class BackendService(BackendServicer):
         """
         super().__init__()
 
+        logger = logging.getLogger(__name__)
+
         # If configuration_unlocked is False, no DSP parameters can be changed.
         self.configuration_unlocked: bool = False
 
@@ -111,7 +115,7 @@ class BackendService(BackendServicer):
             self.settings.config["host"]["ip"],
             self.settings.config["host"]["port"],
         )
-        logging.info(
+        logger.info(
             "Sigma TCP server started on [%s]:%d.",
             self.settings.config["host"]["ip"],
             self.settings.config["host"]["port"],
@@ -122,13 +126,13 @@ class BackendService(BackendServicer):
         worker_thread.daemon = True
         worker_thread.start()
 
-        logging.info("Specified DSP type is '%s'.", self.settings.config["dsp"]["type"])
+        logger.info("Specified DSP type is '%s'.", self.settings.config["dsp"]["type"])
 
         if self.settings.config["dsp"]["type"] == "adau14xx":
             self.dsp = Adau14xx(self.settings.config, self.spi_handler)
 
         else:
-            logging.error(
+            logger.error(
                 "DSP type '%s' is not known! Aborting.",
                 self.settings.config["dsp"]["type"],
             )
@@ -145,18 +149,18 @@ class BackendService(BackendServicer):
         safety_hash_cell = self.settings.parameter_parser.safety_hash_cell
 
         if safety_hash_cell is None:
-            logging.warning("Safety hash in cell not present! Configuration locked.")
+            logger.warning("Safety hash in cell not present! Configuration locked.")
             self.configuration_unlocked = False
 
         else:
             dsp_hash = self.dsp.get_parameter_value(safety_hash_cell.parameter_address, data_format="int")
 
             if safety_hash_cell.parameter_value != dsp_hash:
-                logging.warning("Safety hash in cell does not match! Configuration locked.")
+                logger.warning("Safety hash in cell does not match! Configuration locked.")
                 self.configuration_unlocked = False
 
             else:
-                logging.info("Safety check successful. Configuration unlocked.")
+                logger.info("Safety check successful. Configuration unlocked.")
                 self.configuration_unlocked = True
 
     def worker(self):
@@ -284,7 +288,7 @@ def launch(settings: SigmadspSettings):
     grpc_server.add_insecure_port(backend_address)
     grpc_server.start()
 
-    logging.info("Backend service started on %s", backend_address)
+    logger.info("Backend service started on %s", backend_address)
 
     grpc_server.wait_for_termination()
 
@@ -293,7 +297,7 @@ def main():
     """Launch the backend with default settings."""
     logging.basicConfig(level=logging.INFO)
 
-    logging.info("Starting the sigmadsp backend, version %s.", sigmadsp.__version__)
+    logger.info("Starting the sigmadsp backend, version %s.", sigmadsp.__version__)
 
     argument_parser = argparse.ArgumentParser()
     argument_parser.add_argument(

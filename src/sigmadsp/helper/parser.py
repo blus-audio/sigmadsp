@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from itertools import dropwhile, takewhile
 from typing import ClassVar, List, Union
 
+# A logger for this module
+logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class Cell:
@@ -173,13 +175,13 @@ class Parser:
         self.cells.clear()
 
         if not file_path.endswith(".params"):
-            logging.error("The parameter file is not a *.params file! Aborting.")
+            logger.error("The parameter file is not a *.params file! Aborting.")
             return
 
         # Proceed with opening the file
         try:
             with open(file_path, "r", encoding="utf8") as file:
-                logging.info("Using parameter file path %s.", file_path)
+                logger.info("Using parameter file path %s.", file_path)
 
                 line_iterator = iter(file.readlines())
 
@@ -200,10 +202,10 @@ class Parser:
                     elif cell not in self.cells:
                         self.cells.append(cell)
 
-                logging.info("Found a total number of %d unique parameter cells.", len(self.cells))
+                logger.info("Found a total number of %d unique parameter cells.", len(self.cells))
 
         except FileNotFoundError:
-            logging.info("Parameter file %s not found.", file_path)
+            logger.info("Parameter file %s not found.", file_path)
 
     @property
     def safety_hash_cell(self) -> Union[Cell, None]:

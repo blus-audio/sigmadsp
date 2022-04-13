@@ -2,11 +2,13 @@
 import time
 from dataclasses import dataclass
 from typing import List, Union
-
+import logging
 import gpiozero
 
 from sigmadsp.hardware.spi import SpiHandler
 
+# A logger for this module
+logger = logging.getLogger(__name__)
 
 @dataclass
 class Pin:
@@ -64,29 +66,33 @@ class Dsp:
 
     def parse_config(self):
         """Parse the configuration file and extract relevant information."""
-        for pin_definition_key in self.config["dsp"]["pins"]:
-            pin_definition = self.config["dsp"]["pins"][pin_definition_key]
+        try:
+            for pin_definition_key in self.config["dsp"]["pins"]:
+                pin_definition = self.config["dsp"]["pins"][pin_definition_key]
 
-            if pin_definition["mode"] == "output":
-                output_pin = OutputPin(
-                    pin_definition_key,
-                    pin_definition["number"],
-                    pin_definition["initial_state"],
-                    pin_definition["active_high"],
-                )
+                if pin_definition["mode"] == "output":
+                    output_pin = OutputPin(
+                        pin_definition_key,
+                        pin_definition["number"],
+                        pin_definition["initial_state"],
+                        pin_definition["active_high"],
+                    )
 
-                self.add_pin(output_pin)
+                    self.add_pin(output_pin)
 
-            elif pin_definition["mode"] == "input":
-                input_in = InputPin(
-                    pin_definition_key,
-                    pin_definition["number"],
-                    pin_definition["pull_up"],
-                    pin_definition["active_state"],
-                    pin_definition["bounce_time"],
-                )
+                elif pin_definition["mode"] == "input":
+                    input_pin = InputPin(
+                        pin_definition_key,
+                        pin_definition["number"],
+                        pin_definition["pull_up"],
+                        pin_definition["active_state"],
+                        pin_definition["bounce_time"],
+                    )
 
-                self.add_pin(input_in)
+                    self.add_pin(input_pin)
+        
+        except (KeyError, TypeError):
+            logger.info("No DSP pin definitions were found in the configuration file.")
 
     def get_pin_by_name(self, name: str) -> Union[Pin, None]:
         """Get a pin by its name.
@@ -121,6 +127,7 @@ class Dsp:
             pin (Pin): The pin to add.
         """
         if not self.has_pin(pin):
+            logger.info("Found DSP pin definition '%s' (%d)", pin.name, pin.number)
             self.pins.append(pin)
 
     def remove_pin_by_name(self, name: str):
