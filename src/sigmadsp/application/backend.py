@@ -7,13 +7,16 @@ Commands from Sigma Studio are received, and translated to SPI read/write reques
 """
 import argparse
 import logging
+import sched
 import sys
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
-from typing import List
+from typing import List, Union
 
 import grpc
 import yaml
+from retry import retry
 
 import sigmadsp
 from sigmadsp.communication.sigma_tcp_server import (
@@ -32,6 +35,7 @@ from sigmadsp.generated.backend_service.control_pb2_grpc import (
     add_BackendServicer_to_server,
 )
 from sigmadsp.hardware.adau14xx import Adau14xx
+from sigmadsp.hardware.dsp import SafetyCheckException
 from sigmadsp.hardware.spi import SpiHandler
 from sigmadsp.helper.parser import Parser
 
@@ -66,14 +70,21 @@ class SigmadspSettings:
             logger.error("Settings file not found at %s. Aborting.", config_path)
             raise
 
+        # A parser for parameters, defined in the config file.
+        self.parameter_parser: Union[Parser, None] = None
+
         self.load_parameters()
 
     def load_parameters(self) -> None:
         """Load parameter cells, according to the parameter file path that is defined in the settings object."""
-        parser = Parser()
-        parser.run(self.config["parameters"]["path"])
+        try:
+            parser = Parser()
+            parser.run(self.config["parameters"]["path"])
 
-        self.parameter_parser = parser
+            self.parameter_parser = parser
+
+        except (IndexError, TypeError):
+            logger.info("No parameter path was defined in the configuration file.")
 
     def store_parameters(self, lines: List[str]):
         """Store parameters to the parameter file.
@@ -120,6 +131,9 @@ class BackendService(BackendServicer):
             self.settings.config["host"]["port"],
         )
 
+        # Create a scheduler for recurring tasks
+        self.scheduler = sched.scheduler(time.time, time.sleep)
+
         # Create the worker thread for the handler itself
         worker_thread = threading.Thread(target=self.worker, name="Backend service worker thread")
         worker_thread.daemon = True
@@ -137,6 +151,11 @@ class BackendService(BackendServicer):
             )
             sys.exit(0)
 
+        self.startup_safety_check()
+
+    @retry(SafetyCheckException, 3, 3)
+    def startup_safety_check(self) -> None:
+        """Retries the safety check on startup."""
         self.safety_check()
 
     def safety_check(self) -> None:
@@ -145,11 +164,16 @@ class BackendService(BackendServicer):
         Only if they match, configuration of DSP parameters is allowed. Other operations (e.g. reset, or
         loading a new parameter file) are still allowed, even in a locked configuration state.
         """
+        if not self.settings.parameter_parser:
+            logger.warning("No parameters were loaded! Configuration locked.")
+            return
+
         safety_hash_cell = self.settings.parameter_parser.safety_hash_cell
 
         if safety_hash_cell is None:
             logger.warning("Safety hash in cell not present! Configuration locked.")
             self.configuration_unlocked = False
+            raise SafetyCheckException
 
         else:
             dsp_hash = self.dsp.get_parameter_value(safety_hash_cell.parameter_address, data_format="int")
@@ -196,6 +220,10 @@ class BackendService(BackendServicer):
         # Determine the type of control request.
         command = request.WhichOneof("command")
         response.success = False
+
+        if not self.settings.parameter_parser:
+            response.message = "No parameters loaded, parameters cannot be changed."
+            return response
 
         if not self.configuration_unlocked:
             # Do not allow to change parameters.

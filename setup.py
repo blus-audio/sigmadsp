@@ -37,7 +37,7 @@ setuptools.setup(
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
     python_requires=">=3.6",
-    install_requires=["pyyaml", "spidev", "grpcio", "protobuf", "RPi.GPIO"],
+    install_requires=["pyyaml", "spidev", "grpcio", "protobuf", "RPi.GPIO", "retry"],
     entry_points={
         "console_scripts": [
             "sigmadsp-backend=sigmadsp.application.backend:main",

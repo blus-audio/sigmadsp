@@ -12,6 +12,10 @@ from sigmadsp.hardware.spi import SpiHandler
 logger = logging.getLogger(__name__)
 
 
+class SafetyCheckException(Exception):
+    """Custom exception for failed DSP safety checks."""
+
+
 @dataclass
 class Pin:
     """A class that describes a general DSP pin."""
