@@ -42,6 +42,7 @@ class Adau14xx(Dsp):
         """
         self.spi_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(0))
         self.spi_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(1))
+        logger.info("Soft-resetting the DSP.")
 
     def get_parameter_value(self, address: int, data_format: str) -> Union[float, int, None]:
         """Get a parameter value from a chosen register address.

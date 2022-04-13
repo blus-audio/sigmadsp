@@ -151,11 +151,18 @@ class BackendService(BackendServicer):
             )
             sys.exit(0)
 
-        self.startup_safety_check()
+        try:
+            logger.info("Run startup safety check.")
+            self.startup_safety_check()
 
-    @retry(SafetyCheckException, 3, 3)
+        except SafetyCheckException:
+            logger.warning("Startup safety check failed.")
+
+    @retry(SafetyCheckException, 5, 5)
     def startup_safety_check(self) -> None:
-        """Retries the safety check on startup."""
+        """Retries the safety check on startup.
+
+        The safety check might not be successful immediately after starting the DSP, so it is retried after a while."""
         self.safety_check()
 
     def safety_check(self) -> None:
@@ -165,22 +172,25 @@ class BackendService(BackendServicer):
         loading a new parameter file) are still allowed, even in a locked configuration state.
         """
         if not self.settings.parameter_parser:
-            logger.warning("No parameters were loaded! Configuration locked.")
+            logger.warning("No parameter file was loaded! Configuration remains locked.")
             return
 
         safety_hash_cell = self.settings.parameter_parser.safety_hash_cell
 
         if safety_hash_cell is None:
-            logger.warning("Safety hash in cell not present! Configuration locked.")
+            logger.warning("No safety hash cell exists in the DSP configuration! Configuration remains locked.")
             self.configuration_unlocked = False
-            raise SafetyCheckException
 
         else:
             dsp_hash = self.dsp.get_parameter_value(safety_hash_cell.parameter_address, data_format="int")
 
             if safety_hash_cell.parameter_value != dsp_hash:
-                logger.warning("Safety hash in cell does not match! Configuration locked.")
+                logger.warning(
+                    "Safety hash cell was found in the DSP configuration, but its content does not match!"
+                    "Configuration remains locked."
+                )
                 self.configuration_unlocked = False
+                raise SafetyCheckException
 
             else:
                 logger.info("Safety check successful. Configuration unlocked.")
@@ -277,7 +287,7 @@ class BackendService(BackendServicer):
 
         if "reset_dsp" == command:
             self.dsp.soft_reset()
-            response.message = "Reset DSP."
+            response.message = "Soft-reset DSP."
 
         elif "hard_reset_dsp" == command:
             self.dsp.hard_reset()
@@ -287,7 +297,11 @@ class BackendService(BackendServicer):
             self.settings.store_parameters(list(request.load_parameters.content))
 
             # Repeat safety check after loading a new set of parameters
-            self.safety_check()
+            try:
+                self.safety_check()
+
+            except SafetyCheckException:
+                pass
 
             if self.configuration_unlocked:
                 response.message = "Loaded parameters, control is unlocked."

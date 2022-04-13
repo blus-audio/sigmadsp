@@ -1,6 +1,7 @@
 """General definitions for interfacing DSPs."""
 import logging
 import time
+from abc import abstractmethod
 from dataclasses import dataclass
 from typing import List, Union
 
@@ -155,8 +156,16 @@ class Dsp:
         pin = self.get_pin_by_name("reset")
 
         if not pin:
+            logger.info("Falling back to soft-resetting the DSP, no hard-reset pin is defined.")
+            self.soft_reset()
             return
+
+        logger.info("Hard-resetting the DSP.")
 
         pin.control.on()
         time.sleep(delay)
         pin.control.off()
+
+    @abstractmethod
+    def soft_reset(self):
+        """Soft reset the DSP."""
