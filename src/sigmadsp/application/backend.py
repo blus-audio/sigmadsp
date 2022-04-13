@@ -129,10 +129,7 @@ class BackendService(BackendServicer):
             dsp_hash = self.dsp.get_parameter_value(safety_hash_cell.parameter_address, data_format="int")
 
             if safety_hash_cell.parameter_value != dsp_hash:
-                logger.warning(
-                    "Safety hash cell was found in the DSP configuration, but its content does not match!"
-                    "Configuration remains locked."
-                )
+                logger.warning("Safety hash cell content does not match! Configuration remains locked.")
                 self.configuration_unlocked = False
                 raise SafetyCheckException
 
@@ -232,10 +229,12 @@ class BackendService(BackendServicer):
         if "reset_dsp" == command:
             self.dsp.soft_reset()
             response.message = "Soft-reset DSP."
+            response.success = True
 
         elif "hard_reset_dsp" == command:
             self.dsp.hard_reset()
             response.message = "Hard-reset DSP."
+            response.success = True
 
         elif "load_parameters" == command:
             self.settings.store_parameters(list(request.load_parameters.content))
@@ -249,11 +248,12 @@ class BackendService(BackendServicer):
 
             if self.configuration_unlocked:
                 response.message = "Loaded parameters, control is unlocked."
+                response.success = True
 
             else:
                 response.message = "Safety check failed, parameters cannot be adjusted."
+                response.success = False
 
-        response.success = True
         return response
 
 
