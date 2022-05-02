@@ -30,6 +30,7 @@ retry = "^0.9.2"
 [tool.poetry-dynamic-versioning]
 enable = true
 bump = true
+latest-tag = true
 vcs = "git"
 style = "semver"
 
