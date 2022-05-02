@@ -2,14 +2,9 @@
 
 name: Upload Python Package
 
-# on:
-#   release:
-#     types: [published]
-
 on:
-  push:
-    tags:
-      - '*'
+  release:
+    types: [published]
 
 jobs:
   deploy:
