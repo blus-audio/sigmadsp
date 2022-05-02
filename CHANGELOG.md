@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - recover from any configuration failure that results from missing optional settings
 
+## [1.5.3] - 2022-05-02
+### Fixed
+- remaining traces of versioneer
 ## [1.5.2] - 2022-05-02
 ### Added
 - poetry build
