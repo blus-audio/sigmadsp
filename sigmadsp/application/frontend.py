@@ -87,7 +87,7 @@ def main():
     if arguments.address is not None:
         backend_address = arguments.address
 
-    response: ControlResponse
+    response: ControlResponse = None
     control_request = ControlRequest()
     control_parameter_request = ControlParameterRequest()
 
@@ -124,7 +124,7 @@ def main():
 
             response = stub.control(control_request)
 
-    logging.info(response.message)
+        logging.info(response and response.message)
 
 
 if __name__ == "__main__":
