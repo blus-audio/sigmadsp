@@ -45,7 +45,7 @@ class I2cHandler:
         self.i2c_addr = device
 
     def write(self, address: int, data: bytes):
-        """Write data over the SPI interface via the pipe to the SPI thread.
+        """Write data over the I2C interface via the pipe to the I2C thread.
 
         Args:
             address (int): DSP register address to write to
