@@ -149,7 +149,7 @@ class Adau14xx(Dsp):
 
         Args:
             address (int): Address to write to
-            data (bytes): Data to write; multiple parameter should be concatenated
+            data (bytes): Data to write; multiple parameters should be concatenated
             count (int): Number of words to write
         """
         for sd in range(0, count):
