@@ -150,14 +150,15 @@ class Adau14xx(Dsp):
         Args:
             address (int): Address to write to
             data (bytes): Data to write; multiple parameters should be concatenated
-            count (int): Number of words to write
+            count (int): Number of 4 byte words to write
         """
+        count = min(count, 5)
         for register_index, register_address in zip(range(count), Adau14xx.SAFELOAD_DATA_REGISTERS):
-            register_address = Adau14xx.SAFELOAD_DATA_REGISTERS[sd]
-            data_buf = data[sd * self.FIXPOINT_REGISTER_LENGTH : (sd + 1) * self.FIXPOINT_REGISTER_LENGTH]
-            self.write(register, data_buf)
+            data_buf = data[
+                register_index * self.FIXPOINT_REGISTER_LENGTH : (register_index + 1) * self.FIXPOINT_REGISTER_LENGTH
+            ]
+            self.write(register_address, data_buf)
 
+        # TODO: test if the address is supposed to be shifted down by 1 as old forum posts suggest
         self.write(self.SAFELOAD_ADDRESS_REGISTER, int32_to_bytes(address))
-
-        # TODO: test if this is supposed to be a regular integer or it needs to be encoded as 8.24
         self.write(self.SAFELOAD_COUNT_REGISTER, int32_to_bytes(count))
