@@ -209,5 +209,5 @@ class Dsp:
         Args:
             address (int): Address to write to
             data (bytes): Data to write
-            count (int): Number of words to write (max. 5)
+            count (int): Number of 4 byte words to write (max. 5)
         """
