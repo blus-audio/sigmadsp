@@ -152,8 +152,8 @@ class Adau14xx(Dsp):
             data (bytes): Data to write; multiple parameters should be concatenated
             count (int): Number of words to write
         """
-        for sd in range(0, count):
-            register = self.SAFELOAD_DATA_REGISTERS[sd]
+        for register_index, register_address in zip(range(count), Adau14xx.SAFELOAD_DATA_REGISTERS):
+            register_address = Adau14xx.SAFELOAD_DATA_REGISTERS[sd]
             data_buf = data[sd * self.FIXPOINT_REGISTER_LENGTH : (sd + 1) * self.FIXPOINT_REGISTER_LENGTH]
             self.write(register, data_buf)
 
