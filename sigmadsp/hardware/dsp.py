@@ -7,6 +7,7 @@ from typing import List, Union
 
 import gpiozero
 
+from sigmadsp.hardware.i2c import I2cHandler
 from sigmadsp.hardware.spi import SpiHandler
 
 # A logger for this module
@@ -57,18 +58,24 @@ class OutputPin(Pin):
 class Dsp:
     """A generic DSP class, to be extended by child classes."""
 
-    def __init__(self, config: dict, spi_handler: SpiHandler):
+    comm_handler: Union[I2cHandler, SpiHandler]
+
+    def __init__(self, config: dict):
         """Initialize the DSP with an SpiHandler that talks to it.
 
         Args:
             config (dict): Configuration settings, from the general configuration file.
-            spi_handler (SpiHandler): The SpiHandler that communicates with the DSP.
+            comm_handler (SpiHandler, I2cHandler): The handler that communicates with the DSP.
         """
         self.config = config
         self.pins: List[Pin] = []
         self.parse_config()
 
-        self.spi_handler = spi_handler
+        if self.protocol == "i2c":
+            self.comm_handler = I2cHandler(i2c_bus=self.i2c_bus, i2c_addr=self.i2c_address)
+        else:
+            self.comm_handler = SpiHandler()
+
         self.hard_reset()
 
     def parse_config(self):
@@ -100,6 +107,13 @@ class Dsp:
 
         except (KeyError, TypeError):
             logger.info("No DSP pin definitions were found in the configuration file.")
+
+        self.type = self.config["dsp"]["type"]
+        self.protocol = self.config["dsp"].get("protocol", "spi")
+
+        if self.protocol == "i2c":
+            self.i2c_address = self.config["dsp"].get("i2c_address", 0x38)
+            self.i2c_bus = self.config["dsp"].get("i2c_bus", 1)
 
     def get_pin_by_name(self, name: str) -> Union[Pin, None]:
         """Get a pin by its name.
@@ -166,6 +180,34 @@ class Dsp:
         time.sleep(delay)
         pin.control.off()
 
+    def write(self, address: int, data: bytes):
+        """Write data to the DSP using the configured communication handler.
+
+        Args:
+            address (int): Address to write to
+            data (bytes): Data to write
+        """
+        self.comm_handler.write(address, data)
+
+    def read(self, address: int, length: int) -> bytes:
+        """Write data to the DSP using the configured communication handler.
+
+        Args:
+            address (int): Address to write to
+            length (int): Number of bytes to read
+        """
+        return self.comm_handler.read(address, length)
+
     @abstractmethod
     def soft_reset(self):
         """Soft reset the DSP."""
+
+    @abstractmethod
+    def safeload(self, address: int, data: bytes, count: int):
+        """Write data to the chip using chip-specific safeload.
+
+        Args:
+            address (int): Address to write to
+            data (bytes): Data to write
+            count (int): Number of words to write (max. 5)
+        """
