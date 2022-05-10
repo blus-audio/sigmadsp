@@ -21,7 +21,7 @@ class I2cHandler:
     ADDRESS_LENGTH = 2
 
     def __init__(self, i2c_bus: int = 1, i2c_addr: int = 0x34):
-        """Initialize the SpiHandler thread."""
+        """Initialize the I2cHandler thread."""
         self._initialize_i2c(i2c_bus, i2c_addr)
 
         # Generate a Pipe, for communicating with the I2C handler thread within this class.
