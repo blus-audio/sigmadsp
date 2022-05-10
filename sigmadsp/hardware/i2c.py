@@ -55,7 +55,7 @@ class I2cHandler:
         self.pipe_end_owner.send((address, data))
 
     def read(self, address: int, length: int) -> bytes:
-        """Read data from the SPI interface via the pipe to the SPI thread.
+        """Read data from the I2C interface via the pipe to the I2C thread.
 
         Args:
             address (int): DSP register address to read from
