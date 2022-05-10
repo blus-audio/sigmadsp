@@ -7,6 +7,7 @@ from typing import List, Union
 
 import gpiozero
 
+from sigmadsp.hardware.base import HandlerBase
 from sigmadsp.hardware.i2c import I2cHandler
 from sigmadsp.hardware.spi import SpiHandler
 
@@ -58,7 +59,7 @@ class OutputPin(Pin):
 class Dsp:
     """A generic DSP class, to be extended by child classes."""
 
-    comm_handler: Union[I2cHandler, SpiHandler]
+    comm_handler: HandlerBase
 
     def __init__(self, config: dict):
         """Initialize the DSP with an SpiHandler that talks to it.
@@ -72,7 +73,7 @@ class Dsp:
         self.parse_config()
 
         if self.protocol == "i2c":
-            self.comm_handler = I2cHandler(i2c_bus=self.i2c_bus, i2c_addr=self.i2c_address)
+            self.comm_handler = I2cHandler(bus=self.i2c_bus, device=self.i2c_address)
         else:
             self.comm_handler = SpiHandler()
 

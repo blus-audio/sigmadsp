@@ -1,9 +1,9 @@
 """This module implements an SPI handler that talks to Sigma DSP devices."""
 import logging
-import threading
-from multiprocessing import Pipe
 
 import spidev
+
+from sigmadsp.hardware.base import HandlerBase
 
 # A logger for this module
 logger = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ def build_spi_frame(address: int, data: bytes) -> bytearray:
     return frame
 
 
-class SpiHandler:
+class SpiHandler(HandlerBase):
     """Handle SPI transfers from and to SigmaDSP chipsets.
 
     Tested with ADAU145X
@@ -52,19 +52,7 @@ class SpiHandler:
     WRITE = 0
     READ = 1
 
-    def __init__(self):
-        """Initialize the SpiHandler thread."""
-        self._initialize_spi()
-
-        # Generate a Pipe, for communicating with the SPI handler thread within this class.
-        self.pipe_end_owner, self.pipe_end_user = Pipe()
-
-        logger.info("Starting SPI handling thread.")
-        self.thread = threading.Thread(target=self.serve_forever, name="SPI handler thread")
-        self.thread.daemon = True
-        self.thread.start()
-
-    def _initialize_spi(self, bus: int = 0, device: int = 0):
+    def _initialize(self, bus: int = 0, device: int = 0):
         """Initialize the SPI hardware.
 
         Bus and device numbers shall be kept at (0, 0) for RaspberryPi hardware.
@@ -85,48 +73,7 @@ class SpiHandler:
         self.spi.mode = 0
         self.spi.bits_per_word = 8
 
-    def write(self, address: int, data: bytes):
-        """Write data over the SPI interface via the pipe to the SPI thread.
-
-        Args:
-            address (int): DSP register address to write to
-            data (bytes): Binary data to write
-        """
-        self.pipe_end_owner.send("write")
-        self.pipe_end_owner.send((address, data))
-
-    def read(self, address: int, length: int) -> bytes:
-        """Read data from the SPI interface via the pipe to the SPI thread.
-
-        Args:
-            address (int): DSP register address to read from
-            length (int): Number of bytes to read
-
-        Returns:
-            bytes: Register content
-        """
-        self.pipe_end_owner.send("read")
-        self.pipe_end_owner.send((address, length))
-
-        data = self.pipe_end_owner.recv()
-
-        return data
-
-    def serve_forever(self):
-        """Handle incoming requests for writing or reading data over SPI."""
-        while True:
-            mode = self.pipe_end_user.recv()
-
-            if mode == "write":
-                address, data = self.pipe_end_user.recv()
-                self._write_spi(address, data)
-
-            elif mode == "read":
-                address, length = self.pipe_end_user.recv()
-                data = self._read_spi(address, length)
-                self.pipe_end_user.send(data)
-
-    def _read_spi(self, address: int, length: int) -> bytes:
+    def _read(self, address: int, length: int) -> bytes:
         """Read data over the SPI port from a SigmaDSP.
 
         Args:
@@ -145,7 +92,7 @@ class SpiHandler:
 
         return bytes(spi_response[SpiHandler.HEADER_LENGTH :])
 
-    def _write_spi(self, address: int, data: bytes):
+    def _write(self, address: int, data: bytes):
         """Write data over the SPI port onto a SigmaDSP.
 
         Args:
