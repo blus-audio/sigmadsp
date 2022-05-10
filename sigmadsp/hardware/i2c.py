@@ -1,4 +1,4 @@
-"""This module implements an SPI handler that talks to Sigma DSP devices."""
+"""This module implements an I2C handler that talks to Sigma DSP devices."""
 import logging
 import threading
 from multiprocessing import Pipe
