@@ -34,7 +34,6 @@ from sigmadsp.generated.backend_service.control_pb2_grpc import (
 )
 from sigmadsp.hardware.adau14xx import Adau14xx
 from sigmadsp.hardware.dsp import SafetyCheckException
-from sigmadsp.hardware.spi import SpiHandler
 from sigmadsp.helper.settings import SigmadspSettings
 
 # A logger for this module
@@ -60,19 +59,16 @@ class BackendService(BackendServicer):
 
         self.settings = settings
 
-        # Create an SPI handler, along with its thread
-        self.spi_handler = SpiHandler()
+        config = self.settings.config
+        dsp_type = config["dsp"]["type"]
+        dsp_protocol = config["dsp"].get("protocol", "spi")
 
         # Create a SigmaTCPServer, along with its various threads
         self.sigma_tcp_server = SigmaStudioInterface(
-            self.settings.config["host"]["ip"],
-            self.settings.config["host"]["port"],
+            config["host"]["ip"],
+            config["host"]["port"],
         )
-        logger.info(
-            "Sigma TCP server started on [%s]:%d.",
-            self.settings.config["host"]["ip"],
-            self.settings.config["host"]["port"],
-        )
+        logger.info("Sigma TCP server started on [%s]:%d.", config["host"]["ip"], config["host"]["port"])
 
         # Create a scheduler for recurring tasks
         self.scheduler = sched.scheduler(time.time, time.sleep)
@@ -82,16 +78,13 @@ class BackendService(BackendServicer):
         worker_thread.daemon = True
         worker_thread.start()
 
-        logger.info("Specified DSP type is '%s'.", self.settings.config["dsp"]["type"])
+        logger.info("Specified DSP type is '%s' over %s.", dsp_type, dsp_protocol)
 
-        if self.settings.config["dsp"]["type"] == "adau14xx":
-            self.dsp = Adau14xx(self.settings.config, self.spi_handler)
+        if dsp_type == "adau14xx":
+            self.dsp = Adau14xx(self.settings.config)
 
         else:
-            logger.error(
-                "DSP type '%s' is not known! Aborting.",
-                self.settings.config["dsp"]["type"],
-            )
+            logger.error("DSP type '%s' is not known! Aborting.", dsp_type)
             sys.exit(0)
 
         try:
@@ -127,9 +120,14 @@ class BackendService(BackendServicer):
 
         else:
             dsp_hash = self.dsp.get_parameter_value(safety_hash_cell.parameter_address, data_format="int")
+            logger.info("safety hash address: 0x%04x", safety_hash_cell.parameter_address)
 
             if safety_hash_cell.parameter_value != dsp_hash:
-                logger.warning("Safety hash cell content does not match! Configuration remains locked.")
+                logger.warning(
+                    "Safety hash cell content does not match! params: %d, dsp: %d. Configuration remains locked.",
+                    safety_hash_cell.parameter_value,
+                    dsp_hash,
+                )
                 self.configuration_unlocked = False
                 raise SafetyCheckException
 
@@ -146,10 +144,10 @@ class BackendService(BackendServicer):
             request = self.sigma_tcp_server.pipe_end_user.recv()
 
             if isinstance(request, WriteRequest):
-                self.spi_handler.write(request.address, request.data)
+                self.dsp.write(request.address, request.data)
 
             elif isinstance(request, ReadRequest):
-                payload = self.spi_handler.read(request.address, request.length)
+                payload = self.dsp.read(request.address, request.length)
 
                 self.sigma_tcp_server.pipe_end_user.send(ReadResponse(payload))
 

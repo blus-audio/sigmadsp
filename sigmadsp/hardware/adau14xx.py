@@ -32,6 +32,12 @@ class Adau14xx(Dsp):
     RESET_REGISTER = 0xF890
     RESET_REGISTER_LENGTH = 2
 
+    # safeload registers - SigmaStudio 3.14 and newer
+    SAFELOAD_DATA_REGISTERS = [0x6000, 0x6001, 0x6002, 0x6003, 0x6004]
+    SAFELOAD_ADDRESS_REGISTER = 0x6005
+    SAFELOAD_COUNT_REGISTER = 0x6006
+    SAFELOAD_DATA_REGISTER_LENGTH = 5
+
     # All fixpoint (parameter) registers are four bytes long
     FIXPOINT_REGISTER_LENGTH = 4
 
@@ -40,8 +46,8 @@ class Adau14xx(Dsp):
 
         Set and release the corresponding register for resetting.
         """
-        self.spi_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(0))
-        self.spi_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(1))
+        self.comm_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(0))
+        self.comm_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(1))
         logger.info("Soft-resetting the DSP.")
 
     def get_parameter_value(self, address: int, data_format: str) -> Union[float, int, None]:
@@ -54,7 +60,7 @@ class Adau14xx(Dsp):
         Returns:
             Union[float, int, None]: Representation of the register content in the specified format.
         """
-        data_register = self.spi_handler.read(address, Adau14xx.FIXPOINT_REGISTER_LENGTH)
+        data_register = self.read(address, Adau14xx.FIXPOINT_REGISTER_LENGTH)
         data_integer = bytes_to_int32(data_register)
 
         if "int" == data_format:
@@ -82,7 +88,7 @@ class Adau14xx(Dsp):
             data_register = int32_to_bytes(value)
 
         if data_register is not None:
-            self.spi_handler.write(address, data_register)
+            self.safeload(address, data_register)
 
     def set_volume(self, value_db: float, address: int) -> float:
         """Set the volume register at the given address to a certain value in dB.
@@ -137,3 +143,22 @@ class Adau14xx(Dsp):
         )
 
         return linear_to_db(new_volume)
+
+    def safeload(self, address: int, data: bytes, count: int = 1):
+        """Write data to the chip using software safeload.
+
+        Args:
+            address (int): Address to write to
+            data (bytes): Data to write; multiple parameter should be concatenated
+            count (int): Number of words to write
+        """
+        for sd in range(0, count):
+            register = self.SAFELOAD_DATA_REGISTERS[sd]
+            data_buf = bytearray(self.SAFELOAD_DATA_REGISTER_LENGTH)
+            data_buf[1:] = data[sd * self.FIXPOINT_REGISTER_LENGTH : sd * (self.FIXPOINT_REGISTER_LENGTH + 1)]
+            self.write(register, data_buf)
+
+        self.write(self.SAFELOAD_ADDRESS_REGISTER, int32_to_bytes(address))
+
+        # TODO: test if this is supposed to be a regular integer or it needs to be encoded as 8.24
+        self.write(self.SAFELOAD_COUNT_REGISTER, int32_to_bytes(count))
