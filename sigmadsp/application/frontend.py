@@ -4,6 +4,7 @@ It can control the backend via the command line.
 """
 import argparse
 import logging
+from typing import Union
 
 import grpc
 
