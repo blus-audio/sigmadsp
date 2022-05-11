@@ -87,7 +87,7 @@ def main():
     if arguments.address is not None:
         backend_address = arguments.address
 
-    response: ControlResponse = None
+    response: Union[ControlResponse, None] = None
     control_request = ControlRequest()
     control_parameter_request = ControlParameterRequest()
 
