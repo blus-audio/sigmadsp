@@ -1,0 +1,177 @@
+"""This module provides functionality for controlling SigmaDSP hardware, e.g.
+
+- Changing parameter register contents
+- Reading parameter registers
+- Performing soft reset
+
+For this, it uses the SpiHandler module, to interface to the DSP.
+"""
+import logging
+from typing import Union
+
+from sigmadsp.hardware.dsp import Dsp
+from sigmadsp.helper.conversion import (
+    bytes_to_int16,
+    bytes_to_int32,
+    clamp,
+    db_to_linear,
+    float_to_frac_5_23,
+    frac_5_23_to_float,
+    int16_to_bytes,
+    int32_to_bytes,
+    linear_to_db,
+)
+
+# A logger for this module
+logger = logging.getLogger(__name__)
+
+
+class Adau1701(Dsp):
+    """A class for controlling functionality of Analog Devices Sigma DSPs, especially ADAU1701 series parts."""
+
+    # Addresses and sizes of important registers
+    CONTROL_REGISTER = 0x081C
+    CONTROL_REGISTER_LENGTH = 2
+
+    # All fixpoint (parameter) registers are four bytes long
+    FIXPOINT_REGISTER_LENGTH = 4
+
+    # Safeload registers (address, data)
+    SAFELOAD_REGISTERS = [
+        (0x0815, 0x810),
+        (0x0816, 0x811),
+        (0x0815, 0x812),
+        (0x0818, 0x813),
+        (0x0819, 0x814),
+    ]
+
+    # Safeload register length
+    SAFELOAD_SA_LENGTH = 2
+    SAFELOAD_SD_LENGTH = 5
+
+    def soft_reset(self):
+        """Soft reset the DSP.
+
+        Not available on ADAU1701
+        """
+        logger.info("Soft-resetting the DSP is not available on ADAU1701")
+
+    def get_parameter_value(self, address: int, data_format: str) -> Union[float, int, None]:
+        """Get a parameter value from a chosen register address.
+
+        Args:
+            address (int): The address to look at.
+            data_format (str): The data type to return the register in. Can be 'float' or 'int'.
+
+        Returns:
+            Union[float, int, None]: Representation of the register content in the specified format.
+        """
+        data_register = self.read(address, Adau1701.FIXPOINT_REGISTER_LENGTH)
+        data_integer = bytes_to_int32(data_register)
+
+        float_value = frac_5_23_to_float(data_integer)
+
+        if "int" == data_format:
+            return int(float_value)
+
+        elif "float" == data_format:
+            return float_value
+
+        else:
+            return None
+
+    def set_parameter_value(self, value: Union[float, int], address: int) -> None:
+        """Set a parameter value for a chosen register address.
+
+        Args:
+            value (float): The value to store in the register
+            address (int): The target address
+        """
+        data_register: Union[bytes, None] = None
+        data_register = int32_to_bytes(float_to_frac_5_23(value))
+
+        if data_register is not None:
+            self.safeload(address, data_register)
+
+    def set_volume(self, value_db: float, address: int) -> float:
+        """Set the volume register at the given address to a certain value in dB.
+
+        Args:
+            value_db (float): The volume setting in dB
+            address (int): The volume adjustment register address
+
+        Returns:
+            float: The new volume in dB.
+        """
+        # Read current volume and apply adjustment
+        value_linear = db_to_linear(value_db)
+
+        # Clamp set volume to safe levels
+        clamp(value_linear, 0, 1)
+
+        self.set_parameter_value(value_linear, address)
+
+        logger.info("Set volume to %.2f dB.", linear_to_db(value_linear))
+
+        return linear_to_db(value_linear)
+
+    def adjust_volume(self, adjustment_db: float, address: int) -> float:
+        """Adjust the volume register at the given address by a certain value in dB.
+
+        Args:
+            adjustment_db (float): The volume adjustment in dB
+            address (int): The volume adjustment register address
+
+        Returns:
+            float: The new volume in dB.
+        """
+        # Read current volume and apply adjustment
+        current_volume = self.get_parameter_value(address, data_format="float")
+
+        if not isinstance(current_volume, float):
+            raise TypeError
+
+        linear_adjustment = db_to_linear(adjustment_db)
+        new_volume = current_volume * linear_adjustment
+
+        # Clamp new volume to safe levels
+        clamp(new_volume, 0, 1)
+
+        self.set_parameter_value(new_volume, address)
+
+        logger.info(
+            "Adjusted volume from %.2f dB to %.2f dB.",
+            linear_to_db(current_volume),
+            linear_to_db(new_volume),
+        )
+
+        return linear_to_db(new_volume)
+
+    def safeload(self, address: int, data: bytes, count: int = 1):
+        """Write data to the chip using hardware safeload.
+
+        Args:
+            address (int): Address to write to
+            data (bytes): Data to write; multiple words should be concatenated
+            count (int): number of words to write (max. 5)
+        """
+        # load up the address and data in safeload registers
+        for sd in range(0, count):
+            address_register, data_register = self.SAFELOAD_REGISTERS[sd]
+            address_bytes = int16_to_bytes(address)
+            data_buf = bytearray(self.SAFELOAD_SD_LENGTH)
+
+            data_buf[1:] = data[sd * self.FIXPOINT_REGISTER_LENGTH : (sd + 1) * self.FIXPOINT_REGISTER_LENGTH]
+
+            self.write(address_register, address_bytes)
+            self.write(data_register, data_buf)
+
+        control_bytes = self.comm_handler.read(self.CONTROL_REGISTER, self.CONTROL_REGISTER_LENGTH)
+        control_reg = bytes_to_int16(control_bytes)
+
+        ist_mask = 1 << 5
+
+        control_reg |= ist_mask
+
+        # start safe load
+        self.write(self.CONTROL_REGISTER, int16_to_bytes(control_reg))
