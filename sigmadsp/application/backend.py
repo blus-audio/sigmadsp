@@ -17,12 +17,13 @@ import grpc
 from retry import retry
 
 import sigmadsp
-from sigmadsp.communication.sigma_tcp_server import (
+from sigmadsp.communication.base import (
     ReadRequest,
     ReadResponse,
-    SigmaStudioInterface,
+    SafeloadRequest,
     WriteRequest,
 )
+from sigmadsp.communication.sigma_tcp_server import SigmaStudioInterface
 from sigmadsp.generated.backend_service.control_pb2 import (
     ControlParameterRequest,
     ControlRequest,
@@ -33,7 +34,8 @@ from sigmadsp.generated.backend_service.control_pb2_grpc import (
     add_BackendServicer_to_server,
 )
 from sigmadsp.hardware.adau14xx import Adau14xx
-from sigmadsp.hardware.dsp import ConfigurationError, SafetyCheckException
+from sigmadsp.hardware.adau1701 import Adau1701
+from sigmadsp.hardware.dsp import ConfigurationError, Dsp, SafetyCheckException
 from sigmadsp.helper.settings import SigmadspSettings
 
 # A logger for this module
@@ -45,6 +47,8 @@ class BackendService(BackendServicer):
 
     This service also reacts to rpyc remote procedure calls, for performing actions with the DSP over SPI.
     """
+
+    dsp: Dsp
 
     def __init__(self, settings: SigmadspSettings):
         """Initialize service and start all relevant threads (TCP, SPI).
@@ -67,6 +71,7 @@ class BackendService(BackendServicer):
         self.sigma_tcp_server = SigmaStudioInterface(
             config["host"]["ip"],
             config["host"]["port"],
+            dsp_type,
         )
         logger.info("Sigma TCP server started on [%s]:%d.", config["host"]["ip"], config["host"]["port"])
 
@@ -83,6 +88,9 @@ class BackendService(BackendServicer):
         try:
             if dsp_type == "adau14xx":
                 self.dsp = Adau14xx(self.settings.config)
+
+            elif dsp_type == "adau1701":
+                self.dsp = Adau1701(self.settings.config)
 
             else:
                 logger.error("DSP type '%s' is not known! Aborting.", dsp_type)
@@ -150,6 +158,9 @@ class BackendService(BackendServicer):
 
             if isinstance(request, WriteRequest):
                 self.dsp.write(request.address, request.data)
+
+            if isinstance(request, SafeloadRequest):
+                self.dsp.safeload(request.address, request.data)
 
             elif isinstance(request, ReadRequest):
                 payload = self.dsp.read(request.address, request.length)
