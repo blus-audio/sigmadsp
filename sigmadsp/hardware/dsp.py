@@ -10,6 +10,7 @@ import gpiozero
 from sigmadsp.hardware.base_protocol import BaseProtocol
 from sigmadsp.hardware.i2c import I2C
 from sigmadsp.hardware.spi import SPI
+from sigmadsp.helper.conversion import clamp, db_to_linear, linear_to_db
 
 # A logger for this module
 logger = logging.getLogger(__name__)
@@ -215,6 +216,60 @@ class Dsp(ABC):
         """
         return self.protocol_handler.read(address, length)
 
+    def set_volume(self, value_db: float, address: int) -> float:
+        """Set the volume register at the given address to a certain value in dB.
+
+        Args:
+            value_db (float): The volume setting in dB
+            address (int): The volume adjustment register address
+
+        Returns:
+            float: The new volume in dB.
+        """
+        # Read current volume and apply adjustment
+        value_linear = db_to_linear(value_db)
+
+        # Clamp set volume to safe levels
+        clamp(value_linear, 0, 1)
+
+        self.set_parameter_value(value_linear, address)
+
+        logger.info("Set volume to %.2f dB.", linear_to_db(value_linear))
+
+        return linear_to_db(value_linear)
+
+    def adjust_volume(self, adjustment_db: float, address: int) -> float:
+        """Adjust the volume register at the given address by a certain value in dB.
+
+        Args:
+            adjustment_db (float): The volume adjustment in dB
+            address (int): The volume adjustment register address
+
+        Returns:
+            float: The new volume in dB.
+        """
+        # Read current volume and apply adjustment
+        current_volume = self.get_parameter_value(address, data_format="float")
+
+        if not isinstance(current_volume, float):
+            raise TypeError
+
+        linear_adjustment = db_to_linear(adjustment_db)
+        new_volume = current_volume * linear_adjustment
+
+        # Clamp new volume to safe levels
+        clamp(new_volume, 0, 1)
+
+        self.set_parameter_value(new_volume, address)
+
+        logger.info(
+            "Adjusted volume from %.2f dB to %.2f dB.",
+            linear_to_db(current_volume),
+            linear_to_db(new_volume),
+        )
+
+        return linear_to_db(new_volume)
+
     @abstractmethod
     def soft_reset(self):
         """Soft reset the DSP."""
@@ -227,4 +282,29 @@ class Dsp(ABC):
             address (int): Address to write to
             data (bytes): Data to write
             count (int): Number of 4 byte words to write (max. 5)
+        """
+
+    @abstractmethod
+    def set_parameter_value(self, value: Union[float, int], address: int) -> None:
+        """Set a parameter value for a chosen register address.
+
+        This is an abstract method because number formats are chip-specific.
+
+        Args:
+            value (float): The value to store in the register
+            address (int): The target address
+        """
+
+    @abstractmethod
+    def get_parameter_value(self, address: int, data_format: str) -> Union[float, int, None]:
+        """Get a parameter value from a chosen register address.
+
+        This is an abstract method because number formats are chip-specific.
+
+        Args:
+            address (int): The address to look at.
+            data_format (str): The data type to return the register in. Can be 'float' or 'int'.
+
+        Returns:
+            Union[float, int, None]: Representation of the register content in the specified format.
         """

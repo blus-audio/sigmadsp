@@ -11,13 +11,10 @@ from typing import Union
 from sigmadsp.hardware.dsp import Dsp
 from sigmadsp.helper.conversion import (
     bytes_to_int32,
-    clamp,
-    db_to_linear,
     float_to_frac_8_24,
     frac_8_24_to_float,
     int16_to_bytes,
     int32_to_bytes,
-    linear_to_db,
 )
 
 # A logger for this module
@@ -88,60 +85,6 @@ class Adau14xx(Dsp):
 
         if data_register is not None:
             self.safeload(address, data_register)
-
-    def set_volume(self, value_db: float, address: int) -> float:
-        """Set the volume register at the given address to a certain value in dB.
-
-        Args:
-            value_db (float): The volume setting in dB
-            address (int): The volume adjustment register address
-
-        Returns:
-            float: The new volume in dB.
-        """
-        # Read current volume and apply adjustment
-        value_linear = db_to_linear(value_db)
-
-        # Clamp set volume to safe levels
-        clamp(value_linear, 0, 1)
-
-        self.set_parameter_value(value_linear, address)
-
-        logger.info("Set volume to %.2f dB.", linear_to_db(value_linear))
-
-        return linear_to_db(value_linear)
-
-    def adjust_volume(self, adjustment_db: float, address: int) -> float:
-        """Adjust the volume register at the given address by a certain value in dB.
-
-        Args:
-            adjustment_db (float): The volume adjustment in dB
-            address (int): The volume adjustment register address
-
-        Returns:
-            float: The new volume in dB.
-        """
-        # Read current volume and apply adjustment
-        current_volume = self.get_parameter_value(address, data_format="float")
-
-        if not isinstance(current_volume, float):
-            raise TypeError
-
-        linear_adjustment = db_to_linear(adjustment_db)
-        new_volume = current_volume * linear_adjustment
-
-        # Clamp new volume to safe levels
-        clamp(new_volume, 0, 1)
-
-        self.set_parameter_value(new_volume, address)
-
-        logger.info(
-            "Adjusted volume from %.2f dB to %.2f dB.",
-            linear_to_db(current_volume),
-            linear_to_db(new_volume),
-        )
-
-        return linear_to_db(new_volume)
 
     def safeload(self, address: int, data: bytes, count: int = 1):
         """Write data to the chip using software safeload.
