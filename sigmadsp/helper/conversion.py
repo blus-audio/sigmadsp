@@ -31,7 +31,7 @@ def clamp(value: float, min_value: float, max_value: float) -> float:
 
 
 def frac_8_24_to_float(value: int) -> float:
-    """Convert a value in the DSPs fractional representation to float.
+    """Convert a value in the DSPs 32 bit 8.24 fractional representation to float.
 
     32 bit values consist of 8 integer and 24 fractional bits and are signed.
 
@@ -45,7 +45,7 @@ def frac_8_24_to_float(value: int) -> float:
 
 
 def float_to_frac_8_24(value: float) -> int:
-    """Convert a float value to the DSPs fractional representation.
+    """Convert a float value to the DSPs 32 bit 8.24 fractional representation.
 
     32 bit values consist of 8 integer and 24 fractional bits and are signed.
 
@@ -56,6 +56,34 @@ def float_to_frac_8_24(value: float) -> int:
         int: Output in DSP fractional format
     """
     return int(value * 2**24)
+
+
+def frac_5_23_to_float(value: int) -> float:
+    """Convert a value in the DSPs 28 bit 5.23 fractional representation to float.
+
+    28 bit values consist of 5 integer and 23 fractional bits and are signed.
+
+    Args:
+        value (int): Fractional value to convert
+
+    Returns:
+        float: Output in float format
+    """
+    return value / 2**23
+
+
+def float_to_frac_5_23(value: float) -> int:
+    """Convert a float value to the DSPs 28 bit 5.23 fractional representation.
+
+    28 bit values consist of 5 integer and 23 fractional bits and are signed.
+
+    Args:
+        value (float): Float value to convert
+
+    Returns:
+        int: Output in DSP fractional format
+    """
+    return int(value * 2**23)
 
 
 def db_to_linear(value_db: float) -> float:
