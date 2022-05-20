@@ -33,7 +33,7 @@ from sigmadsp.generated.backend_service.control_pb2_grpc import (
     add_BackendServicer_to_server,
 )
 from sigmadsp.hardware.adau14xx import Adau14xx
-from sigmadsp.hardware.dsp import SafetyCheckException
+from sigmadsp.hardware.dsp import ConfigurationError, SafetyCheckException
 from sigmadsp.helper.settings import SigmadspSettings
 
 # A logger for this module
@@ -80,12 +80,17 @@ class BackendService(BackendServicer):
 
         logger.info("Specified DSP type is '%s' over %s.", dsp_type, dsp_protocol)
 
-        if dsp_type == "adau14xx":
-            self.dsp = Adau14xx(self.settings.config)
+        try:
+            if dsp_type == "adau14xx":
+                self.dsp = Adau14xx(self.settings.config)
 
-        else:
-            logger.error("DSP type '%s' is not known! Aborting.", dsp_type)
-            sys.exit(0)
+            else:
+                logger.error("DSP type '%s' is not known! Aborting.", dsp_type)
+                sys.exit(1)
+
+        except ConfigurationError:
+            logger.error("DSP configuration is broken! Aborting")
+            sys.exit(1)
 
         try:
             logger.info("Run startup safety check.")
