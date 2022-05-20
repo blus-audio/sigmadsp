@@ -22,9 +22,8 @@ dsp:
   type: "$DSP_TYPE"
   # the protocol used to communicate (spi or i2c)
   protocol: "$DSP_PROTOCOL"
-  # for I2C
-  i2c_bus: "$I2C_BUS"
-  i2c_address: "$I2C_ADDRESS"
+  bus_number: "$BUS_NUMBER"
+  device_address: "$DEVICE_ADDRESS"
 
   pins:
     # The DSP's hardware reset pin.
