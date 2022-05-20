@@ -125,7 +125,7 @@ class Dsp(ABC):
             self.bus = self.config["dsp"]["bus_number"]
             self.address = self.config["dsp"]["device_address"]
         except KeyError as e:
-            logger.error("Key %s missing from DSP configuration.", e.message)
+            logger.error("Key %s missing from the DSP configuration.", e.args[0])
             raise ConfigurationError from e
 
     def get_pin_by_name(self, name: str) -> Union[Pin, None]:
