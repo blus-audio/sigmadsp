@@ -45,8 +45,8 @@ class Adau14xx(Dsp):
 
         Set and release the corresponding register for resetting.
         """
-        self.protocol_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(0))
-        self.protocol_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(1))
+        self.write(Adau14xx.RESET_REGISTER, int16_to_bytes(0))
+        self.write(Adau14xx.RESET_REGISTER, int16_to_bytes(1))
         logger.info("Soft-resetting the DSP.")
 
     def get_parameter_value(self, address: int, data_format: str) -> Union[float, int, None]:
