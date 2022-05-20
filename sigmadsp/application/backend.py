@@ -78,7 +78,7 @@ class BackendService(BackendServicer):
         worker_thread.daemon = True
         worker_thread.start()
 
-        logger.info("Specified DSP type is '%s' over %s.", dsp_type, dsp_protocol)
+        logger.info("Specified DSP type is '%s', using the '%s' protocol.", dsp_type, dsp_protocol)
 
         try:
             if dsp_type == "adau14xx":
@@ -125,11 +125,11 @@ class BackendService(BackendServicer):
 
         else:
             dsp_hash = self.dsp.get_parameter_value(safety_hash_cell.parameter_address, data_format="int")
-            logger.info("safety hash address: 0x%04x", safety_hash_cell.parameter_address)
+            logger.info("Safety hash address: 0x%04x.", safety_hash_cell.parameter_address)
 
             if safety_hash_cell.parameter_value != dsp_hash:
                 logger.warning(
-                    "Safety hash cell content does not match! params: %d, dsp: %d. Configuration remains locked.",
+                    "Safety hash cell content does not match! Expected %d, but read %d. Configuration remains locked.",
                     safety_hash_cell.parameter_value,
                     dsp_hash,
                 )
