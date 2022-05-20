@@ -1,29 +1,32 @@
 """This module implements the base class for I2C and SPI communication handlers."""
 import logging
 import threading
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from multiprocessing import Pipe
 
 # A logger for this module
 logger = logging.getLogger(__name__)
 
 
-class HandlerBase:
+class BaseProtocol(ABC):
     """Base class for communication handlers talking to SigmaDSP chipsets."""
 
-    # cosmetic use only
-    PROTOCOL: str
-
     def __init__(self, bus: int = 0, device: int = 0):
-        """Initialize the communications thread."""
+        """Initialize the communications thread.
+
+        Args:
+            bus (int, optional): Bus number. Defaults to 0.
+            device (int, optional): Device number / address. Defaults to 0
+        """
         self._initialize(bus, device)
 
-        # Generate a Pipe, for communicating with the I2C handler thread within this class.
+        # Generate a Pipe, for communicating with the protocol handler thread within this class.
         self.pipe_end_owner, self.pipe_end_user = Pipe()
 
-        logger.info("Starting %s handling thread.", self.PROTOCOL)
-        self.thread = threading.Thread(target=self.serve_forever, name=f"{self.PROTOCOL} handler thread")
-        self.thread.daemon = True
+        protocol = self.__class__.__name__
+
+        logger.info("Starting %s handling thread.", protocol)
+        self.thread = threading.Thread(target=self.serve_forever, name=f"{protocol} handler thread", daemon=True)
         self.thread.start()
 
     def write(self, address: int, data: bytes):
