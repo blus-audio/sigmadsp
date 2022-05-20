@@ -1,15 +1,15 @@
 """General definitions for interfacing DSPs."""
 import logging
 import time
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List, Union
 
 import gpiozero
 
-from sigmadsp.hardware.base import HandlerBase
-from sigmadsp.hardware.i2c import I2cHandler
-from sigmadsp.hardware.spi import SpiHandler
+from sigmadsp.hardware.base_protocol import BaseProtocol
+from sigmadsp.hardware.i2c import I2C
+from sigmadsp.hardware.spi import SPI
 
 # A logger for this module
 logger = logging.getLogger(__name__)
@@ -17,6 +17,10 @@ logger = logging.getLogger(__name__)
 
 class SafetyCheckException(Exception):
     """Custom exception for failed DSP safety checks."""
+
+
+class ConfigurationError(Exception):
+    """Custom exception for invalid DSP configuration."""
 
 
 @dataclass
@@ -56,26 +60,32 @@ class OutputPin(Pin):
         self.control = gpiozero.DigitalOutputDevice(self.number, self.active_high, self.initial_value)
 
 
-class Dsp:
+class Dsp(ABC):
     """A generic DSP class, to be extended by child classes."""
 
-    comm_handler: HandlerBase
+    protocol_handler: BaseProtocol
 
     def __init__(self, config: dict):
         """Initialize the DSP with an SpiHandler that talks to it.
 
         Args:
             config (dict): Configuration settings, from the general configuration file.
-            comm_handler (SpiHandler, I2cHandler): The handler that communicates with the DSP.
         """
         self.config = config
         self.pins: List[Pin] = []
         self.parse_config()
 
-        if self.protocol == "i2c":
-            self.comm_handler = I2cHandler(bus=self.i2c_bus, device=self.i2c_address)
-        else:
-            self.comm_handler = SpiHandler()
+        protocol_handlers: dict[str, type[BaseProtocol]] = {
+            "i2c": I2C,
+            "spi": SPI,
+        }
+
+        try:
+            handler_class: type[BaseProtocol] = protocol_handlers[self.protocol]
+            self.protocol_handler = handler_class(bus=self.bus, device=self.address)
+        except KeyError as e:
+            logger.error("Unknown protocol: %s", self.protocol)
+            raise ConfigurationError from e
 
         self.hard_reset()
 
@@ -109,12 +119,14 @@ class Dsp:
         except (KeyError, TypeError):
             logger.info("No DSP pin definitions were found in the configuration file.")
 
-        self.type = self.config["dsp"]["type"]
-        self.protocol = self.config["dsp"].get("protocol", "spi")
-
-        if self.protocol == "i2c":
-            self.i2c_address = self.config["dsp"].get("i2c_address", 0x38)
-            self.i2c_bus = self.config["dsp"].get("i2c_bus", 1)
+        try:
+            self.type = self.config["dsp"]["type"]
+            self.protocol = self.config["dsp"]["protocol"]
+            self.bus = self.config["dsp"]["bus_number"]
+            self.address = self.config["dsp"]["device_address"]
+        except KeyError as e:
+            logger.error("Key %s missing from DSP configuration.", e.message)
+            raise ConfigurationError from e
 
     def get_pin_by_name(self, name: str) -> Union[Pin, None]:
         """Get a pin by its name.
@@ -188,7 +200,7 @@ class Dsp:
             address (int): Address to write to
             data (bytes): Data to write
         """
-        self.comm_handler.write(address, data)
+        self.protocol_handler.write(address, data)
 
     def read(self, address: int, length: int) -> bytes:
         """Write data to the DSP using the configured communication handler.
@@ -197,7 +209,7 @@ class Dsp:
             address (int): Address to write to
             length (int): Number of bytes to read
         """
-        return self.comm_handler.read(address, length)
+        return self.protocol_handler.read(address, length)
 
     @abstractmethod
     def soft_reset(self):

@@ -3,20 +3,18 @@ import logging
 
 from smbus2 import SMBus, i2c_msg
 
-from sigmadsp.hardware.base import HandlerBase
+from sigmadsp.hardware.base_protocol import BaseProtocol
 from sigmadsp.helper.conversion import int16_to_bytes
 
 # A logger for this module
 logger = logging.getLogger(__name__)
 
 
-class I2cHandler(HandlerBase):
+class I2C(BaseProtocol):
     """Handle I2C transfers from and to SigmaDSP chipsets.
 
     Tested with ADAU1701
     """
-
-    PROTOCOL = "I2C"
 
     def _initialize(self, bus: int = 1, device: int = 0x38):
         """Initialize the I2C hardware.

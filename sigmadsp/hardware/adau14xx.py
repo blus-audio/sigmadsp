@@ -1,10 +1,9 @@
 """This module provides functionality for controlling SigmaDSP hardware, e.g.
 
+- Deploying programs
 - Changing parameter register contents
 - Reading parameter registers
 - Performing soft reset
-
-For this, it uses the SpiHandler module, to interface to the DSP.
 """
 import logging
 from typing import Union
@@ -46,8 +45,8 @@ class Adau14xx(Dsp):
 
         Set and release the corresponding register for resetting.
         """
-        self.comm_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(0))
-        self.comm_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(1))
+        self.protocol_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(0))
+        self.protocol_handler.write(Adau14xx.RESET_REGISTER, int16_to_bytes(1))
         logger.info("Soft-resetting the DSP.")
 
     def get_parameter_value(self, address: int, data_format: str) -> Union[float, int, None]:
