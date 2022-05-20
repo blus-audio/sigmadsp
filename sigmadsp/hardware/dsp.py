@@ -3,7 +3,7 @@ import logging
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Union
+from typing import Dict, List, Type, Union
 
 import gpiozero
 
@@ -75,13 +75,13 @@ class Dsp(ABC):
         self.pins: List[Pin] = []
         self.parse_config()
 
-        protocol_handlers: dict[str, type[BaseProtocol]] = {
+        protocol_handlers: Dict[str, Type[BaseProtocol]] = {
             "i2c": I2C,
             "spi": SPI,
         }
 
         try:
-            handler_class: type[BaseProtocol] = protocol_handlers[self.protocol]
+            handler_class: Type[BaseProtocol] = protocol_handlers[self.protocol]
             self.protocol_handler = handler_class(bus=self.bus, device=self.address)
         except KeyError as e:
             logger.error("Unknown protocol: %s", self.protocol)
