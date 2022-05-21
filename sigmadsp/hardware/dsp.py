@@ -64,9 +64,13 @@ class Dsp(ABC):
     """A generic DSP class, to be extended by child classes."""
 
     protocol_handler: BaseProtocol
+    type: str
+    protocol: str
+    bus: int
+    address: int
 
     def __init__(self, config: dict):
-        """Initialize the DSP with an SpiHandler that talks to it.
+        """Initialize the DSP and set up the protocol handler that talks to it.
 
         Args:
             config (dict): Configuration settings, from the general configuration file.
