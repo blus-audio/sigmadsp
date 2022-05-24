@@ -1,6 +1,6 @@
 # This workflow will upload a Python Package using poetry when a release is created
 
-name: Upload Python Package
+name: Upload Python package
 
 on:
   release:
