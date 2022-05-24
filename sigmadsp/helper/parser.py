@@ -21,8 +21,8 @@ class Cell:
     # The name of the parameter, as defined in SigmaStudio.
     parameter_name: str
 
-    # The value of the parameter, if applicable.
-    parameter_value: Union[int, float, None] = None
+    # The value of the parameter, if any.
+    parameter_value: Union[int, float, None]
 
     # This string separates prefixes within a cell name.
     PREFIX_SEPARATOR: ClassVar[str] = "_"
@@ -131,6 +131,10 @@ class Parser:
         Returns:
             Union[Cell, None]: The new Cell, if the data from the listing is valid, None otherwise.
         """
+        parameter_value: Union[float, int, None] = None
+        parameter_name: str
+        parameter_address: int
+
         for line in cell_lines:
             # Assemble a cell from the information in the cell_lines
             split_line = line.split()
@@ -150,8 +154,6 @@ class Parser:
 
                     if split_line[1] == "Value":
                         data = split_line[3]
-
-                        parameter_value: Union[float, int, None] = None
 
                         try:
                             parameter_value = int(data)
@@ -244,3 +246,23 @@ class Parser:
             List[Cell]: The matched cells
         """
         return [cell for cell in all_cells if name_tokens == cell.name_tokens]
+
+    def get_matching_cells_by_parameter_name(
+        self, all_cells: List[Cell], parameter_name: str, match_substring=False
+    ) -> List[Cell]:
+        """Find cells in a list of cells, whose parameter names match the specified string.
+
+        Args:
+            all_cells (List[Cell]): The list of cells to parse.
+            parameter_name (str): The string to check against.
+            match_substring (bool): If False, only matches parameter names that are exactly `parameter_name`.
+                Otherwise, matches if `parameter_name` is a substring of the parameter name.
+
+        Returns:
+            List[Cell]: The matched cells
+        """
+        if match_substring:
+            return [cell for cell in all_cells if parameter_name in cell.parameter_name]
+
+        else:
+            return [cell for cell in all_cells if parameter_name == cell.parameter_name]
