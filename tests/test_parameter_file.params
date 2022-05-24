@@ -1,0 +1,2003 @@
+Cell Name         = Volume EXT.Shift
+Parameter Name    = BitShiftADAU145XAlg5shift_bits
+Parameter Address = 32
+Parameter Value   = 14
+Parameter Data :
+0x00, 0x00, 0x00, 0x0E, 
+
+
+
+Cell Name         = Volume EXT.Volume control 1
+Parameter Name    = ExternalGainAlgSlew145X3slew_mode
+Parameter Address = 24584
+Parameter Value   = 12480
+Parameter Data :
+0x00, 0x00, 0x30, 0xC0, 
+
+
+
+Cell Name         = Channel selection.Channel select
+Parameter Name    = DCinputmux_stereoHW_AlgSigma3001slew_mode
+Parameter Address = 78
+Parameter Value   = 8330
+Parameter Data :
+0x00, 0x00, 0x20, 0x8A, 
+
+
+
+Cell Name         = Channel selection.Channel select
+Parameter Name    = DCinputmux_stereoHW_AlgSigma3001slew_mode
+Parameter Address = 78
+Parameter Value   = 8330
+Parameter Data :
+0x00, 0x00, 0x20, 0x8A, 
+
+
+
+Cell Name         = Channel selection.Channel select
+Parameter Name    = DCinputmux_stereoHW_AlgSigma3001slew_mode
+Parameter Address = 78
+Parameter Value   = 8330
+Parameter Data :
+0x00, 0x00, 0x20, 0x8A, 
+
+
+
+Cell Name         = Channel selection.Channel select
+Parameter Name    = DCinputmux_stereoHW_AlgSigma3001slew_mode
+Parameter Address = 78
+Parameter Value   = 8330
+Parameter Data :
+0x00, 0x00, 0x20, 0x8A, 
+
+
+
+Cell Name         = Channel selection.Channel select
+Parameter Name    = DCinputmux_stereoHW_AlgSigma3001slew_mode
+Parameter Address = 78
+Parameter Value   = 8330
+Parameter Data :
+0x00, 0x00, 0x20, 0x8A, 
+
+
+
+Cell Name         = Channel selection.Soft mute selector
+Parameter Name    = ExternalGainAlgSlew145X2slew_mode
+Parameter Address = 24588
+Parameter Value   = 12480
+Parameter Data :
+0x00, 0x00, 0x30, 0xC0, 
+
+
+
+Cell Name         = Channel selection.DC silence
+Parameter Name    = DCInpAlg145X5value
+Parameter Address = 258
+Parameter Value   = 0
+Parameter Data :
+0x00, 0x00, 0x00, 0x00, 
+
+
+
+Cell Name         = Volume 0.Shift
+Parameter Name    = BitShiftADAU145XAlg1shift_bits
+Parameter Address = 33
+Parameter Value   = 14
+Parameter Data :
+0x00, 0x00, 0x00, 0x0E, 
+
+
+
+Cell Name         = Volume 0.Volume control 0
+Parameter Name    = ExternalGainAlgSlew145X1slew_mode
+Parameter Address = 24586
+Parameter Value   = 12480
+Parameter Data :
+0x00, 0x00, 0x30, 0xC0, 
+
+
+
+Cell Name         = Input decision.Shift in 2
+Parameter Name    = BitShiftADAU145XAlg2shift_bits
+Parameter Address = 58
+Parameter Value   = 1
+Parameter Data :
+0x00, 0x00, 0x00, 0x01, 
+
+
+
+Cell Name         = Input decision.Shift in 3
+Parameter Name    = BitShiftADAU145XAlg3shift_bits
+Parameter Address = 59
+Parameter Value   = 2
+Parameter Data :
+0x00, 0x00, 0x00, 0x02, 
+
+
+
+Cell Name         = Input decision.Shift in 4
+Parameter Name    = BitShiftADAU145XAlg4shift_bits
+Parameter Address = 60
+Parameter Value   = 3
+Parameter Data :
+0x00, 0x00, 0x00, 0x03, 
+
+
+
+Cell Name         = Input decision.Lookup Table1
+Parameter Name    = LUTGrowAlg300NoLPConfigFormat1table
+Parameter Address = 61
+Parameter Data :
+0x00, 0x00, 0x00, 0x04, 
+0x00, 0x00, 0x00, 0x00, 
+0x00, 0x00, 0x00, 0x01, 
+0x00, 0x00, 0x00, 0x01, 
+0x00, 0x00, 0x00, 0x02, 
+0x00, 0x00, 0x00, 0x02, 
+0x00, 0x00, 0x00, 0x02, 
+0x00, 0x00, 0x00, 0x02, 
+0x00, 0x00, 0x00, 0x03, 
+0x00, 0x00, 0x00, 0x03, 
+0x00, 0x00, 0x00, 0x03, 
+0x00, 0x00, 0x00, 0x03, 
+0x00, 0x00, 0x00, 0x03, 
+0x00, 0x00, 0x00, 0x03, 
+0x00, 0x00, 0x00, 0x03, 
+0x00, 0x00, 0x00, 0x03, 
+
+
+
+Cell Name         = Input decision.Delay
+Parameter Name    = DelaySigma300PMAlg2delay
+Parameter Address = 77
+Parameter Value   = 1440
+Parameter Data :
+0x00, 0x00, 0x05, 0xA0, 
+
+
+
+Cell Name         = Input detection SPDIF.Signal Detect_4
+Parameter Name    = SignalDetectAlgS3004time_constant
+Parameter Address = 39
+Parameter Value   = 240000
+Parameter Data :
+0x00, 0x03, 0xA9, 0x80, 
+
+
+
+Cell Name         = Input detection SPDIF.Signal Detect_4
+Parameter Name    = SignalDetectAlgS3004counterdown
+Parameter Address = 40
+Parameter Value   = 1
+Parameter Data :
+0x00, 0x00, 0x00, 0x01, 
+
+
+
+Cell Name         = Input detection SPDIF.Signal Detect_4
+Parameter Name    = SignalDetectAlgS3004threshold
+Parameter Address = 41
+Parameter Value   = 0.000100016593933105
+Parameter Data :
+0x00, 0x00, 0x06, 0x8E, 
+
+
+
+Cell Name         = Input detection SPDIF.ZeroComp3_5
+Parameter Name    = ZeroCompareAlgSigma3004output
+Parameter Address = 54
+Parameter Value   = 1
+Parameter Data :
+0x00, 0x00, 0x00, 0x01, 
+
+
+
+Cell Name         = Input detection SPDIF.Logic2
+Parameter Name    = LogicAlgBitSigma3005AllOnes
+Parameter Address = 0
+Parameter Value   = 134217727
+Parameter Data :
+0x07, 0xFF, 0xFF, 0xFF, 
+
+
+
+Cell Name         = Input detection SPDIF.ASRC Lock_4
+Parameter Name    = RegisterReadAlg4address0
+Parameter Address = 259
+Parameter Value   = 62848
+Parameter Data :
+0x00, 0x00, 0xF5, 0x80, 
+
+
+
+Cell Name         = Input detection SPDIF.DC1_4
+Parameter Name    = DCInpAlg145X6value
+Parameter Address = 260
+Parameter Value   = 7.62939453125E-06
+Parameter Data :
+0x00, 0x00, 0x00, 0x80, 
+
+
+
+Cell Name         = Input detection SPDIF.Logic2_8
+Parameter Name    = LogicAlgBitSigma3004AllOnes
+Parameter Address = 0
+Parameter Value   = 134217727
+Parameter Data :
+0x07, 0xFF, 0xFF, 0xFF, 
+
+
+
+Cell Name         = Input detection SPDIF.Buff1_10
+Parameter Name    = BufferAlgSigma3004output
+Parameter Address = 34
+Parameter Value   = 1
+Parameter Data :
+0x00, 0x00, 0x00, 0x01, 
+
+
+
+Cell Name         = Input detection USB.Signal Detect_3
+Parameter Name    = SignalDetectAlgS3003time_constant
+Parameter Address = 43
+Parameter Value   = 240000
+Parameter Data :
+0x00, 0x03, 0xA9, 0x80, 
+
+
+
+Cell Name         = Input detection USB.Signal Detect_3
+Parameter Name    = SignalDetectAlgS3003counterdown
+Parameter Address = 44
+Parameter Value   = 1
+Parameter Data :
+0x00, 0x00, 0x00, 0x01, 
+
+
+
+Cell Name         = Input detection USB.Signal Detect_3
+Parameter Name    = SignalDetectAlgS3003threshold
+Parameter Address = 45
+Parameter Value   = 0.000100016593933105
+Parameter Data :
+0x00, 0x00, 0x06, 0x8E, 
+
+
+
+Cell Name         = Input detection USB.ZeroComp3_4
+Parameter Name    = ZeroCompareAlgSigma3003output
+Parameter Address = 55
+Parameter Value   = 1
+Parameter Data :
+0x00, 0x00, 0x00, 0x01, 
+
+
+
+Cell Name         = Input detection USB.Logic2_4
+Parameter Name    = LogicAlgBitSigma3008AllOnes
+Parameter Address = 0
+Parameter Value   = 134217727
+Parameter Data :
+0x07, 0xFF, 0xFF, 0xFF, 
+
+
+
+Cell Name         = Input detection USB.ASRC Lock_3
+Parameter Name    = RegisterReadAlg3address0
+Parameter Address = 261
+Parameter Value   = 62848
+Parameter Data :
+0x00, 0x00, 0xF5, 0x80, 
+
+
+
+Cell Name         = Input detection USB.DC1_3
+Parameter Name    = DCInpAlg145X3value
+Parameter Address = 262
+Parameter Value   = 2.38418579101563E-07
+Parameter Data :
+0x00, 0x00, 0x00, 0x04, 
+
+
+
+Cell Name         = Input detection USB.Logic2_7
+Parameter Name    = LogicAlgBitSigma3003AllOnes
+Parameter Address = 0
+Parameter Value   = 134217727
+Parameter Data :
+0x07, 0xFF, 0xFF, 0xFF, 
+
+
+
+Cell Name         = Input detection USB.Buff1_9
+Parameter Name    = BufferAlgSigma3003output
+Parameter Address = 35
+Parameter Value   = 1
+Parameter Data :
+0x00, 0x00, 0x00, 0x01, 
+
+
+
+Cell Name         = Input detection EXT.Signal Detect_2
+Parameter Name    = SignalDetectAlgS3001time_constant
+Parameter Address = 47
+Parameter Value   = 240000
+Parameter Data :
+0x00, 0x03, 0xA9, 0x80, 
+
+
+
+Cell Name         = Input detection EXT.Signal Detect_2
+Parameter Name    = SignalDetectAlgS3001counterdown
+Parameter Address = 48
+Parameter Value   = 1
+Parameter Data :
+0x00, 0x00, 0x00, 0x01, 
+
+
+
+Cell Name         = Input detection EXT.Signal Detect_2
+Parameter Name    = SignalDetectAlgS3001threshold
+Parameter Address = 49
+Parameter Value   = 0.000100016593933105
+Parameter Data :
+0x00, 0x00, 0x06, 0x8E, 
+
+
+
+Cell Name         = Input detection EXT.ZeroComp3_3
+Parameter Name    = ZeroCompareAlgSigma3002output
+Parameter Address = 56
+Parameter Value   = 1
+Parameter Data :
+0x00, 0x00, 0x00, 0x01, 
+
+
+
+Cell Name         = Input detection EXT.Logic2_3
+Parameter Name    = LogicAlgBitSigma3007AllOnes
+Parameter Address = 0
+Parameter Value   = 134217727
+Parameter Data :
+0x07, 0xFF, 0xFF, 0xFF, 
+
+
+
+Cell Name         = Input detection EXT.ASRC Lock_2
+Parameter Name    = RegisterReadAlg1address0
+Parameter Address = 263
+Parameter Value   = 62848
+Parameter Data :
+0x00, 0x00, 0xF5, 0x80, 
+
+
+
+Cell Name         = Input detection EXT.DC1_2
+Parameter Name    = DCInpAlg145X2value
+Parameter Address = 264
+Parameter Value   = 1.19209289550781E-07
+Parameter Data :
+0x00, 0x00, 0x00, 0x02, 
+
+
+
+Cell Name         = Input detection EXT.Logic2_6
+Parameter Name    = LogicAlgBitSigma3002AllOnes
+Parameter Address = 0
+Parameter Value   = 134217727
+Parameter Data :
+0x07, 0xFF, 0xFF, 0xFF, 
+
+
+
+Cell Name         = Input detection EXT.Buff1_8
+Parameter Name    = BufferAlgSigma3002output
+Parameter Address = 36
+Parameter Value   = 1
+Parameter Data :
+0x00, 0x00, 0x00, 0x01, 
+
+
+
+Cell Name         = Amplifier enable.ZeroComp mute
+Parameter Name    = ZeroCompareAlgSigma3001output
+Parameter Address = 79
+Parameter Value   = 16777216
+Parameter Data :
+0x01, 0x00, 0x00, 0x00, 
+
+
+
+Cell Name         = Amplifier enable.Timeout
+Parameter Name    = DCInpAlg145X4value
+Parameter Address = 265
+Parameter Value   = 0.00143051147460938
+Parameter Data :
+0x00, 0x00, 0x5D, 0xC0, 
+
+
+
+Cell Name         = Amplifier enable.ZeroComp on/off
+Parameter Name    = ZeroCompareAlgSigma3005output
+Parameter Address = 80
+Parameter Value   = 16777216
+Parameter Data :
+0x01, 0x00, 0x00, 0x00, 
+
+
+
+Cell Name         = Input detection Pi.Signal Detect
+Parameter Name    = SignalDetectAlgS3002time_constant
+Parameter Address = 51
+Parameter Value   = 240000
+Parameter Data :
+0x00, 0x03, 0xA9, 0x80, 
+
+
+
+Cell Name         = Input detection Pi.Signal Detect
+Parameter Name    = SignalDetectAlgS3002counterdown
+Parameter Address = 52
+Parameter Value   = 1
+Parameter Data :
+0x00, 0x00, 0x00, 0x01, 
+
+
+
+Cell Name         = Input detection Pi.Signal Detect
+Parameter Name    = SignalDetectAlgS3002threshold
+Parameter Address = 53
+Parameter Value   = 0.000100016593933105
+Parameter Data :
+0x00, 0x00, 0x06, 0x8E, 
+
+
+
+Cell Name         = Input detection Pi.ZeroComp3_2
+Parameter Name    = ZeroCompareAlgSigma3006output
+Parameter Address = 57
+Parameter Value   = 1
+Parameter Data :
+0x00, 0x00, 0x00, 0x01, 
+
+
+
+Cell Name         = Input detection Pi.Logic2_2
+Parameter Name    = LogicAlgBitSigma3006AllOnes
+Parameter Address = 0
+Parameter Value   = 134217727
+Parameter Data :
+0x07, 0xFF, 0xFF, 0xFF, 
+
+
+
+Cell Name         = Input detection Pi.ASRC Lock
+Parameter Name    = RegisterReadAlg2address0
+Parameter Address = 266
+Parameter Value   = 62848
+Parameter Data :
+0x00, 0x00, 0xF5, 0x80, 
+
+
+
+Cell Name         = Input detection Pi.DC1
+Parameter Name    = DCInpAlg145X1value
+Parameter Address = 267
+Parameter Value   = 5.96046447753906E-08
+Parameter Data :
+0x00, 0x00, 0x00, 0x01, 
+
+
+
+Cell Name         = Input detection Pi.Logic2_5
+Parameter Name    = LogicAlgBitSigma3001AllOnes
+Parameter Address = 0
+Parameter Value   = 134217727
+Parameter Data :
+0x07, 0xFF, 0xFF, 0xFF, 
+
+
+
+Cell Name         = Input detection Pi.Buff1_7
+Parameter Name    = BufferAlgSigma3001output
+Parameter Address = 37
+Parameter Value   = 1
+Parameter Data :
+0x00, 0x00, 0x00, 0x01, 
+
+
+
+Cell Name         = Custom filtering.Txt Filter1
+Parameter Name    = EQS300MultiDPHWSlewP1Alg1_slewmode
+Parameter Address = 86
+Parameter Value   = 8330
+Parameter Data :
+0x00, 0x00, 0x20, 0x8A, 
+
+
+
+Cell Name         = Custom filtering.Txt Filter1
+Parameter Name    = EQS300MultiDPHWSlewP1Alg1Targ_B2_1
+Parameter Address = 24590
+Parameter Data :
+0x00, 0xFE, 0xDE, 0x88, 
+0xFE, 0x01, 0x5E, 0x2B, 
+0x00, 0xFF, 0xCE, 0x80, 
+0xFF, 0x01, 0x52, 0xF8, 
+0x01, 0xFE, 0xA1, 0xD5, 
+
+
+
+Cell Name         = Custom filtering.Txt Filter1_2
+Parameter Name    = EQS300MultiDPHWSlewP1Alg2_slewmode
+Parameter Address = 92
+Parameter Value   = 8330
+Parameter Data :
+0x00, 0x00, 0x20, 0x8A, 
+
+
+
+Cell Name         = Custom filtering.Txt Filter1_2
+Parameter Name    = EQS300MultiDPHWSlewP1Alg2Targ_B2_1
+Parameter Address = 24595
+Parameter Data :
+0x00, 0xFE, 0xDE, 0x88, 
+0xFE, 0x01, 0x5E, 0x2B, 
+0x00, 0xFF, 0xCE, 0x80, 
+0xFF, 0x01, 0x52, 0xF8, 
+0x01, 0xFE, 0xA1, 0xD5, 
+
+
+
+Cell Name         = Direct/slave Select.Nx2-2
+Parameter Name    = stereomuxSigma300ns2index
+Parameter Address = 279
+Parameter Value   = 2
+Parameter Data :
+0x00, 0x00, 0x00, 0x02, 
+
+
+
+Cell Name         = Direct/slave Select.Nx2-3
+Parameter Name    = stereomuxSigma300ns3index
+Parameter Address = 277
+Parameter Value   = 0
+Parameter Data :
+0x00, 0x00, 0x00, 0x00, 
+
+
+
+Cell Name         = Direct/slave Select.Mg2
+Parameter Name    = SingleCtrlMixerS3002gain
+Parameter Address = 273
+Parameter Data :
+0x00, 0x80, 0x00, 0x00, 
+0x00, 0x80, 0x00, 0x00, 
+
+
+
+Cell Name         = R/L/merge select.Nx2-1
+Parameter Name    = stereomuxSigma300ns1index
+Parameter Address = 278
+Parameter Value   = 0
+Parameter Data :
+0x00, 0x00, 0x00, 0x00, 
+
+
+
+Cell Name         = R/L/merge select.Mg1
+Parameter Name    = SingleCtrlMixerS3001gain
+Parameter Address = 275
+Parameter Data :
+0x00, 0x80, 0x00, 0x00, 
+0x00, 0x80, 0x00, 0x00, 
+
+
+
+Cell Name         = Loudspeaker EQ.Mute W L
+Parameter Name    = MuteHWSlewAlgADAU145X1mute
+Parameter Address = 162
+Parameter Value   = 1
+Parameter Data :
+0x01, 0x00, 0x00, 0x00, 
+
+
+
+Cell Name         = Loudspeaker EQ.Mute W L
+Parameter Name    = MuteHWSlewAlgADAU145X1slew_mode
+Parameter Address = 161
+Parameter Value   = 8330
+Parameter Data :
+0x00, 0x00, 0x20, 0x8A, 
+
+
+
+Cell Name         = Loudspeaker EQ.Mute T L
+Parameter Name    = MuteHWSlewAlgADAU145X2mute
+Parameter Address = 168
+Parameter Value   = 1
+Parameter Data :
+0x01, 0x00, 0x00, 0x00, 
+
+
+
+Cell Name         = Loudspeaker EQ.Mute T L
+Parameter Name    = MuteHWSlewAlgADAU145X2slew_mode
+Parameter Address = 167
+Parameter Value   = 8330
+Parameter Data :
+0x00, 0x00, 0x20, 0x8A, 
+
+
+
+Cell Name         = Loudspeaker EQ.Mute W R
+Parameter Name    = MuteHWSlewAlgADAU145X3mute
+Parameter Address = 165
+Parameter Value   = 1
+Parameter Data :
+0x01, 0x00, 0x00, 0x00, 
+
+
+
+Cell Name         = Loudspeaker EQ.Mute W R
+Parameter Name    = MuteHWSlewAlgADAU145X3slew_mode
+Parameter Address = 164
+Parameter Value   = 8330
+Parameter Data :
+0x00, 0x00, 0x20, 0x8A, 
+
+
+
+Cell Name         = Loudspeaker EQ.Mute T R
+Parameter Name    = MuteHWSlewAlgADAU145X4mute
+Parameter Address = 171
+Parameter Value   = 1
+Parameter Data :
+0x01, 0x00, 0x00, 0x00, 
+
+
+
+Cell Name         = Loudspeaker EQ.Mute T R
+Parameter Name    = MuteHWSlewAlgADAU145X4slew_mode
+Parameter Address = 170
+Parameter Value   = 8330
+Parameter Data :
+0x00, 0x00, 0x20, 0x8A, 
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter delay
+Parameter Name    = DelaySigma300PMAlg1delay
+Parameter Address = 159
+Parameter Value   = 6
+Parameter Data :
+0x00, 0x00, 0x00, 0x06, 
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3B2_1
+Parameter Address = 129
+Parameter Value   = 0.803954422473907
+Parameter Data :
+0x00 ,	0xCD ,	0xCF ,	0xF5 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3B1_1
+Parameter Address = 130
+Parameter Value   = -1.59294235706329
+Parameter Data :
+0xFE ,	0x68 ,	0x34 ,	0xEE ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3B0_1
+Parameter Address = 131
+Parameter Value   = 0.966476738452911
+Parameter Data :
+0x00 ,	0xF7 ,	0x6B ,	0x05 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3A2_1
+Parameter Address = 132
+Parameter Value   = -0.770431160926819
+Parameter Data :
+0xFF ,	0x3A ,	0xC5 ,	0x06 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3A1_1
+Parameter Address = 133
+Parameter Value   = 1.59294235706329
+Parameter Data :
+0x01 ,	0x97 ,	0xCB ,	0x12 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3B2_2
+Parameter Address = 24620
+Parameter Value   = 0.918434679508209
+Parameter Data :
+0x00 ,	0xEB ,	0x1E ,	0x89 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3B1_2
+Parameter Address = 24621
+Parameter Value   = -1.87923544645309
+Parameter Data :
+0xFE ,	0x1E ,	0xEA ,	0x6D ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3B0_2
+Parameter Address = 24622
+Parameter Value   = 0.98834216594696
+Parameter Data :
+0x00 ,	0xFD ,	0x03 ,	0xFE ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3A2_2
+Parameter Address = 24623
+Parameter Value   = -0.90677684545517
+Parameter Data :
+0xFF ,	0x17 ,	0xDD ,	0x79 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3A1_2
+Parameter Address = 24624
+Parameter Value   = 1.87923544645309
+Parameter Data :
+0x01 ,	0xE1 ,	0x15 ,	0x93 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3B2_3
+Parameter Address = 134
+Parameter Value   = 0.965808808803558
+Parameter Data :
+0x00 ,	0xF7 ,	0x3F ,	0x3F ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3B1_3
+Parameter Address = 135
+Parameter Value   = -1.95360851287842
+Parameter Data :
+0xFE ,	0x0B ,	0xE0 ,	0x50 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3B0_3
+Parameter Address = 136
+Parameter Value   = 0.9951131939888
+Parameter Data :
+0x00 ,	0xFE ,	0xBF ,	0xBD ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3A2_3
+Parameter Address = 137
+Parameter Value   = -0.960922002792358
+Parameter Data :
+0xFF ,	0x0A ,	0x01 ,	0x04 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3A1_3
+Parameter Address = 138
+Parameter Value   = 1.95360851287842
+Parameter Data :
+0x01 ,	0xF4 ,	0x1F ,	0xB0 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3B2_4
+Parameter Address = 24625
+Parameter Value   = 0.26281750202179
+Parameter Data :
+0x00 ,	0x43 ,	0x48 ,	0x02 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3B1_4
+Parameter Address = 24626
+Parameter Value   = -0.680533289909363
+Parameter Data :
+0xFF ,	0x51 ,	0xC8 ,	0x92 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3B0_4
+Parameter Address = 24627
+Parameter Value   = 0.431209564208984
+Parameter Data :
+0x00 ,	0x6E ,	0x63 ,	0xC0 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3A2_4
+Parameter Address = 24628
+Parameter Value   = -0.733116626739502
+Parameter Data :
+0xFF ,	0x44 ,	0x52 ,	0x78 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3A1_4
+Parameter Address = 24629
+Parameter Value   = 1.71962285041809
+Parameter Data :
+0x01 ,	0xB8 ,	0x39 ,	0x34 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3B2_5
+Parameter Address = 139
+Parameter Value   = 0.990638792514801
+Parameter Data :
+0x00 ,	0xFD ,	0x9A ,	0x81 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3B1_5
+Parameter Address = 140
+Parameter Value   = -1.99256831407547
+Parameter Data :
+0xFE ,	0x01 ,	0xE7 ,	0x0B ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3B0_5
+Parameter Address = 141
+Parameter Value   = 1.00200843811035
+Parameter Data :
+0x01 ,	0x00 ,	0x83 ,	0xA0 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3A2_5
+Parameter Address = 142
+Parameter Value   = -0.992621421813965
+Parameter Data :
+0xFF ,	0x01 ,	0xE3 ,	0x90 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3A1_5
+Parameter Address = 143
+Parameter Value   = 1.99259412288666
+Parameter Data :
+0x01 ,	0xFE ,	0x1A ,	0xA6 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3B2_6
+Parameter Address = 24630
+Parameter Value   = 0.94395649433136
+Parameter Data :
+0x00 ,	0xF1 ,	0xA7 ,	0x22 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3B1_6
+Parameter Address = 24631
+Parameter Value   = -1.93427461385727
+Parameter Data :
+0xFE ,	0x10 ,	0xD3 ,	0x61 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3B0_6
+Parameter Address = 24632
+Parameter Value   = 1.00322258472443
+Parameter Data :
+0x01 ,	0x00 ,	0xD3 ,	0x32 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3A2_6
+Parameter Address = 24633
+Parameter Value   = -0.947179019451141
+Parameter Data :
+0xFF ,	0x0D ,	0x85 ,	0xAD ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Woofer filters
+Parameter Name    = General2ndOrderDPSigma300Alg3A1_6
+Parameter Address = 24634
+Parameter Value   = 1.93427461385727
+Parameter Data :
+0x01 ,	0xEF ,	0x2C ,	0x9F ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Phase matching
+Parameter Name    = EQGenFilterDPS300Alg1B2_1
+Parameter Address = 154
+Parameter Value   = 1
+Parameter Data :
+0x01 ,	0x00 ,	0x00 ,	0x00 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Phase matching
+Parameter Name    = EQGenFilterDPS300Alg1B1_1
+Parameter Address = 155
+Parameter Value   = -1.62802702188492
+Parameter Data :
+0xFE ,	0x5F ,	0x39 ,	0x9F ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Phase matching
+Parameter Name    = EQGenFilterDPS300Alg1B0_1
+Parameter Address = 156
+Parameter Value   = 0.674287736415863
+Parameter Data :
+0x00 ,	0xAC ,	0x9E ,	0x1F ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Phase matching
+Parameter Name    = EQGenFilterDPS300Alg1A2_1
+Parameter Address = 157
+Parameter Value   = -0.674287736415863
+Parameter Data :
+0xFF ,	0x53 ,	0x61 ,	0xE1 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Phase matching
+Parameter Name    = EQGenFilterDPS300Alg1A1_1
+Parameter Address = 158
+Parameter Value   = 1.62802702188492
+Parameter Data :
+0x01 ,	0xA0 ,	0xC6 ,	0x61 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B2_0
+Parameter Address = 109
+Parameter Value   = 0.0118576884269714
+Parameter Data :
+0x00 ,	0x03 ,	0x09 ,	0x1B ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B1_0
+Parameter Address = 110
+Parameter Value   = 0.0237153768539429
+Parameter Data :
+0x00 ,	0x06 ,	0x12 ,	0x36 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B0_0
+Parameter Address = 111
+Parameter Value   = 0.0118576884269714
+Parameter Data :
+0x00 ,	0x03 ,	0x09 ,	0x1B ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001A2_0
+Parameter Address = 112
+Parameter Value   = -0.716633856296539
+Parameter Data :
+0xFF ,	0x48 ,	0x8A ,	0xAF ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001A1_0
+Parameter Address = 113
+Parameter Value   = 1.6692031621933
+Parameter Data :
+0x01 ,	0xAB ,	0x50 ,	0xE6 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B2_1
+Parameter Address = 114
+Parameter Value   = 0.0118576884269714
+Parameter Data :
+0x00 ,	0x03 ,	0x09 ,	0x1B ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B1_1
+Parameter Address = 115
+Parameter Value   = 0.0237153768539429
+Parameter Data :
+0x00 ,	0x06 ,	0x12 ,	0x36 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B0_1
+Parameter Address = 116
+Parameter Value   = 0.0118576884269714
+Parameter Data :
+0x00 ,	0x03 ,	0x09 ,	0x1B ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001A2_1
+Parameter Address = 117
+Parameter Value   = -0.716633856296539
+Parameter Data :
+0xFF ,	0x48 ,	0x8A ,	0xAF ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001A1_1
+Parameter Address = 118
+Parameter Value   = 1.6692031621933
+Parameter Data :
+0x01 ,	0xAB ,	0x50 ,	0xE6 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B2_2
+Parameter Address = 24600
+Parameter Value   = 0.712206721305847
+Parameter Data :
+0x00 ,	0xB6 ,	0x53 ,	0x2E ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B1_2
+Parameter Address = 24601
+Parameter Value   = -1.42441338300705
+Parameter Data :
+0xFE ,	0x93 ,	0x59 ,	0xA5 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B0_2
+Parameter Address = 24602
+Parameter Value   = 0.712206721305847
+Parameter Data :
+0x00 ,	0xB6 ,	0x53 ,	0x2E ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001A2_2
+Parameter Address = 24603
+Parameter Value   = -0.716633856296539
+Parameter Data :
+0xFF ,	0x48 ,	0x8A ,	0xAF ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001A1_2
+Parameter Address = 24604
+Parameter Value   = 1.6692031621933
+Parameter Data :
+0x01 ,	0xAB ,	0x50 ,	0xE6 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B2_3
+Parameter Address = 24605
+Parameter Value   = 0.846459269523621
+Parameter Data :
+0x00 ,	0xD8 ,	0xB1 ,	0x8E ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B1_3
+Parameter Address = 24606
+Parameter Value   = -1.6929184794426
+Parameter Data :
+0xFE ,	0x4E ,	0x9C ,	0xE5 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B0_3
+Parameter Address = 24607
+Parameter Value   = 0.846459269523621
+Parameter Data :
+0x00 ,	0xD8 ,	0xB1 ,	0x8E ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001A2_3
+Parameter Address = 24608
+Parameter Value   = -0.716633856296539
+Parameter Data :
+0xFF ,	0x48 ,	0x8A ,	0xAF ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001A1_3
+Parameter Address = 24609
+Parameter Value   = 1.6692031621933
+Parameter Data :
+0x01 ,	0xAB ,	0x50 ,	0xE6 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001LowInvert
+Parameter Address = 280
+Parameter Value   = -1
+Parameter Data :
+0xFF, 0x00, 0x00, 0x00, 
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B2_0
+Parameter Address = 119
+Parameter Value   = 0.0118576884269714
+Parameter Data :
+0x00 ,	0x03 ,	0x09 ,	0x1B ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B1_0
+Parameter Address = 120
+Parameter Value   = 0.0237153768539429
+Parameter Data :
+0x00 ,	0x06 ,	0x12 ,	0x36 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B0_0
+Parameter Address = 121
+Parameter Value   = 0.0118576884269714
+Parameter Data :
+0x00 ,	0x03 ,	0x09 ,	0x1B ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002A2_0
+Parameter Address = 122
+Parameter Value   = -0.716633856296539
+Parameter Data :
+0xFF ,	0x48 ,	0x8A ,	0xAF ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002A1_0
+Parameter Address = 123
+Parameter Value   = 1.6692031621933
+Parameter Data :
+0x01 ,	0xAB ,	0x50 ,	0xE6 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B2_1
+Parameter Address = 124
+Parameter Value   = 0.0118576884269714
+Parameter Data :
+0x00 ,	0x03 ,	0x09 ,	0x1B ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B1_1
+Parameter Address = 125
+Parameter Value   = 0.0237153768539429
+Parameter Data :
+0x00 ,	0x06 ,	0x12 ,	0x36 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B0_1
+Parameter Address = 126
+Parameter Value   = 0.0118576884269714
+Parameter Data :
+0x00 ,	0x03 ,	0x09 ,	0x1B ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002A2_1
+Parameter Address = 127
+Parameter Value   = -0.716633856296539
+Parameter Data :
+0xFF ,	0x48 ,	0x8A ,	0xAF ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002A1_1
+Parameter Address = 128
+Parameter Value   = 1.6692031621933
+Parameter Data :
+0x01 ,	0xAB ,	0x50 ,	0xE6 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B2_2
+Parameter Address = 24610
+Parameter Value   = 0.712206721305847
+Parameter Data :
+0x00 ,	0xB6 ,	0x53 ,	0x2E ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B1_2
+Parameter Address = 24611
+Parameter Value   = -1.42441338300705
+Parameter Data :
+0xFE ,	0x93 ,	0x59 ,	0xA5 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B0_2
+Parameter Address = 24612
+Parameter Value   = 0.712206721305847
+Parameter Data :
+0x00 ,	0xB6 ,	0x53 ,	0x2E ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002A2_2
+Parameter Address = 24613
+Parameter Value   = -0.716633856296539
+Parameter Data :
+0xFF ,	0x48 ,	0x8A ,	0xAF ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002A1_2
+Parameter Address = 24614
+Parameter Value   = 1.6692031621933
+Parameter Data :
+0x01 ,	0xAB ,	0x50 ,	0xE6 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B2_3
+Parameter Address = 24615
+Parameter Value   = 0.846459269523621
+Parameter Data :
+0x00 ,	0xD8 ,	0xB1 ,	0x8E ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B1_3
+Parameter Address = 24616
+Parameter Value   = -1.6929184794426
+Parameter Data :
+0xFE ,	0x4E ,	0x9C ,	0xE5 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B0_3
+Parameter Address = 24617
+Parameter Value   = 0.846459269523621
+Parameter Data :
+0x00 ,	0xD8 ,	0xB1 ,	0x8E ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002A2_3
+Parameter Address = 24618
+Parameter Value   = -0.716633856296539
+Parameter Data :
+0xFF ,	0x48 ,	0x8A ,	0xAF ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002A1_3
+Parameter Address = 24619
+Parameter Value   = 1.6692031621933
+Parameter Data :
+0x01 ,	0xAB ,	0x50 ,	0xE6 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002LowInvert
+Parameter Address = 281
+Parameter Value   = -1
+Parameter Data :
+0xFF, 0x00, 0x00, 0x00, 
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B2_0
+Parameter Address = 109
+Parameter Value   = 0.0118576884269714
+Parameter Data :
+0x00 ,	0x03 ,	0x09 ,	0x1B ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B1_0
+Parameter Address = 110
+Parameter Value   = 0.0237153768539429
+Parameter Data :
+0x00 ,	0x06 ,	0x12 ,	0x36 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B0_0
+Parameter Address = 111
+Parameter Value   = 0.0118576884269714
+Parameter Data :
+0x00 ,	0x03 ,	0x09 ,	0x1B ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001A2_0
+Parameter Address = 112
+Parameter Value   = -0.716633856296539
+Parameter Data :
+0xFF ,	0x48 ,	0x8A ,	0xAF ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001A1_0
+Parameter Address = 113
+Parameter Value   = 1.6692031621933
+Parameter Data :
+0x01 ,	0xAB ,	0x50 ,	0xE6 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B2_1
+Parameter Address = 114
+Parameter Value   = 0.0118576884269714
+Parameter Data :
+0x00 ,	0x03 ,	0x09 ,	0x1B ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B1_1
+Parameter Address = 115
+Parameter Value   = 0.0237153768539429
+Parameter Data :
+0x00 ,	0x06 ,	0x12 ,	0x36 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B0_1
+Parameter Address = 116
+Parameter Value   = 0.0118576884269714
+Parameter Data :
+0x00 ,	0x03 ,	0x09 ,	0x1B ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001A2_1
+Parameter Address = 117
+Parameter Value   = -0.716633856296539
+Parameter Data :
+0xFF ,	0x48 ,	0x8A ,	0xAF ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001A1_1
+Parameter Address = 118
+Parameter Value   = 1.6692031621933
+Parameter Data :
+0x01 ,	0xAB ,	0x50 ,	0xE6 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B2_2
+Parameter Address = 24600
+Parameter Value   = 0.712206721305847
+Parameter Data :
+0x00 ,	0xB6 ,	0x53 ,	0x2E ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B1_2
+Parameter Address = 24601
+Parameter Value   = -1.42441338300705
+Parameter Data :
+0xFE ,	0x93 ,	0x59 ,	0xA5 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B0_2
+Parameter Address = 24602
+Parameter Value   = 0.712206721305847
+Parameter Data :
+0x00 ,	0xB6 ,	0x53 ,	0x2E ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001A2_2
+Parameter Address = 24603
+Parameter Value   = -0.716633856296539
+Parameter Data :
+0xFF ,	0x48 ,	0x8A ,	0xAF ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001A1_2
+Parameter Address = 24604
+Parameter Value   = 1.6692031621933
+Parameter Data :
+0x01 ,	0xAB ,	0x50 ,	0xE6 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B2_3
+Parameter Address = 24605
+Parameter Value   = 0.846459269523621
+Parameter Data :
+0x00 ,	0xD8 ,	0xB1 ,	0x8E ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B1_3
+Parameter Address = 24606
+Parameter Value   = -1.6929184794426
+Parameter Data :
+0xFE ,	0x4E ,	0x9C ,	0xE5 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001B0_3
+Parameter Address = 24607
+Parameter Value   = 0.846459269523621
+Parameter Data :
+0x00 ,	0xD8 ,	0xB1 ,	0x8E ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001A2_3
+Parameter Address = 24608
+Parameter Value   = -0.716633856296539
+Parameter Data :
+0xFF ,	0x48 ,	0x8A ,	0xAF ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001A1_3
+Parameter Address = 24609
+Parameter Value   = 1.6692031621933
+Parameter Data :
+0x01 ,	0xAB ,	0x50 ,	0xE6 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3001LowInvert
+Parameter Address = 280
+Parameter Value   = -1
+Parameter Data :
+0xFF, 0x00, 0x00, 0x00, 
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B2_0
+Parameter Address = 119
+Parameter Value   = 0.0118576884269714
+Parameter Data :
+0x00 ,	0x03 ,	0x09 ,	0x1B ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B1_0
+Parameter Address = 120
+Parameter Value   = 0.0237153768539429
+Parameter Data :
+0x00 ,	0x06 ,	0x12 ,	0x36 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B0_0
+Parameter Address = 121
+Parameter Value   = 0.0118576884269714
+Parameter Data :
+0x00 ,	0x03 ,	0x09 ,	0x1B ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002A2_0
+Parameter Address = 122
+Parameter Value   = -0.716633856296539
+Parameter Data :
+0xFF ,	0x48 ,	0x8A ,	0xAF ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002A1_0
+Parameter Address = 123
+Parameter Value   = 1.6692031621933
+Parameter Data :
+0x01 ,	0xAB ,	0x50 ,	0xE6 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B2_1
+Parameter Address = 124
+Parameter Value   = 0.0118576884269714
+Parameter Data :
+0x00 ,	0x03 ,	0x09 ,	0x1B ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B1_1
+Parameter Address = 125
+Parameter Value   = 0.0237153768539429
+Parameter Data :
+0x00 ,	0x06 ,	0x12 ,	0x36 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B0_1
+Parameter Address = 126
+Parameter Value   = 0.0118576884269714
+Parameter Data :
+0x00 ,	0x03 ,	0x09 ,	0x1B ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002A2_1
+Parameter Address = 127
+Parameter Value   = -0.716633856296539
+Parameter Data :
+0xFF ,	0x48 ,	0x8A ,	0xAF ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002A1_1
+Parameter Address = 128
+Parameter Value   = 1.6692031621933
+Parameter Data :
+0x01 ,	0xAB ,	0x50 ,	0xE6 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B2_2
+Parameter Address = 24610
+Parameter Value   = 0.712206721305847
+Parameter Data :
+0x00 ,	0xB6 ,	0x53 ,	0x2E ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B1_2
+Parameter Address = 24611
+Parameter Value   = -1.42441338300705
+Parameter Data :
+0xFE ,	0x93 ,	0x59 ,	0xA5 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B0_2
+Parameter Address = 24612
+Parameter Value   = 0.712206721305847
+Parameter Data :
+0x00 ,	0xB6 ,	0x53 ,	0x2E ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002A2_2
+Parameter Address = 24613
+Parameter Value   = -0.716633856296539
+Parameter Data :
+0xFF ,	0x48 ,	0x8A ,	0xAF ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002A1_2
+Parameter Address = 24614
+Parameter Value   = 1.6692031621933
+Parameter Data :
+0x01 ,	0xAB ,	0x50 ,	0xE6 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B2_3
+Parameter Address = 24615
+Parameter Value   = 0.846459269523621
+Parameter Data :
+0x00 ,	0xD8 ,	0xB1 ,	0x8E ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B1_3
+Parameter Address = 24616
+Parameter Value   = -1.6929184794426
+Parameter Data :
+0xFE ,	0x4E ,	0x9C ,	0xE5 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002B0_3
+Parameter Address = 24617
+Parameter Value   = 0.846459269523621
+Parameter Data :
+0x00 ,	0xD8 ,	0xB1 ,	0x8E ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002A2_3
+Parameter Address = 24618
+Parameter Value   = -0.716633856296539
+Parameter Data :
+0xFF ,	0x48 ,	0x8A ,	0xAF ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002A1_3
+Parameter Address = 24619
+Parameter Value   = 1.6692031621933
+Parameter Data :
+0x01 ,	0xAB ,	0x50 ,	0xE6 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Crossover
+Parameter Name    = CrossoverFilter2WayAlgDPS3002LowInvert
+Parameter Address = 281
+Parameter Value   = -1
+Parameter Data :
+0xFF, 0x00, 0x00, 0x00, 
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter filters
+Parameter Name    = General2ndOrderDPSigma300Alg1B2_1
+Parameter Address = 144
+Parameter Value   = 0.604029595851898
+Parameter Data :
+0x00 ,	0x9A ,	0xA1 ,	0xAF ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter filters
+Parameter Name    = General2ndOrderDPSigma300Alg1B1_1
+Parameter Address = 145
+Parameter Value   = 0
+Parameter Data :
+0x00 ,	0x00 ,	0x00 ,	0x00 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter filters
+Parameter Name    = General2ndOrderDPSigma300Alg1B0_1
+Parameter Address = 146
+Parameter Value   = 0.97723126411438
+Parameter Data :
+0x00 ,	0xFA ,	0x2B ,	0xD4 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter filters
+Parameter Name    = General2ndOrderDPSigma300Alg1A2_1
+Parameter Address = 147
+Parameter Value   = -0.581260859966278
+Parameter Data :
+0xFF ,	0x6B ,	0x32 ,	0x7D ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter filters
+Parameter Name    = General2ndOrderDPSigma300Alg1A1_1
+Parameter Address = 148
+Parameter Value   = 0
+Parameter Data :
+0x00 ,	0x00 ,	0x00 ,	0x00 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter filters
+Parameter Name    = General2ndOrderDPSigma300Alg1B2_2
+Parameter Address = 24635
+Parameter Value   = 0.646913051605225
+Parameter Data :
+0x00 ,	0xA5 ,	0x9C ,	0x18 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter filters
+Parameter Name    = General2ndOrderDPSigma300Alg1B1_2
+Parameter Address = 24636
+Parameter Value   = -0.889650642871857
+Parameter Data :
+0xFF ,	0x1C ,	0x3F ,	0xDB ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter filters
+Parameter Name    = General2ndOrderDPSigma300Alg1B0_2
+Parameter Address = 24637
+Parameter Value   = 1.02030289173126
+Parameter Data :
+0x01 ,	0x05 ,	0x32 ,	0x92 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter filters
+Parameter Name    = General2ndOrderDPSigma300Alg1A2_2
+Parameter Address = 24638
+Parameter Value   = -0.667215943336487
+Parameter Data :
+0xFF ,	0x55 ,	0x31 ,	0x56 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter filters
+Parameter Name    = General2ndOrderDPSigma300Alg1A1_2
+Parameter Address = 24639
+Parameter Value   = 0.889650642871857
+Parameter Data :
+0x00 ,	0xE3 ,	0xC0 ,	0x25 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter filters
+Parameter Name    = General2ndOrderDPSigma300Alg1B2_3
+Parameter Address = 149
+Parameter Value   = 0.118302881717682
+Parameter Data :
+0x00 ,	0x1E ,	0x49 ,	0x19 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter filters
+Parameter Name    = General2ndOrderDPSigma300Alg1B1_3
+Parameter Address = 150
+Parameter Value   = 0.997920155525208
+Parameter Data :
+0x00 ,	0xFF ,	0x77 ,	0xB2 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter filters
+Parameter Name    = General2ndOrderDPSigma300Alg1B0_3
+Parameter Address = 151
+Parameter Value   = 1.2929692864418
+Parameter Data :
+0x01 ,	0x4B ,	0x00 ,	0x09 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter filters
+Parameter Name    = General2ndOrderDPSigma300Alg1A2_3
+Parameter Address = 152
+Parameter Value   = -0.41127222776413
+Parameter Data :
+0xFF ,	0x96 ,	0xB6 ,	0xDD ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter filters
+Parameter Name    = General2ndOrderDPSigma300Alg1A1_3
+Parameter Address = 153
+Parameter Value   = -0.997920155525208
+Parameter Data :
+0xFF ,	0x00 ,	0x88 ,	0x4E ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter filters
+Parameter Name    = General2ndOrderDPSigma300Alg1B2_4
+Parameter Address = 24640
+Parameter Value   = 0.482777059078217
+Parameter Data :
+0x00 ,	0x7B ,	0x97 ,	0x47 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter filters
+Parameter Name    = General2ndOrderDPSigma300Alg1B1_4
+Parameter Address = 24641
+Parameter Value   = -1.20597779750824
+Parameter Data :
+0xFE ,	0xCB ,	0x45 ,	0x0A ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter filters
+Parameter Name    = General2ndOrderDPSigma300Alg1B0_4
+Parameter Address = 24642
+Parameter Value   = 0.753689110279083
+Parameter Data :
+0x00 ,	0xC0 ,	0xF1 ,	0xC5 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter filters
+Parameter Name    = General2ndOrderDPSigma300Alg1A2_4
+Parameter Address = 24643
+Parameter Value   = -0.2364661693573
+Parameter Data :
+0xFF ,	0xC3 ,	0x76 ,	0xF4 ,	
+
+
+
+Cell Name         = Loudspeaker EQ.Tweeter filters
+Parameter Name    = General2ndOrderDPSigma300Alg1A1_4
+Parameter Address = 24644
+Parameter Value   = 1.20597779750824
+Parameter Data :
+0x01 ,	0x34 ,	0xBA ,	0xF6 ,	
+
+
+
+Cell Name         = adjustable_volume_main
+Parameter Name    = SWGainADAU145XAlg2target
+Parameter Address = 272
+Parameter Value   = 0.316227793693542
+Parameter Data :
+0x00, 0x50, 0xF4, 0x4E, 
+
+
+
+Cell Name         = adjustable_volume_main
+Parameter Name    = SWGainADAU145XAlg2alpha
+Parameter Address = 256
+Parameter Data :
+0x00, 0xFF, 0xE4, 0xB3, 
+0x00, 0x00, 0x1B, 0x4D, 
+
+
+
+Cell Name         = Switch G0
+Parameter Name    = SwitchAlg145X1ison
+Parameter Address = 268
+Parameter Value   = 0
+Parameter Data :
+0x00, 0x00, 0x00, 0x00, 
+
+
+
+Cell Name         = Switch G1
+Parameter Name    = SwitchAlg145X2ison
+Parameter Address = 269
+Parameter Value   = 0
+Parameter Data :
+0x00, 0x00, 0x00, 0x00, 
+
+
+
+Cell Name         = safety_hash
+Parameter Name    = DCInpAlg145X7value
+Parameter Address = 270
+Parameter Value   = 1661147736
+Parameter Data :
+0x63, 0x03, 0x1A, 0x58, 
+
+
+
+Cell Name         = None - Framework
+Parameter Name    = __SafeLoad_Module__data_SafeLoad
+Parameter Address = 24576
+Parameter Data :
+0x00, 0x00, 0x00, 0x00, 
+0x00, 0x00, 0x00, 0x00, 
+0x00, 0x00, 0x00, 0x00, 
+0x00, 0x00, 0x00, 0x00, 
+0x00, 0x00, 0x00, 0x00, 
+
+
+
+Cell Name         = None - Framework
+Parameter Name    = __SafeLoad_Module__address_SafeLoad
+Parameter Address = 24581
+Parameter Value   = 0
+Parameter Data :
+0x00, 0x00, 0x00, 0x00, 
+
+
+
+Cell Name         = None - Framework
+Parameter Name    = __SafeLoad_Module__num_SafeLoad
+Parameter Address = 24582
+Parameter Value   = 0
+Parameter Data :
+0x00, 0x00, 0x00, 0x00, 
+
+
+
