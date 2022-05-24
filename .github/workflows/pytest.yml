@@ -1,6 +1,6 @@
 # This workflow will run pytest on this package.
 
-name: Upload Python Package
+name: Test Python package with pytest
 
 on:
   push
