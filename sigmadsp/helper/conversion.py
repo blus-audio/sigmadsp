@@ -18,10 +18,13 @@ def clamp(value: float, min_value: float, max_value: float) -> float:
     Returns:
         float: The clamped value.
     """
-    if value >= max_value:
+    if max_value < min_value:
+        raise ValueError("Invalid clamping interval [{min_value}, {max_value}].")
+
+    if value > max_value:
         value = max_value
 
-    elif value <= min_value:
+    elif value < min_value:
         value = min_value
 
     return value
