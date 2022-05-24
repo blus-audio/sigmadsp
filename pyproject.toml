@@ -22,9 +22,9 @@ PyYAML = "^6.0"
 spidev = "^3.5"
 grpcio = "^1.44.0"
 protobuf = "^3.20.1"
-"RPi.GPIO" = "^0.7.1"
 retry = "^0.9.2"
 smbus2 = "^0.4.1"
+gpiozero = "^1.6.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
