@@ -153,7 +153,8 @@ class Adau14xx(Dsp):
         """
         if count > len(Adau14xx.SAFELOAD_DATA_REGISTERS):
             raise IndexError(
-                f"Cannot write {count * 4} bytes by means of software safeload, the maximum is {len(Adau14xx.SAFELOAD_DATA_REGISTERS) * 4} bytes."
+                f"Cannot write {count * 4} bytes by means of software safeload, the maximum is "
+                f"{len(Adau14xx.SAFELOAD_DATA_REGISTERS) * 4} bytes."
             )
         for register_index, register_address in zip(range(count), Adau14xx.SAFELOAD_DATA_REGISTERS):
             data_buf = data[
