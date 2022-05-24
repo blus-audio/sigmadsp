@@ -9,5 +9,10 @@
         120
     ],
     "pre-commit-helper.runOnSaveRegex": "^(.*)\\.py$",
-    "pre-commit-helper.runOnSave": "all hooks",
+    "pre-commit-helper.runOnSave": "fixes",
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
 }
