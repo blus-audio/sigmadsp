@@ -31,6 +31,33 @@ class SigmaStudioRequestHandler(socketserver.BaseRequestHandler):
     server: ThreadedTCPServer
     dsp_type: str
 
+    def read(self, amount: int) -> bytearray:
+        """Reads the specified amount of data from the socket.
+
+        Args:
+            amount (int): The number of bytes to get.
+
+        Returns:
+            bytearray: The received data.
+        """
+        data = bytearray()
+
+        while amount > len(data):
+            # Wait until the complete TCP payload was received.
+            received = self.request.recv(amount - len(data))
+
+            if 0 == len(received):
+                # Give up, if no more data arrives.
+                # Close the socket.
+                self.request.shutdown(socket.SHUT_RDWR)
+                self.request.close()
+
+                raise ConnectionError
+
+            data.extend(received)
+
+        return data
+
     def handle_write_data(self, packet: SigmaProtocolPacket):
         """Handle requests, where SigmaStudio wants to write to the DSP.
 
@@ -78,7 +105,7 @@ class SigmaStudioRequestHandler(socketserver.BaseRequestHandler):
         while True:
             try:
                 packet: SigmaProtocolPacket = SigmaProtocolPacket(self.dsp_type)
-                packet.init_from_network(self.request)
+                packet.init_from_network(self)
 
                 if packet.header.is_write_request:
                     self.handle_write_data(packet)
