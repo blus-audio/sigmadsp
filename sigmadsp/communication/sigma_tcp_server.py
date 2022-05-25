@@ -3,21 +3,102 @@
 It can receive read/write requests and return with read response packets.
 """
 import logging
+import socket
 import socketserver
 import threading
 from multiprocessing import Pipe
 from typing import Type
 
-from sigmadsp.communication import tcpip1701, tcpipadau145x
 from sigmadsp.communication.base import (
     ReadRequest,
     SafeloadRequest,
     ThreadedTCPServer,
     WriteRequest,
 )
+from sigmadsp.communication.sigmastudio_protocols import (
+    SigmaProtocolHeader,
+    SigmaProtocolPacket,
+)
 
 # A logger for this module
 logger = logging.getLogger(__name__)
+
+
+class SigmaStudioRequestHandler(socketserver.BaseRequestHandler):
+    """Request handler for messages from SigmaStudio."""
+
+    request: socket.socket
+    server: ThreadedTCPServer
+    dsp_type: str
+
+    def handle_write_data(self, packet: SigmaProtocolPacket):
+        """Handle requests, where SigmaStudio wants to write to the DSP.
+
+        Args:
+            packet (SigmaProtocolPacket): The request packet object.
+        """
+        request: WriteRequest
+
+        if packet.header.is_safeload:
+            logger.info("[safeload] %s bytes to address 0x%04x", packet.header["data_length"], packet.header["address"])
+            request = SafeloadRequest(packet.header["address"], packet.payload)
+        else:
+            logger.info("[write] %s bytes to address 0x%04x", packet.header["data_length"], packet.header["address"])
+            request = WriteRequest(packet.header["address"], packet.payload)
+
+        self.server.pipe_end_owner.send(request)
+
+    def handle_read_request(self, packet: SigmaProtocolPacket):
+        """Handle requests, where SigmaStudio wants to read from the DSP.
+
+        Args:
+            packet (SigmaProtocolPacket): The request header object.
+        """
+        logger.info("[read] %s bytes from address 0x%04x", packet.header["data_length"], packet.header["address"])
+
+        # Notify application of read request
+        self.server.pipe_end_owner.send(ReadRequest(packet.header["address"], packet.header["data_length"]))
+
+        # Wait for payload data that goes into the read response
+        read_response = self.server.pipe_end_owner.recv()
+
+        header_defaults = packet.header.field_values
+
+        response_packet = SigmaProtocolPacket(self.dsp_type)
+        response_packet.init_from_payload(SigmaProtocolHeader.READ_RESPONSE, read_response.data, header_defaults)
+        response_packet.header["success"] = 0
+
+        self.request.sendall(response_packet.as_bytes)
+
+    def handle(self):
+        """Call, when the TCP server receives new data for handling.
+
+        It never stops, except if the connection is reset.
+        """
+        while True:
+            try:
+                packet: SigmaProtocolPacket = SigmaProtocolPacket(self.dsp_type)
+                packet.init_from_network(self.request)
+
+                if packet.header.is_write_request:
+                    self.handle_write_data(packet)
+                elif packet.header.is_read_request:
+                    self.handle_read_request(packet)
+
+            except ConnectionError:
+                break
+
+
+class Adau145xRequestHandler(SigmaStudioRequestHandler):
+    """ADAU144x/5x/6x request handler."""
+
+    dsp_type = "adau145x"
+
+
+class Adau1701RequestHandler(SigmaStudioRequestHandler):
+    """ADAU1701 request handler."""
+
+    dsp_type = "adau1701"
 
 
 class SigmaStudioInterface:
@@ -49,13 +130,13 @@ class SigmaStudioInterface:
 
     def tcp_server_worker(self):
         """The main worker for the TCP server."""
-        protocol_handler: Type[socketserver.BaseRequestHandler]
+        protocol_handler: Type[SigmaStudioRequestHandler]
 
-        if self.dsp_type == "adau145x":
-            protocol_handler = tcpipadau145x.SigmaStudioRequestHandler
+        if self.dsp_type in ["adau144x", "adau145x", "adau146x"]:
+            protocol_handler = Adau145xRequestHandler
 
         elif self.dsp_type == "adau1701":
-            protocol_handler = tcpip1701.SigmaStudioRequestHandler
+            protocol_handler = Adau1701RequestHandler
 
         else:
             raise TypeError(f"The specified DSP type {self.dsp_type} is not supported.")
