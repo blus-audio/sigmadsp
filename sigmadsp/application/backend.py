@@ -166,6 +166,8 @@ class BackendService(BackendServicer):
                 payload = self.dsp.read(request.address, request.length)
 
                 self.sigma_tcp_server.pipe_end_user.send(ReadResponse(payload))
+            else:
+                raise TypeError(f"Unknown command type {type(request)}.")
 
     def control_parameter(self, request: ControlParameterRequest, context):
         """Main backend entry point for control messages that change or read parameters.
