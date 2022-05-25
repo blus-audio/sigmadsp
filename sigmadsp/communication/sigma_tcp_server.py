@@ -3,8 +3,10 @@
 It can receive read/write requests and return with read response packets.
 """
 import logging
+import socketserver
 import threading
 from multiprocessing import Pipe
+from typing import Type
 
 from sigmadsp.communication import tcpip1701, tcpipadau145x
 from sigmadsp.communication.base import (
@@ -24,7 +26,7 @@ class SigmaStudioInterface:
     It creates a TCP server, which SigmaStudio talks to.
     """
 
-    def __init__(self, host: str, port: int, dsp_type: str = "adau14xx"):
+    def __init__(self, host: str, port: int, dsp_type: str):
         """Initialize the SigmaStudio interface.
 
         Starts the main TCP worker and initializes a pipe for communicating with the sigmadsp backend.
@@ -47,8 +49,7 @@ class SigmaStudioInterface:
 
     def tcp_server_worker(self):
         """The main worker for the TCP server."""
-        # default to ADAU145x
-        protocol_handler:
+        protocol_handler: Type[socketserver.BaseRequestHandler]
 
         if self.dsp_type == "adau145x":
             protocol_handler = tcpipadau145x.SigmaStudioRequestHandler

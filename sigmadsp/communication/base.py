@@ -12,12 +12,8 @@ class WriteRequest:
     data: bytes
 
 
-@dataclass(frozen=True)
-class SafeloadRequest:
-    """SigmaStudio requests to write data to the DSP."""
-
-    address: int
-    data: bytes
+class SafeloadRequest(WriteRequest):
+    """SigmaStudio requests to write data to the DSP using safeload."""
 
 
 @dataclass(frozen=True)
