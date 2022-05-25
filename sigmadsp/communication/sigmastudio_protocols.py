@@ -8,11 +8,14 @@ https://wiki.analog.com/resources/tools-software/sigmastudio/usingsigmastudio/tc
 Protocol headers for ADAU1401/1701 are documented on the Analog Devices forum at
 https://ez.analog.com/dsp/sigmadsp/f/q-a/163849/adau1401-adau1701-tcp-ip-documentation-unonficial-self-made
 """
-import socket
 from abc import ABC
-from typing import Dict, Tuple, Type, Union
+from typing import TYPE_CHECKING, Dict, Tuple, Type, Union
 
 from sigmadsp.helper.conversion import bytes_to_int, int_to_bytes
+
+if TYPE_CHECKING:
+    # avoid circular import
+    from sigmadsp.communication.sigma_tcp_server import SigmaStudioRequestHandler
 
 
 class SigmaProtocolHeader(ABC):
@@ -302,7 +305,7 @@ class SigmaProtocolPacket:
     header: SigmaProtocolHeader
     payload: bytearray
 
-    def __init__(self, dsp_type):
+    def __init__(self, dsp_type: str):
         """Initialize the packet.
 
         Args:
@@ -336,53 +339,25 @@ class SigmaProtocolPacket:
 
             self.header[field] = header_defaults.get(field, 0)
 
-    def init_from_network(self, connection: socket.socket):
-        """Fetch data from a socket.
+    def init_from_network(self, request_handler: "SigmaStudioRequestHandler"):
+        """Fetch data from the request handler.
 
         Args:
-            connection (socket): Socket to use.
+            request_handler (SigmaStudioRequestHandler): The request handler that deals with the network.
         """
         # first get the operation code
-        header_bytes: bytearray = self.read(connection, 1)
+        header_bytes: bytearray = request_handler.read(1)
 
         # get the appropriate header object
         self.header = _get_header(self.dsp_type, header_bytes[0])
 
         # finally, read the rest of the header and parse it
-        header_bytes.extend(self.read(connection, self.header.length - 1))
+        header_bytes.extend(request_handler.read(self.header.length - 1))
         self.header.parse(header_bytes)
 
         if self.header.is_write_request:
             # we have a payload
-            self.payload = self.read(connection, self.header["data_length"])
-
-    def read(self, connection: socket.socket, amount: int) -> bytearray:
-        """Reads the specified amount of data from the socket.
-
-        Args:
-            connection (socket.socket): Communication socket for fetching the header data / payload.
-            amount (int): The number of bytes to get.
-
-        Returns:
-            bytearray: The received data.
-        """
-        data = bytearray()
-
-        while amount > len(data):
-            # Wait until the complete TCP payload was received.
-            received = connection.recv(amount - len(data))
-
-            if 0 == len(received):
-                # Give up, if no more data arrives.
-                # Close the socket.
-                connection.shutdown(socket.SHUT_RDWR)
-                connection.close()
-
-                raise ConnectionError
-
-            data.extend(received)
-
-        return data
+            self.payload = request_handler.read(self.header["data_length"])
 
     @property
     def as_bytes(self) -> bytearray:
