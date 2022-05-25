@@ -159,7 +159,7 @@ class BackendService(BackendServicer):
             if isinstance(request, WriteRequest):
                 self.dsp.write(request.address, request.data)
 
-            if isinstance(request, SafeloadRequest):
+            elif isinstance(request, SafeloadRequest):
                 self.dsp.safeload(request.address, request.data)
 
             elif isinstance(request, ReadRequest):
