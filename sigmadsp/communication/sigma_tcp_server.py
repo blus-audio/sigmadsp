@@ -48,14 +48,14 @@ class SigmaStudioInterface:
     def tcp_server_worker(self):
         """The main worker for the TCP server."""
         # default to ADAU145x
-        protocol_handler: 
-        
+        protocol_handler:
+
         if self.dsp_type == "adau145x":
             protocol_handler = tcpipadau145x.SigmaStudioRequestHandler
 
         elif self.dsp_type == "adau1701":
             protocol_handler = tcpip1701.SigmaStudioRequestHandler
-        
+
         else:
             raise TypeError(f"The specified DSP type {self.dsp_type} is not supported.")
 
