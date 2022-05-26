@@ -89,7 +89,7 @@ class SigmaStudioRequestHandler(socketserver.BaseRequestHandler):
         # Wait for payload data that goes into the read response
         read_response = self.server.pipe_end_owner.recv()
 
-        header_defaults = packet.header.field_values
+        header_defaults = packet.header.fields
 
         response_packet = SigmaProtocolPacket(self.dsp_type)
         response_packet.init_from_payload(SigmaProtocolHeader.READ_RESPONSE, read_response.data, header_defaults)
