@@ -9,6 +9,7 @@ Protocol headers for ADAU1401/1701 are documented on the Analog Devices forum at
 https://ez.analog.com/dsp/sigmadsp/f/q-a/163849/adau1401-adau1701-tcp-ip-documentation-unonficial-self-made
 """
 from abc import ABC
+from collections import OrderedDict
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Dict, Iterator, List, Type, Union
 
@@ -46,6 +47,10 @@ class Field:
         # The last byte index that is occupied by this field.
         self.end = self.offset + self.size - 1
 
+    def __hash__(self) -> int:
+        """Hash functionality."""
+        return hash((self.name, self.offset, self.size))
+
 
 class Fields:
     """An iterable collection of Field objects."""
@@ -65,9 +70,10 @@ class Fields:
         Args:
             fields (List[Field]): The list of fields to add initially.
         """
-        self._fields: List[Field] = fields
-        self._check_for_overlaps()
-        self._sort_fields_by_offset()
+        self._fields: OrderedDict[str, Field] = OrderedDict()  # pylint: disable=E1136
+
+        for field in fields:
+            self.add_field(field)
 
     @property
     def size(self) -> int:
@@ -77,26 +83,13 @@ class Fields:
     @property
     def is_continuous(self) -> bool:
         """Whether or not there are spaces in the header that are not defined."""
-        for field, next_field in zip(self._fields, self._fields[1:]):
+        fields_entries = self.as_list()
+
+        for field, next_field in zip(fields_entries, fields_entries[1:]):
             if (field.end + 1) != next_field.offset:
                 return False
 
         return True
-
-    def has_field(self, name: str) -> bool:
-        """Check, if the object contains a field with a certain name.
-
-        Args:
-            name (str): The name to look for.
-
-        Returns:
-            bool: True, if the field exists, False otherwise.
-        """
-        for field in self:
-            if field.name == name:
-                return True
-
-        return False
 
     def _check_for_overlaps(self):
         """Check for overlapping fields.
@@ -104,14 +97,16 @@ class Fields:
         Raises:
             MemoryError: If overlapping fields are found.
         """
+        fields_entries = self.as_list()
+
         # Check for overlapping fields, which are sorted by their offset.
-        for field, next_field in zip(self._fields, self._fields[1:]):
+        for field, next_field in zip(fields_entries, fields_entries[1:]):
             if not field.end <= next_field.offset:
                 raise MemoryError("Fields {field.name} and {next_field.name} overlap.")
 
     def _sort_fields_by_offset(self):
         """Sorts the fields in this header by their offset."""
-        self._fields = sorted(self._fields, key=lambda field: field.offset)
+        self._fields = OrderedDict(sorted(self._fields.items(), key=lambda item: item[1].offset))
 
     def add_field(self, field: Field):
         """Add a new field. Duplicates are ignored.
@@ -120,9 +115,10 @@ class Fields:
             field (Field): The field to add.
         """
         if field not in self:
-            self._fields.append(field)
-            self._check_for_overlaps()
+            self._fields[field.name] = field
+
             self._sort_fields_by_offset()
+            self._check_for_overlaps()
 
     def as_bytes(self) -> bytes:
         """Get the full header as a bytes object."""
@@ -133,12 +129,21 @@ class Fields:
 
         return bytes(buffer)
 
+    def as_list(self) -> List[Field]:
+        """The fields as a list.
+
+        Returns:
+            List[Field]: The list of fields.
+        """
+        return list(self._fields.values())
+
     def __iter__(self) -> Iterator[Field]:
-        """The list iterator for fields."""
-        return iter(self._fields)
+        """The iterator for fields."""
+        for item in self._fields.values():
+            yield item
 
     def __getitem__(self, name: str) -> Field:
-        """Get a field by its name. Returns the first field that matches.
+        """Get a field by its name.
 
         Args:
             name (str): The name of the field.
@@ -149,11 +154,7 @@ class Fields:
         Raises:
             IndexError: If the field does not exist.
         """
-        for field in self:
-            if field.name == name:
-                return field
-
-        raise IndexError(f"No field {name} exists.")
+        return self._fields[name]
 
     def __contains__(self, name: str) -> bool:
         """Magic methods for using `in`.
@@ -164,7 +165,7 @@ class Fields:
         Returns:
             bool: True, if a field with the given name exists.
         """
-        return self[name] is not None
+        return name in self._fields
 
 
 class SigmaProtocolHeader(ABC):
@@ -473,7 +474,7 @@ class SigmaProtocolPacket:
             if field.name in ["operation", "total_length", "data_length", "success"]:
                 continue
 
-            if header_defaults.has_field(field.name):
+            if field.name in header_defaults:
                 self.header.fields[field.name].value = header_defaults[field.name].value
 
     def init_from_network(self, request_handler: "SigmaStudioRequestHandler"):
