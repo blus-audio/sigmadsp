@@ -83,6 +83,21 @@ class Fields:
 
         return True
 
+    def has_field(self, name: str) -> bool:
+        """Check, if the object contains a field with a certain name.
+
+        Args:
+            name (str): The name to look for.
+
+        Returns:
+            bool: True, if the field exists, False otherwise.
+        """
+        for field in self:
+            if field.name == name:
+                return True
+
+        return False
+
     def _check_for_overlaps(self):
         """Check for overlapping fields.
 
@@ -458,7 +473,8 @@ class SigmaProtocolPacket:
             if field.name in ["operation", "total_length", "data_length", "success"]:
                 continue
 
-            self.header.fields[field.name].value = header_defaults[field.name].value
+            if header_defaults.has_field(field.name):
+                self.header.fields[field.name].value = header_defaults[field.name].value
 
     def init_from_network(self, request_handler: "SigmaStudioRequestHandler"):
         """Fetch data from the request handler.
