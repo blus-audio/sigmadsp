@@ -26,3 +26,6 @@ def test_adau1701_write_header():
     assert header.is_write_request
     assert header.is_safeload
     assert header.as_bytes() == header_message
+
+    assert header.fields.has_field("operation")
+    assert not header.fields.has_field("not_in_there")
