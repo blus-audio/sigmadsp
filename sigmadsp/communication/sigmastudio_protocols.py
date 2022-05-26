@@ -9,13 +9,163 @@ Protocol headers for ADAU1401/1701 are documented on the Analog Devices forum at
 https://ez.analog.com/dsp/sigmadsp/f/q-a/163849/adau1401-adau1701-tcp-ip-documentation-unonficial-self-made
 """
 from abc import ABC
-from typing import TYPE_CHECKING, Dict, Tuple, Type, Union
+from collections import OrderedDict
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Dict, Iterator, List, Type, Union
 
 from sigmadsp.helper.conversion import bytes_to_int, int_to_bytes
 
 if TYPE_CHECKING:
     # avoid circular import
     from sigmadsp.communication.sigma_tcp_server import SigmaStudioRequestHandler
+
+
+@dataclass
+class Field:
+    """A class that represents a field in a protocol header."""
+
+    # The name of the field, e.g. "operation", "safeload", "channel".
+    name: str
+
+    # The offset of the field in bytes from the start of the header.
+    offset: int
+
+    # The size of the field in bytes.
+    size: int
+
+    # The stored value.
+    value: int = 0
+
+    def __post_init__(self):
+        """Perform sanity checks on the field properties."""
+        if self.size < 0:
+            raise ValueError("Field size must be a positive integer.")
+
+        if self.offset < 0:
+            raise ValueError("Field offset must be a positive integer.")
+
+        # The last byte index that is occupied by this field.
+        self.end = self.offset + self.size - 1
+
+    def __hash__(self) -> int:
+        """Hash functionality."""
+        return hash((self.name, self.offset, self.size))
+
+
+class Fields:
+    """An iterable collection of Field objects."""
+
+    def __init__(self, fields: List[Field]):
+        """Initialize the header fields. Add more fields to it by means of `add()`.
+
+        Instantiate via:
+        Fields(
+            [
+                Field("field_name", 0, 4),
+                Field("next_field_name", 4, 1),
+                # ...
+            ]
+        )
+
+        Args:
+            fields (List[Field]): The list of fields to add initially.
+        """
+        self._fields: OrderedDict[str, Field] = OrderedDict()  # pylint: disable=E1136
+
+        for field in fields:
+            self.add_field(field)
+
+    @property
+    def size(self) -> int:
+        """The total size of the header in bytes."""
+        return sum([field.size for field in self])
+
+    @property
+    def is_continuous(self) -> bool:
+        """Whether or not there are spaces in the header that are not defined."""
+        fields_entries = self.as_list()
+
+        for field, next_field in zip(fields_entries, fields_entries[1:]):
+            if (field.end + 1) != next_field.offset:
+                return False
+
+        return True
+
+    def _check_for_overlaps(self):
+        """Check for overlapping fields.
+
+        Raises:
+            MemoryError: If overlapping fields are found.
+        """
+        fields_entries = self.as_list()
+
+        # Check for overlapping fields, which are sorted by their offset.
+        for field, next_field in zip(fields_entries, fields_entries[1:]):
+            if not field.end <= next_field.offset:
+                raise MemoryError("Fields {field.name} and {next_field.name} overlap.")
+
+    def _sort_fields_by_offset(self):
+        """Sorts the fields in this header by their offset."""
+        self._fields = OrderedDict(sorted(self._fields.items(), key=lambda item: item[1].offset))
+
+    def add_field(self, field: Field):
+        """Add a new field. Duplicates are ignored.
+
+        Args:
+            field (Field): The field to add.
+        """
+        if field not in self:
+            self._fields[field.name] = field
+
+            self._sort_fields_by_offset()
+            self._check_for_overlaps()
+
+    def as_bytes(self) -> bytes:
+        """Get the full header as a bytes object."""
+        buffer = bytearray()
+
+        for field in self:
+            int_to_bytes(field.value, buffer, field.offset, field.size)
+
+        return bytes(buffer)
+
+    def as_list(self) -> List[Field]:
+        """The fields as a list.
+
+        Returns:
+            List[Field]: The list of fields.
+        """
+        return list(self._fields.values())
+
+    def __iter__(self) -> Iterator[Field]:
+        """The iterator for fields."""
+        for item in self._fields.values():
+            yield item
+
+    def __getitem__(self, name: str) -> Field:
+        """Get a field by its name.
+
+        Args:
+            name (str): The name of the field.
+
+        Returns:
+            Union[Field, None]: The field, or None, if no field was found.
+
+        Raises:
+            IndexError: If the field does not exist.
+        """
+        return self._fields[name]
+
+    def __contains__(self, name: str) -> bool:
+        """Magic methods for using `in`.
+
+        Args:
+            name (str): The name to look for in the fields.
+
+        Returns:
+            bool: True, if a field with the given name exists.
+        """
+        return name in self._fields
 
 
 class SigmaProtocolHeader(ABC):
@@ -25,38 +175,18 @@ class SigmaProtocolHeader(ABC):
     READ_RESPONSE: int = 0x0B
     WRITE: int = 0x09
 
-    # field configuration
-    fields: Dict[str, Tuple[int, int]]
-
-    # field values
-    field_values: Dict[str, int]
-
-    def __init__(self):
-        """Initialize field values."""
-        self.field_values = {}
-        for field in self.fields:
-            self.field_values[field] = 0
-
     @property
-    def length(self) -> int:
-        """Get the total header size.
-
-        Returns:
-            int: The header size.
-        """
-        if not hasattr(self, "__length"):
-            self.__length = sum([size for offset, size in self.fields.values()])
-
-        return self.__length
+    def fields(self) -> Fields:
+        """Fields of the header."""
 
     @property
     def has_payload(self) -> bool:
-        """Whether this kind of packet carryies a payload.
+        """Whether this kind of packet carries a payload.
 
         Returns:
             bool: True if this is a write / read response, False otherwise.
         """
-        return self.field_values["operation"] in [self.WRITE, self.READ_RESPONSE]
+        return self.fields["operation"].value in [self.WRITE, self.READ_RESPONSE]
 
     @property
     def is_write_request(self) -> bool:
@@ -65,7 +195,7 @@ class SigmaProtocolHeader(ABC):
         Returns:
             bool: True if this is a write.
         """
-        return self.field_values["operation"] == self.WRITE
+        return self.fields["operation"].value == self.WRITE
 
     @property
     def is_safeload(self) -> bool:
@@ -74,7 +204,7 @@ class SigmaProtocolHeader(ABC):
         Returns:
             bool: True if this is a safeload request.
         """
-        return self.field_values["operation"] == self.WRITE and self.field_values["safeload"] == 1
+        return self.fields["operation"].value == self.WRITE and self.fields["safeload"].value == 1
 
     @property
     def is_read_request(self) -> bool:
@@ -83,7 +213,7 @@ class SigmaProtocolHeader(ABC):
         Returns:
             bool: True if this is a read request.
         """
-        return self.field_values["operation"] == self.READ_REQUEST
+        return self.fields["operation"].value == self.READ_REQUEST
 
     @property
     def is_read_response(self) -> bool:
@@ -92,21 +222,15 @@ class SigmaProtocolHeader(ABC):
         Returns:
             bool: True if this is a read response.
         """
-        return self.field_values["operation"] == self.READ_RESPONSE
+        return self.fields["operation"].value == self.READ_RESPONSE
 
-    @property
-    def as_bytes(self) -> bytearray:
+    def as_bytes(self) -> bytes:
         """Return the bytes representation of the current header.
 
         Returns:
-            bytearray: the assembled header
+            bytes: the assembled header
         """
-        buffer = bytearray(self.length)
-
-        for name, (offset, size) in self.fields.items():
-            int_to_bytes(self.field_values[name], buffer, offset, size)
-
-        return buffer
+        return self.fields.as_bytes()
 
     def parse(self, data: bytes):
         """Parse a header and populate field values.
@@ -114,11 +238,11 @@ class SigmaProtocolHeader(ABC):
         Args:
             data (bytes): The data to parse.
         """
-        if len(data) != self.length:
-            raise ValueError(f"Input data needs to be exactly {self.length} bytes long!")
+        if len(data) != self.fields.size:
+            raise ValueError(f"Input data needs to be exactly {self.fields.size} bytes long!")
 
-        for name, (offset, size) in self.fields.items():
-            self.field_values[name] = bytes_to_int(data, offset, size)
+        for field in self.fields:
+            field.value = bytes_to_int(data, field.offset, field.size)
 
     def __setitem__(self, name: str, value: int):
         """Set a field value.
@@ -127,11 +251,12 @@ class SigmaProtocolHeader(ABC):
             name (str): Field name.
             value (int): Field value.
         """
-        valid_names = self.fields.keys()
+        valid_names = [field.name for field in self.fields]
+
         if name not in valid_names:
             raise ValueError(f"Invalid field name {name}; valid names are {', '.join(valid_names)}")
 
-        self.field_values[name] = value
+        self.fields[name].value = value
 
     def __getitem__(self, name: str) -> int:
         """Get a field value.
@@ -142,7 +267,7 @@ class SigmaProtocolHeader(ABC):
         Returns:
             int: The field value.
         """
-        return self.field_values[name]
+        return self.fields[name].value
 
 
 _REGISTRY: Dict[int, Dict[str, Type[SigmaProtocolHeader]]] = {}
@@ -190,15 +315,17 @@ class Adau1701WriteHeader(SigmaProtocolHeader):
     This is used for ADAU1701 and ADAU1401.
     """
 
-    fields = {
-        "operation": (0, 1),
-        "safeload": (1, 1),
-        "channel": (2, 1),
-        "total_length": (3, 2),
-        "chip_address": (5, 1),
-        "data_length": (6, 2),
-        "address": (8, 2),
-    }
+    fields = Fields(
+        [
+            Field("operation", 0, 1),
+            Field("safeload", 1, 1),
+            Field("channel", 2, 1),
+            Field("total_length", 3, 2),
+            Field("chip_address", 5, 1),
+            Field("data_length", 6, 2),
+            Field("address", 8, 2),
+        ]
+    )
 
 
 class Adau1701ReadRequestHeader(SigmaProtocolHeader):
@@ -207,13 +334,15 @@ class Adau1701ReadRequestHeader(SigmaProtocolHeader):
     This is used for ADAU1701 and ADAU1401 chips.
     """
 
-    fields = {
-        "operation": (0, 1),
-        "total_length": (1, 2),
-        "chip_address": (3, 1),
-        "data_length": (4, 2),
-        "address": (6, 2),
-    }
+    fields = Fields(
+        [
+            Field("operation", 0, 1),
+            Field("total_length", 1, 2),
+            Field("chip_address", 3, 1),
+            Field("data_length", 4, 2),
+            Field("address", 6, 2),
+        ]
+    )
 
 
 class Adau1701ReadResponseHeader(SigmaProtocolHeader):
@@ -222,11 +351,13 @@ class Adau1701ReadResponseHeader(SigmaProtocolHeader):
     This is used for ADAU1701 and ADAU1401.
     """
 
-    fields = {
-        "operation": (0, 1),
-        "total_length": (1, 2),
-        "success": (3, 1),
-    }
+    fields = Fields(
+        [
+            Field("operation", 0, 1),
+            Field("total_length", 1, 2),
+            Field("address", 3, 1),
+        ]
+    )
 
 
 _register(SigmaProtocolHeader.WRITE, "adau1701", Adau1701WriteHeader)
@@ -240,15 +371,17 @@ class Adau145xWriteHeader(SigmaProtocolHeader):
     This is presumably used for ADAU144x, ADAU145x and ADAU146x chips.
     """
 
-    fields = {
-        "operation": (0, 1),
-        "safeload": (1, 1),
-        "channel": (2, 1),
-        "total_length": (3, 4),
-        "chip_address": (7, 1),
-        "data_length": (8, 4),
-        "address": (12, 2),
-    }
+    fields = Fields(
+        [
+            Field("operation", 0, 1),
+            Field("safeload", 1, 1),
+            Field("channel", 2, 1),
+            Field("total_length", 3, 4),
+            Field("chip_address", 7, 1),
+            Field("data_length", 8, 4),
+            Field("address", 12, 2),
+        ]
+    )
 
 
 class Adau145xReadRequestHeader(SigmaProtocolHeader):
@@ -257,14 +390,16 @@ class Adau145xReadRequestHeader(SigmaProtocolHeader):
     This is presumably used for ADAU144x, ADAU145x and ADAU146x chips.
     """
 
-    fields = {
-        "operation": (0, 1),
-        "total_length": (1, 4),
-        "chip_address": (5, 1),
-        "data_length": (6, 4),
-        "address": (10, 2),
-        "reserved": (12, 2),
-    }
+    fields = Fields(
+        [
+            Field("operation", 0, 1),
+            Field("total_length", 1, 4),
+            Field("chip_address", 5, 1),
+            Field("data_length", 6, 4),
+            Field("address", 10, 2),
+            Field("reserved", 12, 2),
+        ]
+    )
 
 
 class Adau145xReadResponseHeader(SigmaProtocolHeader):
@@ -273,15 +408,17 @@ class Adau145xReadResponseHeader(SigmaProtocolHeader):
     This is presumably used for ADAU144x, ADAU145x and ADAU146x chips.
     """
 
-    fields = {
-        "operation": (0, 1),
-        "total_length": (1, 4),
-        "chip_address": (5, 1),
-        "data_length": (6, 4),
-        "address": (10, 2),
-        "success": (12, 1),
-        "reserved": (13, 1),
-    }
+    fields = Fields(
+        [
+            Field("operation", 0, 1),
+            Field("total_length", 1, 4),
+            Field("chip_address", 5, 1),
+            Field("data_length", 6, 4),
+            Field("address", 10, 2),
+            Field("success", 12, 1),
+            Field("reserved", 13, 1),
+        ]
+    )
 
 
 _register(SigmaProtocolHeader.WRITE, "adau144x", Adau145xWriteHeader)
@@ -313,18 +450,18 @@ class SigmaProtocolPacket:
         """
         self.dsp_type = dsp_type
 
-    def init_from_payload(self, operation: int, payload: bytearray, header_defaults: Union[dict, None] = None):
+    def init_from_payload(self, operation: int, payload: bytearray, header_defaults: Union[Fields, None] = None):
         """Initialize the packet with a new header and the provided payload.
 
         Args:
             operation (int): Operation code; most often SigmaStudioPacket.READ_RESPONSE
             payload (bytearray): Payload.
-            header_defaults (dict): Default values for header fields; useful when setting chip address, etc. from the
-                                    request headers
+            header_defaults (Union[Fields, None]): Default values for header fields; useful when setting chip address,
+                etc. from therequest headers
         """
         self.header = _get_header(self.dsp_type, operation)
         self.payload = payload
-        self.header["total_length"] = self.header.length + len(payload)
+        self.header["total_length"] = self.header.fields.size + len(payload)
 
         # adau145x and friends have some additional response fields
         if "data_length" in self.header.fields:
@@ -334,10 +471,11 @@ class SigmaProtocolPacket:
             return
 
         for field in self.header.fields:
-            if field in ["operation", "total_length", "data_length", "success"]:
+            if field.name in ["operation", "total_length", "data_length", "success"]:
                 continue
 
-            self.header[field] = header_defaults.get(field, 0)
+            if field.name in header_defaults:
+                self.header.fields[field.name].value = header_defaults[field.name].value
 
     def init_from_network(self, request_handler: "SigmaStudioRequestHandler"):
         """Fetch data from the request handler.
@@ -352,7 +490,7 @@ class SigmaProtocolPacket:
         self.header = _get_header(self.dsp_type, header_bytes[0])
 
         # finally, read the rest of the header and parse it
-        header_bytes.extend(request_handler.read(self.header.length - 1))
+        header_bytes.extend(request_handler.read(self.header.fields.size - 1))
         self.header.parse(header_bytes)
 
         if self.header.is_write_request:
@@ -360,14 +498,16 @@ class SigmaProtocolPacket:
             self.payload = request_handler.read(self.header["data_length"])
 
     @property
-    def as_bytes(self) -> bytearray:
-        """Return the whole packet as a bytearray, ready for sending over the network.
+    def as_bytes(self) -> bytes:
+        """Return the whole packet as bytes, ready for sending over the network.
 
         This also handles all of the math involved in setting up the header.
 
         Returns:
-            bytearray: header and payload combined
+            bytes: header and payload combined
         """
-        buffer = self.header.as_bytes
+        buffer = bytearray(self.header.as_bytes())
+
         buffer.extend(self.payload)
-        return buffer
+
+        return bytes(buffer)
