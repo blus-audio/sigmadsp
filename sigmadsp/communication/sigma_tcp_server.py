@@ -116,10 +116,10 @@ class SigmaStudioRequestHandler(socketserver.BaseRequestHandler):
                 break
 
 
-class Adau145xRequestHandler(SigmaStudioRequestHandler):
+class Adau14xxRequestHandler(SigmaStudioRequestHandler):
     """ADAU144x/5x/6x request handler."""
 
-    dsp_type = "adau145x"
+    dsp_type = "adau14xx"
 
 
 class Adau1701RequestHandler(SigmaStudioRequestHandler):
@@ -159,7 +159,7 @@ class SigmaStudioInterface:
         """The main worker for the TCP server."""
         protocol_handler: Type[SigmaStudioRequestHandler]
 
-        if self.dsp_type in ["adau144x", "adau145x", "adau146x"]:
+        if self.dsp_type == "adau14xx":
             protocol_handler = Adau145xRequestHandler
 
         elif self.dsp_type == "adau1701":
