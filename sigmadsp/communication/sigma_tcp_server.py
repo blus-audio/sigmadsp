@@ -160,7 +160,7 @@ class SigmaStudioInterface:
         protocol_handler: Type[SigmaStudioRequestHandler]
 
         if self.dsp_type == "adau14xx":
-            protocol_handler = Adau145xRequestHandler
+            protocol_handler = Adau14xxRequestHandler
 
         elif self.dsp_type == "adau1701":
             protocol_handler = Adau1701RequestHandler
