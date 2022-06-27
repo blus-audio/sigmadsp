@@ -1,14 +1,8 @@
-"""This module provides functionality for controlling SigmaDSP hardware, e.g.
-
-- Deploying programs
-- Changing parameter register contents
-- Reading parameter registers
-- Performing soft reset
-"""
+"""This module provides functionality for controlling SigmaDSP ADAU14xx hardware."""
 import logging
-from typing import Union
+from typing import Literal, Union
 
-from sigmadsp.hardware.dsp import Dsp
+from sigmadsp.dsp.common import Dsp
 from sigmadsp.helper.conversion import (
     bytes_to_int32,
     float_to_frac_8_24,
@@ -16,6 +10,7 @@ from sigmadsp.helper.conversion import (
     int16_to_bytes,
     int32_to_bytes,
 )
+from sigmadsp.sigmastudio.adau14xx import Adau14xxHeaderGenerator
 
 # A logger for this module
 logger = logging.getLogger(__name__)
@@ -37,6 +32,8 @@ class Adau14xx(Dsp):
     # All fixpoint (parameter) registers are four bytes long
     FIXPOINT_REGISTER_LENGTH = 4
 
+    header_generator = Adau14xxHeaderGenerator()
+
     def soft_reset(self):
         """Soft reset the DSP.
 
@@ -46,12 +43,12 @@ class Adau14xx(Dsp):
         self.write(Adau14xx.RESET_REGISTER, int16_to_bytes(1))
         logger.info("Soft-resetting the DSP.")
 
-    def get_parameter_value(self, address: int, data_format: str) -> Union[float, int, None]:
+    def get_parameter_value(self, address: int, data_format: Literal["int", "float"]) -> Union[float, int, None]:
         """Get a parameter value from a chosen register address.
 
         Args:
             address (int): The address to look at.
-            data_format (str): The data type to return the register in. Can be 'float' or 'int'.
+            data_format (Literal["int", "float"]): The data type to return the register in. Can be 'float' or 'int'.
 
         Returns:
             Union[float, int, None]: Representation of the register content in the specified format.

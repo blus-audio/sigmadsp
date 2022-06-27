@@ -17,13 +17,8 @@ import grpc
 from retry import retry
 
 import sigmadsp
-from sigmadsp.communication.base import (
-    ReadRequest,
-    ReadResponse,
-    SafeloadRequest,
-    WriteRequest,
-)
-from sigmadsp.communication.sigma_tcp_server import SigmaStudioInterface
+from sigmadsp.dsp.common import ConfigurationError, Dsp, SafetyCheckError
+from sigmadsp.dsp.factory import dsp_from_config
 from sigmadsp.generated.backend_service.control_pb2 import (
     ControlParameterRequest,
     ControlRequest,
@@ -33,10 +28,14 @@ from sigmadsp.generated.backend_service.control_pb2_grpc import (
     BackendServicer,
     add_BackendServicer_to_server,
 )
-from sigmadsp.hardware.adau14xx import Adau14xx
-from sigmadsp.hardware.adau1701 import Adau1701
-from sigmadsp.hardware.dsp import ConfigurationError, Dsp, SafetyCheckException
 from sigmadsp.helper.settings import SigmadspSettings
+from sigmadsp.sigmastudio.common import (
+    ReadRequest,
+    ReadResponse,
+    SafeloadRequest,
+    WriteRequest,
+)
+from sigmadsp.sigmastudio.server import SigmaStudioTcpServer
 
 # A logger for this module
 logger = logging.getLogger(__name__)
@@ -68,7 +67,7 @@ class BackendService(BackendServicer):
         dsp_protocol = config["dsp"].get("protocol", "spi")
 
         # Create a SigmaTCPServer, along with its various threads
-        self.sigma_tcp_server = SigmaStudioInterface(
+        self.sigma_tcp_server = SigmaStudioTcpServer(
             config["host"]["ip"],
             config["host"]["port"],
             dsp_type,
@@ -86,15 +85,7 @@ class BackendService(BackendServicer):
         logger.info("Specified DSP type is '%s', using the '%s' protocol.", dsp_type, dsp_protocol)
 
         try:
-            if dsp_type == "adau14xx":
-                self.dsp = Adau14xx(self.settings.config)
-
-            elif dsp_type == "adau1701":
-                self.dsp = Adau1701(self.settings.config)
-
-            else:
-                logger.error("DSP type '%s' is not known! Aborting.", dsp_type)
-                sys.exit(1)
+            self.dsp = dsp_from_config(self.settings.config)
 
         except ConfigurationError:
             logger.error("DSP configuration is broken! Aborting")
@@ -104,10 +95,10 @@ class BackendService(BackendServicer):
             logger.info("Run startup safety check.")
             self.startup_safety_check()
 
-        except SafetyCheckException:
+        except SafetyCheckError:
             logger.warning("Startup safety check failed.")
 
-    @retry(SafetyCheckException, 5, 5)
+    @retry(SafetyCheckError, 5, 5)
     def startup_safety_check(self) -> None:
         """Perform startup safety check, retrying a few times.
 
@@ -142,7 +133,7 @@ class BackendService(BackendServicer):
                     dsp_hash,
                 )
                 self.configuration_unlocked = False
-                raise SafetyCheckException
+                raise SafetyCheckError
 
             else:
                 logger.info("Safety check successful. Configuration unlocked.")
@@ -259,7 +250,7 @@ class BackendService(BackendServicer):
             try:
                 self.safety_check()
 
-            except SafetyCheckException:
+            except SafetyCheckError:
                 pass
 
             if self.configuration_unlocked:

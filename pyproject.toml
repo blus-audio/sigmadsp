@@ -28,6 +28,7 @@ gpiozero = "^1.6.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
+hypothesis = "^6.47.5"
 
 [tool.poetry-dynamic-versioning]
 enable = true

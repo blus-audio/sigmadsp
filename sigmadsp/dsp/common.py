@@ -3,25 +3,24 @@ import logging
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict, List, Type, Union
+from typing import List, Literal, Union
 
 import gpiozero
 
-from sigmadsp.hardware.base_protocol import BaseProtocol
-from sigmadsp.hardware.i2c import I2C
-from sigmadsp.hardware.spi import SPI
 from sigmadsp.helper.conversion import clamp, db_to_linear, linear_to_db
+from sigmadsp.protocols.factory import DspProtocol
+from sigmadsp.sigmastudio.headers.header import PacketHeaderGenerator
 
 # A logger for this module
 logger = logging.getLogger(__name__)
 
 
-class SafetyCheckException(Exception):
+class SafetyCheckError(Exception):
     """Custom exception for failed DSP safety checks."""
 
 
 class ConfigurationError(Exception):
-    """Custom exception for invalid DSP configuration."""
+    """Custom exception for an invalid DSP configuration."""
 
 
 @dataclass
@@ -61,77 +60,18 @@ class OutputPin(Pin):
         self.control = gpiozero.DigitalOutputDevice(self.number, self.active_high, self.initial_value)
 
 
+# see https://github.com/python/mypy/issues/5374
+@dataclass  # type: ignore
 class Dsp(ABC):
     """A generic DSP class, to be extended by child classes."""
 
-    protocol_handler: BaseProtocol
-    type: str
-    protocol: str
-    bus: int
-    address: int
+    dsp_protocol: DspProtocol
+    pins: List[Pin] = []
 
-    def __init__(self, config: dict):
-        """Initialize the DSP and set up the protocol handler that talks to it.
-
-        Args:
-            config (dict): Configuration settings, from the general configuration file.
-        """
-        self.config = config
-        self.pins: List[Pin] = []
-        self.parse_config()
-
-        protocol_handlers: Dict[str, Type[BaseProtocol]] = {
-            "i2c": I2C,
-            "spi": SPI,
-        }
-
-        try:
-            handler_class: Type[BaseProtocol] = protocol_handlers[self.protocol]
-            self.protocol_handler = handler_class(bus=self.bus, device=self.address)
-        except KeyError as e:
-            logger.error("Unknown protocol: %s", self.protocol)
-            raise ConfigurationError from e
-
-        self.hard_reset()
-
-    def parse_config(self):
-        """Parse the configuration file and extract relevant information."""
-        try:
-            for pin_definition_key in self.config["dsp"]["pins"]:
-                pin_definition = self.config["dsp"]["pins"][pin_definition_key]
-
-                if pin_definition["mode"] == "output":
-                    output_pin = OutputPin(
-                        pin_definition_key,
-                        pin_definition["number"],
-                        pin_definition["initial_state"],
-                        pin_definition["active_high"],
-                    )
-
-                    self.add_pin(output_pin)
-
-                elif pin_definition["mode"] == "input":
-                    input_pin = InputPin(
-                        pin_definition_key,
-                        pin_definition["number"],
-                        pin_definition["pull_up"],
-                        pin_definition["active_state"],
-                        pin_definition["bounce_time"],
-                    )
-
-                    self.add_pin(input_pin)
-
-        except (KeyError, TypeError):
-            logger.info("No DSP pin definitions were found in the configuration file.")
-
-        try:
-            self.type = self.config["dsp"]["type"]
-            self.protocol = self.config["dsp"]["protocol"]
-            self.bus = self.config["dsp"]["bus_number"]
-            self.address = self.config["dsp"]["device_address"]
-        except KeyError as e:
-            logger.error("Key %s missing from the DSP configuration.", e.args[0])
-            raise ConfigurationError from e
+    @abstractmethod
+    @property
+    def header_generator(self) -> PacketHeaderGenerator:
+        """The packet header generator of the DSP."""
 
     def get_pin_by_name(self, name: str) -> Union[Pin, None]:
         """Get a pin by its name.
@@ -205,7 +145,7 @@ class Dsp(ABC):
             address (int): Address to write to
             data (bytes): Data to write
         """
-        self.protocol_handler.write(address, data)
+        self.dsp_protocol.write(address, data)
 
     def read(self, address: int, length: int) -> bytes:
         """Write data to the DSP using the configured communication handler.
@@ -214,7 +154,7 @@ class Dsp(ABC):
             address (int): Address to write to
             length (int): Number of bytes to read
         """
-        return self.protocol_handler.read(address, length)
+        return self.dsp_protocol.read(address, length)
 
     def set_volume(self, value_db: float, address: int) -> float:
         """Set the volume register at the given address to a certain value in dB.
@@ -296,14 +236,14 @@ class Dsp(ABC):
         """
 
     @abstractmethod
-    def get_parameter_value(self, address: int, data_format: str) -> Union[float, int, None]:
+    def get_parameter_value(self, address: int, data_format: Literal["int", "float"]) -> Union[float, int, None]:
         """Get a parameter value from a chosen register address.
 
         This is an abstract method because number formats are chip-specific.
 
         Args:
             address (int): The address to look at.
-            data_format (str): The data type to return the register in. Can be 'float' or 'int'.
+            data_format (Literal["int", "float"]): The data type to return the register in. Can be 'float' or 'int'.
 
         Returns:
             Union[float, int, None]: Representation of the register content in the specified format.

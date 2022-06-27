@@ -1,5 +1,5 @@
 """Tests for the communication.sigmastudio_protocols module."""
-from sigmadsp.communication.sigmastudio_protocols import Adau1701WriteHeader
+from sigmadsp.sigmastudio.protocol import Adau1701WriteHeader
 
 
 def test_adau1701_write_header():

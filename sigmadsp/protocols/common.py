@@ -8,18 +8,11 @@ from multiprocessing import Pipe
 logger = logging.getLogger(__name__)
 
 
-class BaseProtocol(ABC):
+class DspProtocol(ABC):
     """Base class for communication handlers talking to SigmaDSP chipsets."""
 
-    def __init__(self, bus: int = 0, device: int = 0):
-        """Initialize the communications thread.
-
-        Args:
-            bus (int, optional): Bus number. Defaults to 0.
-            device (int, optional): Device number / address. Defaults to 0
-        """
-        self._initialize(bus, device)
-
+    def run(self):
+        """Start the DSP protocol thread."""
         # Generate a Pipe, for communicating with the protocol handler thread within this class.
         self.pipe_end_owner, self.pipe_end_user = Pipe()
 
@@ -69,15 +62,6 @@ class BaseProtocol(ABC):
                 address, length = self.pipe_end_user.recv()
                 data = self._read(address, length)
                 self.pipe_end_user.send(data)
-
-    @abstractmethod
-    def _initialize(self, bus: int = 0, device: int = 0):
-        """Initialize the hardware.
-
-        Args:
-            bus (int, optional): Bus number. Defaults to 0.
-            device (int, optional): Device number / address. Defaults to 0
-        """
 
     @abstractmethod
     def _read(self, address: int, length: int) -> bytes:
