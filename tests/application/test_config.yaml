@@ -1,0 +1,15 @@
+host:
+  ip: "localhost"
+  port: 12345
+
+backend:
+  port: 50051
+
+parameters:
+  path: "tests/helper/test_parameter_file.params"
+
+dsp:
+  type: "adau14xx"
+  protocol: "dummy"
+  bus_number: "0"
+  device_address: "0"
