@@ -97,6 +97,9 @@ class BackendService(BackendServicer):
 
     def startup_worker(self):
         """A thread that performs a startup check and then starts the rest of the threads."""
+        # Reset the DSP first.
+        self.dsp.hard_reset()
+
         try:
             logger.info("Run startup safety check.")
             self.retry_safety_check()
