@@ -13,8 +13,8 @@ classifiers = [
 ]
 
 [tool.poetry.scripts]
-sigmadsp-backend = "sigmadsp.application.backend:main"
-sigmadsp = "sigmadsp.application.frontend:main"
+sigmadsp-backend = "sigmadsp.backend:main"
+sigmadsp = "sigmadsp.frontend:main"
 
 [tool.poetry.dependencies]
 python = "^3.7"
