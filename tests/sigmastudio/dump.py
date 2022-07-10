@@ -2,7 +2,7 @@
 import pickle
 import threading
 from multiprocessing import Queue
-from typing import Union
+from typing import Type, Union
 
 from sigmadsp.sigmastudio.adau14xx import Adau14xxHeaderGenerator
 from sigmadsp.sigmastudio.common import CONNECTION_CLOSED
@@ -36,7 +36,7 @@ def dump_sigma_studio(raw: bool, output_path: str = ""):
     receive_queue: Queue = Queue()
     send_queue: Queue = Queue()
 
-    request_handler_type: Union[SigmaStudioRawRequestHandler, SigmaStudioRequestHandler]
+    request_handler_type: Union[Type[SigmaStudioRawRequestHandler], Type[SigmaStudioRequestHandler]]
     if raw:
         request_handler_type = SigmaStudioRawRequestHandler
 
