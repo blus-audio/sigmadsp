@@ -103,7 +103,4 @@ def dsp_from_config(config: Dict) -> Dsp:
     except (KeyError, TypeError):
         logger.info("No DSP pin definitions were found in the configuration file.")
 
-    else:
-        dsp.hard_reset()
-
     return dsp

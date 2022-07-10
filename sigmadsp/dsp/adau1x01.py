@@ -53,7 +53,7 @@ class Adau1x01(Dsp):
 
         Not available on ADAU1x01
         """
-        logger.info("Soft-resetting the DSP is not available on ADAU1x01")
+        logger.info("Soft-reset is not available on ADAU1x01")
 
     def safeload(self, address: int, data: bytes):
         """Write data to the chip using hardware safeload.

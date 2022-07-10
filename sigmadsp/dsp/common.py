@@ -150,16 +150,18 @@ class Dsp(ABC):
         """
         pin = self.get_pin_by_name("reset")
 
-        if not pin:
-            logger.info("Falling back to soft-resetting the DSP, no hard-reset pin is defined.")
-            self.soft_reset()
-            return
+        if pin:
+            logger.info("Hard-resetting the DSP.")
 
-        logger.info("Hard-resetting the DSP.")
+            pin.control.on()
+            time.sleep(delay)
+            pin.control.off()
 
-        pin.control.on()
-        time.sleep(delay)
-        pin.control.off()
+        else:
+            logger.warning("No hard-reset pin is defined, not resetting.")
+
+        # Soft-reset in the end, for flushing registers.
+        self.soft_reset()
 
     def write(self, address: int, data: bytes):
         """Write data to the DSP using the configured communication handler.
