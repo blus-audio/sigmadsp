@@ -99,7 +99,7 @@ class BackendService(BackendServicer):
         """A thread that performs a startup check and then starts the rest of the threads."""
         try:
             logger.info("Run startup safety check.")
-            self.safety_check()
+            self.retry_safety_check()
 
         except SafetyCheckError:
             logger.warning("Startup safety check failed.")
@@ -128,7 +128,15 @@ class BackendService(BackendServicer):
         )
         self.sigma_studio_worker_thread.start()
 
-    @retry(SafetyCheckError, 5, 5)
+    def trigger_retry_safety_check(self):
+        """Runs the safety check in a new thread."""
+        safety_check_thread = threading.Thread(target=self.retry_safety_check, daemon=True)
+        safety_check_thread.start()
+
+    def retry_safety_check(self) -> None:
+        """The ``safety_check``, but with retries."""
+        retry(SafetyCheckError, 5, 5)(self.safety_check)
+
     def safety_check(self) -> None:
         """Check a hash cell within the DSP's memory against a hash value from the parameter file.
 
@@ -238,12 +246,12 @@ class BackendService(BackendServicer):
         response.success = False
 
         if not self.settings.parameter_parser:
-            response.message = "No parameters loaded, parameters cannot be changed."
+            response.message = "No parameters were loaded, parameters cannot be changed."
             return response
 
         if not self.configuration_unlocked:
             # Do not allow to change parameters.
-            response.message = "Configuration locked, parameters cannot be changed."
+            response.message = "Configuration is currently locked, parameters cannot be changed."
             return response
 
         if "change_volume" == command:
@@ -293,14 +301,14 @@ class BackendService(BackendServicer):
 
         if "reset_dsp" == command:
             self.dsp.soft_reset()
-            self.safety_check()
+            self.trigger_retry_safety_check()
 
             response.message = "Soft-reset DSP."
             response.success = True
 
         elif "hard_reset_dsp" == command:
             self.dsp.hard_reset()
-            self.safety_check()
+            self.trigger_retry_safety_check()
 
             response.message = "Hard-reset DSP."
             response.success = True
