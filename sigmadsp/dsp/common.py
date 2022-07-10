@@ -2,17 +2,26 @@
 import logging
 import time
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from math import nan
 from typing import List, Literal, Union
 
 import gpiozero
 
-from sigmadsp.helper.conversion import clamp, db_to_linear, linear_to_db
-from sigmadsp.protocols.factory import DspProtocol
-from sigmadsp.sigmastudio.headers.header import PacketHeaderGenerator
+from sigmadsp.helper.conversion import (
+    bytes_to_int32,
+    clamp,
+    db_to_linear,
+    int32_to_bytes,
+    linear_to_db,
+)
+from sigmadsp.protocols.common import DspProtocol
+from sigmadsp.sigmastudio.header import PacketHeaderGenerator
 
 # A logger for this module
 logger = logging.getLogger(__name__)
+
+ParameterType = Literal["float", "int"]
 
 
 class SafetyCheckError(Exception):
@@ -65,13 +74,27 @@ class OutputPin(Pin):
 class Dsp(ABC):
     """A generic DSP class, to be extended by child classes."""
 
+    use_safeload: bool
     dsp_protocol: DspProtocol
-    pins: List[Pin] = []
+    pins: List[Pin] = field(default_factory=list)
 
-    @abstractmethod
+    # All fixpoint (parameter) registers are four bytes long
+    FIXPOINT_REGISTER_LENGTH = 4
+
     @property
+    @abstractmethod
     def header_generator(self) -> PacketHeaderGenerator:
         """The packet header generator of the DSP."""
+
+    @staticmethod
+    @abstractmethod
+    def float_to_frac(value: float) -> int:
+        """The method that converts floating-point values to fractional integers on this Dsp."""
+
+    @staticmethod
+    @abstractmethod
+    def frac_to_float(value: int) -> float:
+        """The method that converts fractional integers to floating-point values on this Dsp."""
 
     def get_pin_by_name(self, name: str) -> Union[Pin, None]:
         """Get a pin by its name.
@@ -145,6 +168,8 @@ class Dsp(ABC):
             address (int): Address to write to
             data (bytes): Data to write
         """
+        assert address >= 0
+
         self.dsp_protocol.write(address, data)
 
     def read(self, address: int, length: int) -> bytes:
@@ -154,29 +179,64 @@ class Dsp(ABC):
             address (int): Address to write to
             length (int): Number of bytes to read
         """
+        assert address >= 0
+        assert length > 0
+
         return self.dsp_protocol.read(address, length)
 
-    def set_volume(self, value_db: float, address: int) -> float:
+    def set_volume(self, volume_db: float, address: int, relative: bool = False) -> float:
         """Set the volume register at the given address to a certain value in dB.
 
         Args:
-            value_db (float): The volume setting in dB
+            volume_db (float): The volume setting in dB
             address (int): The volume adjustment register address
+            relative (bool): If True, the current DSP register value is changed by ``volume_db``. If False, it is set.
 
         Returns:
             float: The new volume in dB.
         """
-        # Read current volume and apply adjustment
-        value_linear = db_to_linear(value_db)
+        # Read current volume first
+        current_volume_linear = self.get_parameter_value(address, data_format="float")
 
-        # Clamp set volume to safe levels
-        clamp(value_linear, 0, 1)
+        if not isinstance(current_volume_linear, float):
+            raise TypeError(f"Current volume readout has incorrect type {type(current_volume_linear)}.")
 
-        self.set_parameter_value(value_linear, address)
+        current_volume_db = linear_to_db(current_volume_linear)
 
-        logger.info("Set volume to %.2f dB.", linear_to_db(value_linear))
+        if volume_db is nan:
+            logger.info("Volume value is nan.")
+            return current_volume_db
 
-        return linear_to_db(value_linear)
+        if relative:
+            new_volume_value_db = volume_db + current_volume_db
+
+        else:
+            new_volume_value_db = volume_db
+
+        try:
+            # Clamp set volume to safe levels
+            new_volume_value_linear = clamp(db_to_linear(new_volume_value_db), 0, 1)
+
+        except OverflowError:
+            logger.info("Volume adjustment was too large, ignoring.")
+            return current_volume_db
+
+        try:
+            self.set_parameter_value(new_volume_value_linear, address, data_format="float")
+
+        except ValueError:
+            # Parameter conversion failed.
+            return current_volume_db
+
+        logger.info("Set volume to %.2f dB.", linear_to_db(new_volume_value_linear))
+
+        # Read back current volume and verify.
+        new_volume_value_linear_from_dsp = self.get_parameter_value(address, data_format="float")
+
+        if not isinstance(new_volume_value_linear_from_dsp, float):
+            raise TypeError(f"New volume readout has incorrect type {type(new_volume_value_linear_from_dsp)}.")
+
+        return linear_to_db(new_volume_value_linear_from_dsp)
 
     def adjust_volume(self, adjustment_db: float, address: int) -> float:
         """Adjust the volume register at the given address by a certain value in dB.
@@ -188,63 +248,62 @@ class Dsp(ABC):
         Returns:
             float: The new volume in dB.
         """
-        # Read current volume and apply adjustment
-        current_volume = self.get_parameter_value(address, data_format="float")
-
-        if not isinstance(current_volume, float):
-            raise TypeError
-
-        linear_adjustment = db_to_linear(adjustment_db)
-        new_volume = current_volume * linear_adjustment
-
-        # Clamp new volume to safe levels
-        clamp(new_volume, 0, 1)
-
-        self.set_parameter_value(new_volume, address)
-
-        logger.info(
-            "Adjusted volume from %.2f dB to %.2f dB.",
-            linear_to_db(current_volume),
-            linear_to_db(new_volume),
-        )
-
-        return linear_to_db(new_volume)
+        return self.set_volume(adjustment_db, address, relative=True)
 
     @abstractmethod
     def soft_reset(self):
         """Soft reset the DSP."""
 
     @abstractmethod
-    def safeload(self, address: int, data: bytes, count: int):
+    def safeload(self, address: int, data: bytes):
         """Write data to the chip using chip-specific safeload.
 
         Args:
             address (int): Address to write to
             data (bytes): Data to write
-            count (int): Number of 4 byte words to write (max. 5)
         """
 
-    @abstractmethod
-    def set_parameter_value(self, value: Union[float, int], address: int) -> None:
-        """Set a parameter value for a chosen register address.
-
-        This is an abstract method because number formats are chip-specific.
+    def set_parameter_value(self, value: Union[float, int], address: int, data_format: ParameterType) -> None:
+        """Set a parameter value for a chosen register address. Registers are 32 bits wide.
 
         Args:
             value (float): The value to store in the register
             address (int): The target address
+            data_format (PARAMETER_TYPE): The data type of value. Can be ``float`` or ``int``.
         """
+        data_register: Union[bytes, None] = None
 
-    @abstractmethod
+        if data_format == "float":
+            data_register = int32_to_bytes(self.float_to_frac(value))
+
+        elif data_format == "int":
+            data_register = int32_to_bytes(value)
+
+        if data_register is not None:
+            if self.use_safeload:
+                self.safeload(address, data_register)
+
+            else:
+                self.write(address, data_register)
+
     def get_parameter_value(self, address: int, data_format: Literal["int", "float"]) -> Union[float, int, None]:
         """Get a parameter value from a chosen register address.
 
-        This is an abstract method because number formats are chip-specific.
-
         Args:
             address (int): The address to look at.
-            data_format (Literal["int", "float"]): The data type to return the register in. Can be 'float' or 'int'.
+            data_format (Literal["int", "float"]): The data type to return the register in. Can be ``float`` or ``int``.
 
         Returns:
             Union[float, int, None]: Representation of the register content in the specified format.
         """
+        data_register = self.read(address, Dsp.FIXPOINT_REGISTER_LENGTH)
+        data_integer = bytes_to_int32(data_register)
+
+        if "int" == data_format:
+            return data_integer
+
+        elif "float" == data_format:
+            return self.frac_to_float(data_integer)
+
+        else:
+            return None

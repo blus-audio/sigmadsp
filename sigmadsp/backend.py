@@ -12,6 +12,7 @@ import sys
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
+from multiprocessing import Queue
 
 import grpc
 from retry import retry
@@ -30,12 +31,13 @@ from sigmadsp.generated.backend_service.control_pb2_grpc import (
 )
 from sigmadsp.helper.settings import SigmadspSettings
 from sigmadsp.sigmastudio.common import (
+    CONNECTION_CLOSED,
     ReadRequest,
     ReadResponse,
     SafeloadRequest,
     WriteRequest,
 )
-from sigmadsp.sigmastudio.server import SigmaStudioTcpServer
+from sigmadsp.sigmastudio.server import SigmaStudioRequestHandler, SigmaStudioTcpServer
 
 # A logger for this module
 logger = logging.getLogger(__name__)
@@ -48,6 +50,8 @@ class BackendService(BackendServicer):
     """
 
     dsp: Dsp
+    send_queue: Queue
+    receive_queue: Queue
 
     def __init__(self, settings: SigmadspSettings):
         """Initialize service and start all relevant threads (TCP, SPI).
@@ -57,46 +61,69 @@ class BackendService(BackendServicer):
         """
         super().__init__()
 
+        self._active = True
+
+        self.send_queue = Queue()
+        self.receive_queue = Queue()
+
         # If configuration_unlocked is False, no DSP parameters can be changed.
         self.configuration_unlocked: bool = False
 
         self.settings = settings
-
-        config = self.settings.config
-        dsp_type = config["dsp"]["type"]
-        dsp_protocol = config["dsp"].get("protocol", "spi")
-
-        # Create a SigmaTCPServer, along with its various threads
-        self.sigma_tcp_server = SigmaStudioTcpServer(
-            config["host"]["ip"],
-            config["host"]["port"],
-            dsp_type,
-        )
-        logger.info("Sigma TCP server started on [%s]:%d.", config["host"]["ip"], config["host"]["port"])
+        self.config = self.settings.config
 
         # Create a scheduler for recurring tasks
         self.scheduler = sched.scheduler(time.time, time.sleep)
 
-        # Create the worker thread for the handler itself
-        worker_thread = threading.Thread(target=self.worker, name="Backend service worker thread")
-        worker_thread.daemon = True
-        worker_thread.start()
-
-        logger.info("Specified DSP type is '%s', using the '%s' protocol.", dsp_type, dsp_protocol)
-
         try:
-            self.dsp = dsp_from_config(self.settings.config)
+            self.dsp = dsp_from_config(self.config)
 
         except ConfigurationError:
             logger.error("DSP configuration is broken! Aborting")
             sys.exit(1)
 
+        logger.info(
+            "Specified DSP type is '%s', using the '%s' protocol.",
+            type(self.dsp).__name__,
+            type(self.dsp.dsp_protocol).__name__,
+        )
+
+        # Create the startup thread
+        startup_worker_thread = threading.Thread(target=self.startup_worker, name="Startup worker", daemon=True)
+        startup_worker_thread.start()
+
+    def startup_worker(self):
+        """A thread that performs a startup check and then starts the rest of the threads."""
         try:
             logger.info("Run startup safety check.")
             self.startup_safety_check()
 
         except SafetyCheckError:
             logger.warning("Startup safety check failed.")
+
+        logger.info("Startup finished.")
+
+        # Create a SigmaTCPServer and run it.
+        self.sigma_tcp_server = SigmaStudioTcpServer(
+            (self.config["host"]["ip"], self.config["host"]["port"]),
+            SigmaStudioRequestHandler,
+            self.dsp.header_generator,
+            self.send_queue,
+            self.receive_queue,
+        )
+
+        self.sigma_tcp_server_worker_thread = threading.Thread(
+            target=self.sigma_tcp_server_worker, daemon=True, name="Sigma TCP server worker"
+        )
+        self.sigma_tcp_server_worker_thread.start()
+
+        logger.info("Sigma TCP server started on [%s]:%d.", self.config["host"]["ip"], self.config["host"]["port"])
+
+        # Create the request worker thread.
+        self.sigma_studio_worker_thread = threading.Thread(
+            target=self.sigma_studio_worker, name="SigmaStudio worker", daemon=True
+        )
+        self.sigma_studio_worker_thread.start()
 
     @retry(SafetyCheckError, 5, 5)
     def startup_safety_check(self) -> None:
@@ -139,26 +166,59 @@ class BackendService(BackendServicer):
                 logger.info("Safety check successful. Configuration unlocked.")
                 self.configuration_unlocked = True
 
-    def worker(self):
-        """Main worker functionality.
+    def close(self):
+        """Close the backend service and terminate its threads."""
+        self._active = False
+
+        self.send_queue.close()
+        self.receive_queue.close()
+
+        self.sigma_studio_worker_thread.join()
+
+        self.sigma_tcp_server.shutdown()
+        self.sigma_tcp_server_worker_thread.join()
+
+    def sigma_tcp_server_worker(self):
+        """Sigma TCP server worker.
+
+        Simply runs the TCP server.
+        """
+        with self.sigma_tcp_server:
+            self.sigma_tcp_server.serve_forever()
+
+        logger.info("Sigma TCP server worker terminated.")
+
+    def sigma_studio_worker(self):
+        """Sigma studio worker.
 
         Gets requests from the TCP server component and forwards them to the SPI handler.
         """
-        while True:
-            request = self.sigma_tcp_server.pipe_end_user.recv()
+        with self.sigma_tcp_server:
+            while self._active:
+                try:
+                    request = self.receive_queue.get()
 
-            if isinstance(request, WriteRequest):
-                self.dsp.write(request.address, request.data)
+                    if request is CONNECTION_CLOSED:
+                        ...
 
-            elif isinstance(request, SafeloadRequest):
-                self.dsp.safeload(request.address, request.data)
+                    elif isinstance(request, WriteRequest):
+                        self.dsp.write(request.address, request.data)
 
-            elif isinstance(request, ReadRequest):
-                payload = self.dsp.read(request.address, request.length)
+                    elif isinstance(request, SafeloadRequest):
+                        self.dsp.safeload(request.address, request.data)
 
-                self.sigma_tcp_server.pipe_end_user.send(ReadResponse(payload))
-            else:
-                raise TypeError(f"Unknown command type {type(request)}.")
+                    elif isinstance(request, ReadRequest):
+                        payload = self.dsp.read(request.address, request.length)
+                        self.send_queue.put(ReadResponse(payload))
+
+                    else:
+                        raise TypeError(f"Unknown command type {type(request)}.")
+
+                except EOFError:
+                    # Access to one of the queues failed, terminate the worker.
+                    break
+
+        logger.info("Sigma studio worker terminated.")
 
     def control_parameter(self, request: ControlParameterRequest, context):
         """Main backend entry point for control messages that change or read parameters.

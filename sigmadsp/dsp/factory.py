@@ -4,6 +4,7 @@ from typing import Type, Union
 
 from sigmadsp.protocols.i2c import I2cProtocol
 from sigmadsp.protocols.spi import SpiProtocol
+from tests.protocols.dummy import DummyProtocol
 
 from .adau1x01 import Adau1x01
 from .adau14xx import Adau14xx
@@ -66,12 +67,17 @@ def dsp_from_config(config: dict) -> Dsp:
         elif dsp_protocol_name == "i2c":
             dsp_protocol = I2cProtocol(bus=bus, device=device)
 
+        elif dsp_protocol_name == "dummy":
+            dsp_protocol = DummyProtocol()
+
         else:
             raise TypeError(f"Unknown DSP protocol {dsp_protocol_name}.")
 
         # Then, generate the dsp itself.
         dsp_type: Type[Dsp] = dsp_factory(dsp_type_name)
-        dsp = dsp_type(dsp_protocol)
+
+        # Use safeload by default.
+        dsp = dsp_type(True, dsp_protocol)
 
     try:
         # Parse the configuration for pin definitions.

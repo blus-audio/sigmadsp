@@ -100,9 +100,6 @@ class SpiProtocol(DspProtocol):
         Args:
             address (int): Address to write to
             data (bytes): Data to write
-
-        Returns:
-            int: Number of bytes written
         """
         remaining_data_length = len(data)
         current_address = address

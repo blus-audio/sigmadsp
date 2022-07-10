@@ -61,7 +61,7 @@ class Cell:
         For example ['main', 'left'] for a full cell name 'adjustable_volume_main_left'.
 
         Returns:
-            str: The unprefixed cell name, if prefix tokens exist. The 'full_name_tokens' otherwise.
+            str: The unprefixed cell name, if prefix tokens exist. The ``full_name_tokens`` otherwise.
         """
         if self.prefix_tokens is None:
             return self.full_name_tokens
@@ -255,8 +255,8 @@ class Parser:
         Args:
             all_cells (List[Cell]): The list of cells to parse.
             parameter_name (str): The string to check against.
-            match_substring (bool): If False, only matches parameter names that are exactly `parameter_name`.
-                Otherwise, matches if `parameter_name` is a substring of the parameter name.
+            match_substring (bool): If False, only matches parameter names that are exactly ``parameter_name``.
+                Otherwise, matches if ``parameter_name`` is a substring of the parameter name.
 
         Returns:
             List[Cell]: The matched cells

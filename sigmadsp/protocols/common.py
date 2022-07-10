@@ -2,7 +2,9 @@
 import logging
 import threading
 from abc import ABC, abstractmethod
-from multiprocessing import Pipe
+from multiprocessing import Queue
+
+from sigmadsp.sigmastudio.common import ReadRequest, WriteRequest
 
 # A logger for this module
 logger = logging.getLogger(__name__)
@@ -13,8 +15,9 @@ class DspProtocol(ABC):
 
     def run(self):
         """Start the DSP protocol thread."""
-        # Generate a Pipe, for communicating with the protocol handler thread within this class.
-        self.pipe_end_owner, self.pipe_end_user = Pipe()
+        # Generate queues, for communicating with the protocol handler thread within this class.
+        self.transmit_queue = Queue()
+        self.receive_queue = Queue()
 
         protocol = self.__class__.__name__
 
@@ -29,8 +32,7 @@ class DspProtocol(ABC):
             address (int): DSP register address to write to
             data (bytes): Binary data to write
         """
-        self.pipe_end_owner.send("write")
-        self.pipe_end_owner.send((address, data))
+        self.transmit_queue.put(WriteRequest(address, data))
 
     def read(self, address: int, length: int) -> bytes:
         """Read data from the hardware interface via the pipe to the hardware thread.
@@ -42,26 +44,29 @@ class DspProtocol(ABC):
         Returns:
             bytes: Register content
         """
-        self.pipe_end_owner.send("read")
-        self.pipe_end_owner.send((address, length))
-
-        data = self.pipe_end_owner.recv()
-
-        return data
+        self.transmit_queue.put(ReadRequest(address, length))
+        return self.receive_queue.get()
 
     def serve_forever(self):
         """Handle incoming requests for writing or reading data."""
         while True:
-            mode = self.pipe_end_user.recv()
+            try:
+                request = self.transmit_queue.get()
 
-            if mode == "write":
-                address, data = self.pipe_end_user.recv()
-                self._write(address, data)
+            except EOFError:
+                break
 
-            elif mode == "read":
-                address, length = self.pipe_end_user.recv()
-                data = self._read(address, length)
-                self.pipe_end_user.send(data)
+            if isinstance(request, WriteRequest):
+                self._write(request.address, request.data)
+
+            elif isinstance(request, ReadRequest):
+                data = self._read(request.address, request.length)
+
+                try:
+                    self.receive_queue.put(data)
+
+                except EOFError:
+                    break
 
     @abstractmethod
     def _read(self, address: int, length: int) -> bytes:
@@ -76,10 +81,13 @@ class DspProtocol(ABC):
         """
 
     @abstractmethod
-    def _write(self, address: int, data: bytes):
+    def _write(self, address: int, data: bytes) -> int:
         """Write data onto a SigmaDSP.
 
         Args:
             address (int): Address to write to
             data (bytes): Data to write
+
+        Returns:
+            int: Number of written bytes.
         """
