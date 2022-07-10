@@ -1,3 +1,4 @@
+"""Header generator for ADAU1x01 parts."""
 from .header import Field, PacketHeader, PacketHeaderGenerator
 
 
@@ -5,7 +6,8 @@ class Adau1x01HeaderGenerator(PacketHeaderGenerator):
     """Header generator for ADAU1x01 parts."""
 
     @staticmethod
-    def new_write_header():
+    def new_write_header() -> PacketHeader:
+        """Generate a new header for a ADAU1x01 write packet."""
         return PacketHeader(
             [
                 Field("operation", 0, 1),
@@ -19,7 +21,8 @@ class Adau1x01HeaderGenerator(PacketHeaderGenerator):
         )
 
     @staticmethod
-    def new_read_request_header():
+    def new_read_request_header() -> PacketHeader:
+        """Generate a new header for a ADAU1x01 read request packet."""
         return PacketHeader(
             [
                 Field("operation", 0, 1),
@@ -31,7 +34,8 @@ class Adau1x01HeaderGenerator(PacketHeaderGenerator):
         )
 
     @staticmethod
-    def new_read_response_header():
+    def new_read_response_header() -> PacketHeader:
+        """Generate a new header for a ADAU1x01 read response packet."""
         return PacketHeader(
             [
                 Field("operation", 0, 1),

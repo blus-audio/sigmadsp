@@ -27,3 +27,7 @@ class ReadResponse:
     """SigmaStudio is sent a response to its ReadRequest."""
 
     data: bytes
+
+
+# SigmaStudio disconnected from the server.
+CONNECTION_CLOSED = None

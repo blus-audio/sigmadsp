@@ -5,6 +5,11 @@
 - Conversion from integers to bytes-like objects of specified length
 """
 import math
+from typing import Literal, Union
+
+BIT_LENGTH_8_24 = 31
+BIT_LENGTH_5_23 = 27
+SIGMADSP_ENDIANNESS: Literal["big", "little"] = "big"
 
 
 def clamp(value: float, min_value: float, max_value: float) -> float:
@@ -41,6 +46,9 @@ def frac_8_24_to_float(value: int) -> float:
     Returns:
         float: Output in float format
     """
+    if BIT_LENGTH_8_24 < value.bit_length():
+        raise OverflowError
+
     return value / 2**24
 
 
@@ -55,7 +63,11 @@ def float_to_frac_8_24(value: float) -> int:
     Returns:
         int: Output in DSP fractional format
     """
-    return int(value * 2**24)
+    frac = int(value * 2**24)
+    if BIT_LENGTH_8_24 < frac.bit_length():
+        raise OverflowError
+
+    return frac
 
 
 def frac_5_23_to_float(value: int) -> float:
@@ -69,6 +81,9 @@ def frac_5_23_to_float(value: int) -> float:
     Returns:
         float: Output in float format
     """
+    if BIT_LENGTH_5_23 < value.bit_length():
+        raise OverflowError
+
     return value / 2**23
 
 
@@ -83,7 +98,11 @@ def float_to_frac_5_23(value: float) -> int:
     Returns:
         int: Output in DSP fractional format
     """
-    return int(value * 2**23)
+    frac = int(value * 2**23)
+    if BIT_LENGTH_5_23 < frac.bit_length():
+        raise OverflowError
+
+    return frac
 
 
 def db_to_linear(value_db: float) -> float:
@@ -107,10 +126,13 @@ def linear_to_db(value_linear: float) -> float:
     Returns:
         float: Output in dB scale
     """
+    if value_linear == 0:
+        return -math.inf
+
     return 20 * math.log10(value_linear)
 
 
-def bytes_to_int(data: bytes, offset: int = 0, length: int = 1) -> int:
+def bytes_to_int(data: bytes, offset: int = 0, length: Union[int, None] = None) -> int:
     """Convert a number of bytes to their integer representation.
 
     Uses "length" bytes from the "data" input, starting at "offset".
@@ -118,12 +140,17 @@ def bytes_to_int(data: bytes, offset: int = 0, length: int = 1) -> int:
     Args:
         data (bytes): Input bytes
         offset (int, optional): Offset in number of bytes, from the beginning of the data buffer
-        length (int, optional): Number of bytes to convert. Defaults to 1.
+        length (Union[int, None], optional): Number of bytes to convert. Defaults to None,
+            where the complete length of data (after offset) is used.
 
     Returns:
         int: Integer representation of the input data stream
     """
-    return int.from_bytes(data[offset : offset + length], byteorder="big")
+    if length is not None:
+        return int.from_bytes(data[offset : offset + length], byteorder=SIGMADSP_ENDIANNESS)
+
+    else:
+        return int.from_bytes(data[offset:], byteorder=SIGMADSP_ENDIANNESS)
 
 
 def bytes_to_int8(data: bytes, offset: int = 0) -> int:
@@ -177,7 +204,7 @@ def int_to_bytes(value: int, buffer: bytearray = None, offset: int = 0, length: 
     if buffer is None:
         buffer = bytearray(length + offset)
 
-    buffer[offset : offset + length] = value.to_bytes(length, byteorder="big")
+    buffer[offset : offset + length] = value.to_bytes(length, byteorder=SIGMADSP_ENDIANNESS)
 
     return buffer
 

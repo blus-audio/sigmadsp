@@ -1,23 +1,26 @@
 """This module describes the header of a packet that is exchanged with SigmaStudio.
 
-Headers contain individual fields that follow each other in a certain sequence."""
+Headers contain individual fields that follow each other in a certain sequence.
+"""
 
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 from dataclasses import dataclass
 from enum import Enum
-from typing import Iterator, List, Literal
+from typing import Iterator, List, Literal, Union
 
 from sigmadsp.helper.conversion import bytes_to_int, int_to_bytes
 
 
 class OperationKey(Enum):
+    """Possible operation keys that are exchanged with SigmaStudio."""
+
     READ_REQUEST_KEY = 0x0A
     READ_RESPONSE_KEY = 0x0B
     WRITE_KEY = 0x09
 
 
-VALID_FIELD_NAMES = Literal[
+ValidFieldNames = Literal[
     "operation", "safeload", "channel", "total_length", "chip_address", "data_length", "address", "success", "reserved"
 ]
 
@@ -27,7 +30,7 @@ class Field:
     """A class that represents a single field in the header."""
 
     # The name of the field.
-    name: VALID_FIELD_NAMES
+    name: ValidFieldNames
 
     # The offset of the field in bytes from the start of the header.
     offset: int
@@ -35,11 +38,40 @@ class Field:
     # The size of the field in bytes.
     size: int
 
-    # The stored value.
-    value: int = 0
+    @property
+    def value(self) -> int:
+        """The stored value."""
+        return self._value
+
+    @value.setter
+    def value(self, new_value: Union[int, bytes, bytearray]):
+        """Store a new value and convert it before storage, if required.
+
+        Args:
+            new_value (Union[int, bytes, bytearray]): The new value to set. If ``int``, it is stored without conversion.
+                If ``bytes`` or ``bytearray``, it is first converted to int.
+
+        Raises:
+            TypeError: If the value type is not supported.
+        """
+        if isinstance(new_value, bytearray):
+            new_value = bytes(new_value)
+
+        if isinstance(new_value, bytes):
+            assert len(new_value) == self.size
+            self._value = bytes_to_int(new_value, 0)
+
+        elif isinstance(new_value, int):
+            assert new_value.bit_length() <= self.size * 8
+            self._value = new_value
+
+        else:
+            raise TypeError(f"Unsupported value type {type(new_value)} for the field value.")
 
     def __post_init__(self):
         """Perform sanity checks on the field properties."""
+        self.value = 0
+
         if self.size < 0:
             raise ValueError("Field size must be a positive integer.")
 
@@ -54,11 +86,11 @@ class Field:
         return hash((self.name, self.offset, self.size))
 
 
-class PacketHeader(ABC):
+class PacketHeader:
     """An iterable collection of Field objects that forms the packet header."""
 
     def __init__(self, fields: List[Field]):
-        """Initialize the header fields. Add more fields to it by means of `add()`.
+        """Initialize the header fields. Add more fields to it by means of ``add()``.
 
         Instantiate via:
         PacketHeader(
@@ -80,7 +112,7 @@ class PacketHeader(ABC):
     @property
     def size(self) -> int:
         """The total size of the header in bytes."""
-        return sum([field.size for field in self])
+        return sum((field.size for field in self))
 
     @property
     def is_continuous(self) -> bool:
@@ -110,8 +142,15 @@ class PacketHeader(ABC):
         """Sorts the fields in this header by their offset."""
         self._fields = OrderedDict(sorted(self._fields.items(), key=lambda item: item[1].offset))
 
-    def add(self, name: VALID_FIELD_NAMES, offset: int, size: int, value: int = 0):
-        field = Field(name, offset, size, value)
+    def add(self, name: ValidFieldNames, offset: int, size: int):
+        """Create and add a new field.
+
+        Args:
+            name (ValidFieldNames): The name of the field.
+            offset (int): The field offset in number of bytes.
+            size (int): The size of the field in bytes.
+        """
+        field = Field(name, offset, size)
         self.add_field(field)
 
     def add_field(self, field: Field):
@@ -158,17 +197,17 @@ class PacketHeader(ABC):
     @property
     def is_write_request(self) -> bool:
         """Whether this is a write request."""
-        return self._fields["operation"].value == OperationKey.WRITE_KEY
+        return self._fields["operation"].value == OperationKey.WRITE_KEY.value
 
     @property
     def is_read_request(self) -> bool:
         """Whether this is a read request."""
-        return self._fields["operation"].value == OperationKey.READ_REQUEST_KEY
+        return self._fields["operation"].value == OperationKey.READ_REQUEST_KEY.value
 
     @property
     def is_read_response(self) -> bool:
         """Whether this is a read response."""
-        return self._fields["operation"].value == OperationKey.READ_RESPONSE_KEY
+        return self._fields["operation"].value == OperationKey.READ_RESPONSE_KEY.value
 
     @property
     def is_safeload(self) -> bool:
@@ -182,6 +221,7 @@ class PacketHeader(ABC):
 
     @property
     def names(self) -> List[str]:
+        """All field names in a list."""
         return [field.name for field in self]
 
     def __iter__(self) -> Iterator[Field]:
@@ -189,23 +229,24 @@ class PacketHeader(ABC):
         for item in self._fields.values():
             yield item
 
-    def __setitem__(self, name: VALID_FIELD_NAMES, value: int):
+    def __setitem__(self, name: ValidFieldNames, value: Union[int, bytes, bytearray]):
         """Set a field value.
 
         Args:
-            name (VALID_FIELD_NAMES): Field name.
-            value (int): Field value.
+            name (ValidFieldNames): Field name.
+            value (Union[int, bytes, bytearray]): Field value.
         """
         if name not in self.names:
             raise ValueError(f"Invalid field name {name}; valid names are {', '.join(self.names)}")
 
-        self._fields[name].value = value
+        # FIXME: Type is correct, see https://github.com/python/mypy/issues/3004.
+        self._fields[name].value = value  # type: ignore
 
-    def __getitem__(self, name: VALID_FIELD_NAMES) -> Field:
+    def __getitem__(self, name: ValidFieldNames) -> Field:
         """Get a field by its name.
 
         Args:
-            name (VALID_FIELD_NAMES): The name of the field.
+            name (ValidFieldNames): The name of the field.
 
         Returns:
             Union[Field, None]: The field, or None, if no field was found.
@@ -215,11 +256,11 @@ class PacketHeader(ABC):
         """
         return self._fields[name]
 
-    def __contains__(self, name: VALID_FIELD_NAMES) -> bool:
-        """Magic methods for using `in`.
+    def __contains__(self, name: ValidFieldNames) -> bool:
+        """Magic methods for using ``in``.
 
         Args:
-            name (VALID_FIELD_NAMES): The name to look for in the fields.
+            name (ValidFieldNames): The name to look for in the fields.
 
         Returns:
             bool: True, if a field with the given name exists.
@@ -228,34 +269,51 @@ class PacketHeader(ABC):
 
 
 class PacketHeaderGenerator(ABC):
-    @abstractmethod
+    """Generic generator for packet headers."""
+
     @staticmethod
+    @abstractmethod
     def new_write_header() -> PacketHeader:
         """Generate a new header for a write packet."""
 
-    @abstractmethod
     @staticmethod
+    @abstractmethod
     def new_read_request_header() -> PacketHeader:
         """Generate a new header for a read request packet."""
 
-    @abstractmethod
     @staticmethod
+    @abstractmethod
     def new_read_response_header() -> PacketHeader:
         """Generate a new header for a read response packet."""
 
     def new_header_from_operation_byte(self, operation_byte: bytes) -> PacketHeader:
+        """Generate a header from an operation byte.
+
+        Args:
+            operation_byte (bytes): The operation byte to decide on the header.
+
+        Raises:
+            ValueError: If the operation key, extracted from the operation byte, is not known.
+
+        Returns:
+            PacketHeader: A new packet header.
+        """
         assert len(operation_byte) == 1, "Operation byte must have a length of 1."
 
         operation_key = OperationKey(bytes_to_int(operation_byte, offset=0, length=1))
 
+        header: PacketHeader
         if operation_key == OperationKey.READ_REQUEST_KEY:
-            return self.new_read_request_header()
+            header = self.new_read_request_header()
 
         elif operation_key == OperationKey.READ_RESPONSE_KEY:
-            return self.new_read_response_header()
+            header = self.new_read_response_header()
 
         elif operation_key == OperationKey.WRITE_KEY:
-            return self.new_write_header()
+            header = self.new_write_header()
 
         else:
             raise ValueError(f"Unknown operation key {operation_key}.")
+
+        header["operation"] = operation_byte
+        return header
