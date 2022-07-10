@@ -34,7 +34,6 @@ class DummyProtocol(DspProtocol):
         Returns:
             bytes: Data with the required length.
         """
-
         try:
             data = self._memory[address]
 
