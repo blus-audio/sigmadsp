@@ -1,10 +1,11 @@
+"""Helper functionality for dumping data from SigmaStudio."""
 import pickle
 import threading
 from multiprocessing import Queue
-from typing import List
+from typing import Union
 
 from sigmadsp.sigmastudio.adau14xx import Adau14xxHeaderGenerator
-from sigmadsp.sigmastudio.common import CONNECTION_CLOSED, WriteRequest
+from sigmadsp.sigmastudio.common import CONNECTION_CLOSED
 from sigmadsp.sigmastudio.server import (
     SigmaStudioRawRequestHandler,
     SigmaStudioRequestHandler,
@@ -16,14 +17,26 @@ PORT = 8089
 
 
 def server_worker(server: SigmaStudioTcpServer):
+    """A worker that is started as a thread, for running the SigmaStudio TCP server.
+
+    Args:
+        server (SigmaStudioTcpServer): The server to run.
+    """
     with server:
         server.serve_forever()
 
 
-def dump_sigma_studio(raw: bool, output_path: str = "") -> List[WriteRequest]:
-    receive_queue = Queue()
-    send_queue = Queue()
+def dump_sigma_studio(raw: bool, output_path: str = ""):
+    """Dumps data that was received from SigmaStudio.
 
+    Args:
+        raw (bool): If True, dump the raw received data. If False, dump ``WriteRequest`` objects.
+        output_path (str, optional): The path to store the dump to. Defaults to "".
+    """
+    receive_queue: Queue = Queue()
+    send_queue: Queue = Queue()
+
+    request_handler_type: Union[SigmaStudioRawRequestHandler, SigmaStudioRequestHandler]
     if raw:
         request_handler_type = SigmaStudioRawRequestHandler
 
@@ -55,8 +68,6 @@ def dump_sigma_studio(raw: bool, output_path: str = "") -> List[WriteRequest]:
     server.shutdown()
     sigma_tcp_server_thread.join()
 
-    return requests
 
-
-# dump_sigma_studio(True, "sigma_studio_raw_dump.pkl")
-# dump_sigma_studio(False, "sigma_studio_dump.pkl")
+dump_sigma_studio(True, "sigma_studio_raw_dump.pkl")
+dump_sigma_studio(False, "sigma_studio_dump.pkl")

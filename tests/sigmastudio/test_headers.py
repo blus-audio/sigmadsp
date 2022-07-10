@@ -6,7 +6,7 @@ from sigmadsp.sigmastudio.adau1x01 import Adau1x01HeaderGenerator
 from sigmadsp.sigmastudio.header import Field, OperationKey
 
 
-def test_Adau1x01HeaderGenerator():
+def test_adau1x01_header_generator():
     """Test the adau1x01 write headers."""
     header_generator = Adau1x01HeaderGenerator()
 
@@ -53,6 +53,7 @@ def test_Adau1x01HeaderGenerator():
 
 
 def test_field():
+    """Test setting values in fields."""
     operation_field = Field("operation", 0, 1)
 
     with pytest.raises(AssertionError) as _:

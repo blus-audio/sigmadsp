@@ -13,6 +13,7 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing import Queue
+from typing import Callable, Dict
 
 import grpc
 from retry import retry
@@ -53,11 +54,13 @@ class BackendService(BackendServicer):
     send_queue: Queue
     receive_queue: Queue
 
-    def __init__(self, settings: SigmadspSettings):
+    def __init__(self, settings: SigmadspSettings, dsp_from_config_fn: Callable[[Dict], Dsp] = dsp_from_config):
         """Initialize service and start all relevant threads (TCP, SPI).
 
         Args:
             settings (SigmadspSettings): The settings object.
+            dsp_from_config_fn (Callable[[Dict], Dsp]): The function to use for generating new Dsp objects
+                from a config.
         """
         super().__init__()
 
@@ -76,7 +79,7 @@ class BackendService(BackendServicer):
         self.scheduler = sched.scheduler(time.time, time.sleep)
 
         try:
-            self.dsp = dsp_from_config(self.config)
+            self.dsp = dsp_from_config_fn(self.config)
 
         except ConfigurationError:
             logger.error("DSP configuration is broken! Aborting")

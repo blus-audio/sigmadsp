@@ -1,15 +1,9 @@
 """Factory module for generating DSP objects."""
 import logging
-from typing import Type, Union
+from typing import Dict, Type, Union
 
 from sigmadsp.protocols.i2c import I2cProtocol
 from sigmadsp.protocols.spi import SpiProtocol
-
-try:
-    from tests.protocols.dummy import DummyProtocol
-
-except ImportError:
-    pass
 
 from .adau1x01 import Adau1x01
 from .adau14xx import Adau14xx
@@ -40,7 +34,7 @@ def dsp_factory(dsp_type_name: str) -> Type[Dsp]:
         raise TypeError("DSP type {dsp_type} is not known.")
 
 
-def dsp_from_config(config: dict) -> Dsp:
+def dsp_from_config(config: Dict) -> Dsp:
     """Parse a configuration dictionary and create a new DSP from it.
 
     Args:
@@ -63,7 +57,6 @@ def dsp_from_config(config: dict) -> Dsp:
 
     else:
         # Generate the protocol first (e.g. SPI or I2C).
-
         dsp_protocol: Union[SpiProtocol, I2cProtocol]
 
         if dsp_protocol_name == "spi":
@@ -71,9 +64,6 @@ def dsp_from_config(config: dict) -> Dsp:
 
         elif dsp_protocol_name == "i2c":
             dsp_protocol = I2cProtocol(bus=bus, device=device)
-
-        elif DummyProtocol and dsp_protocol_name == "dummy":
-            dsp_protocol = DummyProtocol()
 
         else:
             raise TypeError(f"Unknown DSP protocol {dsp_protocol_name}.")
