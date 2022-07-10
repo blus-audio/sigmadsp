@@ -1,13 +1,13 @@
+"""Tests for different Dsp classes."""
 import math
 from typing import Callable, Union
 
 from hypothesis import given
 from hypothesis.strategies import floats
 
-from sigmadsp.dsp.adau14xx import Adau14xx
 from sigmadsp.dsp.factory import VALID_ADAU14XX, dsp_factory
 from sigmadsp.helper.conversion import db_to_linear, int32_to_bytes, linear_to_db
-from tests.protocols.dummy import DummyProtocol
+from tests.mock.dummy_protocol import DummyProtocol
 
 TEST_ADDRESS = 123
 ABS_TOL = 0.1
@@ -44,7 +44,7 @@ def test_adau14xx_adjust_volume(test_volume: float, volume_change_db: float):
     test_volume_db = linear_to_db(test_volume)
 
     # Do not use safeload while testing. The dummy protocol does not support it.
-    adau14xx: Adau14xx = dsp_factory(VALID_ADAU14XX[0])(False, dummy_protocol)
+    adau14xx = dsp_factory(VALID_ADAU14XX[0])(False, dummy_protocol)
 
     dummy_protocol.write(TEST_ADDRESS, int32_to_bytes(adau14xx.float_to_frac(test_volume)))
 
@@ -73,7 +73,7 @@ def test_adau14xx_set_volume(test_volume_db: float):
     dummy_protocol = DummyProtocol()
 
     # Do not use safeload while testing. The dummy protocol does not support it.
-    adau14xx: Adau14xx = dsp_factory(VALID_ADAU14XX[0])(False, dummy_protocol)
+    adau14xx = dsp_factory(VALID_ADAU14XX[0])(False, dummy_protocol)
 
     current_volume_db = round_value_db_dsp(test_volume_db, adau14xx.float_to_frac, adau14xx.frac_to_float)
     if current_volume_db is None:
