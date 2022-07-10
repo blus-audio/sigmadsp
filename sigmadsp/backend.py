@@ -99,7 +99,7 @@ class BackendService(BackendServicer):
         """A thread that performs a startup check and then starts the rest of the threads."""
         try:
             logger.info("Run startup safety check.")
-            self.startup_safety_check()
+            self.safety_check()
 
         except SafetyCheckError:
             logger.warning("Startup safety check failed.")
@@ -129,19 +129,14 @@ class BackendService(BackendServicer):
         self.sigma_studio_worker_thread.start()
 
     @retry(SafetyCheckError, 5, 5)
-    def startup_safety_check(self) -> None:
-        """Perform startup safety check, retrying a few times.
-
-        The safety check might not be successful immediately after starting the DSP, so it is retried periodically.
-        """
-        self.safety_check()
-
     def safety_check(self) -> None:
         """Check a hash cell within the DSP's memory against a hash value from the parameter file.
 
         Only if they match, configuration of DSP parameters is allowed. Other operations (e.g. reset, or
         loading a new parameter file) are still allowed, even in a locked configuration state.
         """
+        self.configuration_unlocked = False
+
         if not self.settings.parameter_parser:
             logger.warning("No parameter file was loaded! Configuration remains locked.")
             return
@@ -298,11 +293,15 @@ class BackendService(BackendServicer):
 
         if "reset_dsp" == command:
             self.dsp.soft_reset()
+            self.safety_check()
+
             response.message = "Soft-reset DSP."
             response.success = True
 
         elif "hard_reset_dsp" == command:
             self.dsp.hard_reset()
+            self.safety_check()
+
             response.message = "Hard-reset DSP."
             response.success = True
 
