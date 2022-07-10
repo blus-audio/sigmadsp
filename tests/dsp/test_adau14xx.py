@@ -60,7 +60,7 @@ def test_adau14xx_adjust_volume(test_volume: float, volume_change_db: float):
         assert math.isclose(new_volume_db, rounded_new_volume_db, rel_tol=REL_TOL, abs_tol=ABS_TOL)
 
     else:
-        assert math.isclose(new_volume_db, test_volume_db, rel_tol=REL_TOL, abs_tol=ABS_TOL)
+        assert new_volume_db == 0
 
 
 @given(floats())
