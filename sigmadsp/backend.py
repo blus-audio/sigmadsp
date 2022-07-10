@@ -16,7 +16,7 @@ from multiprocessing import Queue
 from typing import Callable, Dict
 
 import grpc
-from retry import retry
+from retry.api import retry_call
 
 import sigmadsp
 from sigmadsp.dsp.common import ConfigurationError, Dsp, SafetyCheckError
@@ -135,7 +135,7 @@ class BackendService(BackendServicer):
 
     def retry_safety_check(self) -> None:
         """The ``safety_check``, but with retries."""
-        retry(SafetyCheckError, 5, 5)(self.safety_check)
+        retry_call(self.safety_check, exceptions=SafetyCheckError, tries=5, delay=5)
 
     def safety_check(self) -> None:
         """Check a hash cell within the DSP's memory against a hash value from the parameter file.
