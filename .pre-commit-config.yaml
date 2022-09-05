@@ -10,7 +10,7 @@ repos:
     -   id: isort
 
 -   repo: https://github.com/psf/black
-    rev: 22.6.0
+    rev: 22.8.0
     hooks:
     -   id: black
 
@@ -49,7 +49,7 @@ repos:
     -   id: flake8
 
 -   repo: https://github.com/PyCQA/pylint
-    rev: v2.14.5
+    rev: v2.15.0
     hooks:
     -   id: pylint
         args:
