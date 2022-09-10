@@ -42,8 +42,8 @@ For installing, please install git first, then clone this repository and run the
 
 ```bash
 sudo apt install git &&
-git clone https://github.com/elagil/sigma-dsp.git &&
-cd sigma-dsp &&
+git clone https://github.com/elagil/sigmadsp.git &&
+cd sigmadsp &&
 ./install.sh
 ```
 
@@ -64,7 +64,7 @@ sudo systemctl restart sigmadsp-backend.service
 
 ## Removal
 
-From within the previously cloned repository folder `sigma-dsp` run
+From within the previously cloned repository folder `sigmadsp` run
 
 ```bash
 ./uninstall.sh
