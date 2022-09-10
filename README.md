@@ -72,7 +72,7 @@ From within the previously cloned repository folder `sigmadsp` run
 
 ## Configuration
 
-Configuration of `sigmadsp` is done via a `*.yaml` file, which is created during installation. Its default path is `/var/lib/config.yaml`.
+Configuration of `sigmadsp` is done via a `*.yaml` file, which is created during installation. Its default path is `/var/lib/sigmadsp/config.yaml`.
 
 ## Usage
 
