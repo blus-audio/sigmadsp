@@ -7,6 +7,7 @@ Commands from Sigma Studio are received, and translated to SPI read/write reques
 """
 import argparse
 import logging
+import os
 import sched
 import sys
 import threading
@@ -360,7 +361,11 @@ def launch(settings: SigmadspSettings):
 
 def main():
     """Launch the backend with default settings."""
-    logging.basicConfig(level=logging.INFO)
+    if os.environ.get("SIGMADSP_DEBUG") is None:
+        logging.basicConfig(level=logging.INFO)
+
+    else:
+        logging.basicConfig(level=logging.DEBUG)
 
     logger.info("Starting the sigmadsp backend, version %s.", sigmadsp.__version__)
 
