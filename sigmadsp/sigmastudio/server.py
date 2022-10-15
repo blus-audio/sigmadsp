@@ -6,7 +6,7 @@ import logging
 import socket
 import socketserver
 from multiprocessing import Queue
-from typing import Tuple, Type
+from typing import Tuple, Type, Union
 
 from sigmadsp.sigmastudio.common import (
     CONNECTION_CLOSED,
@@ -25,16 +25,16 @@ logger = logging.getLogger(__name__)
 class Packet:
     """A packet for data exchange with SigmaStudio."""
 
-    def __init__(self, header: PacketHeader, payload: bytes = bytes()):
+    def __init__(self, header: PacketHeader, payload: Union[bytes, None] = None):
         """Initialize a new packet from a header and payload.
 
         Args:
             header (PacketHeader): The packet header object.
-            payload (bytes): An optional payload.
+            payload (Union[bytes, None]): An optional payload. Defaults to None.
         """
         self._header = header
 
-        if self.header.carries_payload:
+        if payload is not None:
             self.payload = payload
 
     @property
@@ -44,8 +44,13 @@ class Packet:
 
     @property
     def payload(self) -> bytes:
-        """The packet payload."""
-        return self._payload
+        """The packet payload, if any."""
+        try:
+            return self._payload
+
+        except AttributeError:
+            # There is no payload for this packet.
+            return bytes()
 
     @payload.setter
     def payload(self, new_payload: bytes):
@@ -85,6 +90,7 @@ class SigmaStudioTcpServer(socketserver.TCPServer):
         packet_header_generator: PacketHeaderGenerator,
         send_queue: Queue,
         receive_queue: Queue,
+        raw_receive_queue: Union[Queue, None] = None,
         bind_and_activate=True,
     ):
         """Initialize the ThreadedTCPServer with a Pipe for communicating with the TCP server worker thread.
@@ -96,9 +102,12 @@ class SigmaStudioTcpServer(socketserver.TCPServer):
             bind_and_activate (bool, optional): Whether to bind and activate the TCP server. Defaults to True.
             send_queue (Queue): The queue for data to send to SigmaStudio.
             receive_queue (Queue): The queue for data that was received by SigmaStudio.
+            raw_receive_queue (Union[Queue, None]): The queue for raw binary data, as received by SigmaStudio.
+                Used for debugging. Optional, defaults to None.
         """
         self.send_queue = send_queue
         self.receive_queue = receive_queue
+        self.raw_receive_queue = raw_receive_queue
         self.packet_header_generator = packet_header_generator
 
         super().__init__(server_address, request_handler_type, bind_and_activate=bind_and_activate)
@@ -214,6 +223,10 @@ class SigmaStudioRequestHandler(socketserver.BaseRequestHandler):
             try:
                 packet = self.new_packet()
 
+                if self.server.raw_receive_queue is not None:
+                    # For debugging purposes, store the full binary package.
+                    self.server.raw_receive_queue.put(packet.as_bytes())
+
                 if packet.header.is_write_request:
                     self.handle_write_request(packet)
 
@@ -221,45 +234,6 @@ class SigmaStudioRequestHandler(socketserver.BaseRequestHandler):
                     self.handle_read_request(packet)
 
             except ConnectionError:
-                self.server.receive_queue.put(CONNECTION_CLOSED)
-                break
-
-
-class SigmaStudioRawRequestHandler(SigmaStudioRequestHandler):
-    """Raw request handler for messages from SigmaStudio.
-
-    Outputs the raw requests in the shape of ``bytes``.
-    """
-
-    request: socket.socket
-    server: SigmaStudioTcpServer
-
-    def new_raw_packet(self) -> bytes:
-        """Create a new packet from a request."""
-        # First, get the operation key. It is always the first received byte.
-        operation_byte: bytes = self.read(1)
-        header = self.server.packet_header_generator.new_header_from_operation_byte(operation_byte)
-
-        # Read the rest of the header.
-        remaining_header_bytes = self.read(header.size - 1)
-        header.parse(operation_byte + remaining_header_bytes)
-
-        payload: bytes = bytes()
-        if header.carries_payload:
-            payload = self.read(header["data_length"].value)
-
-        return operation_byte + remaining_header_bytes + payload
-
-    def handle(self):
-        """Called, when the TCP server has to handle a request.
-
-        It never stops, except if the connection is reset.
-        """
-        while True:
-            try:
-                packet = self.new_raw_packet()
-                self.server.receive_queue.put(packet)
-
-            except ConnectionError:
+                logger.debug("Connection closed in request handler.")
                 self.server.receive_queue.put(CONNECTION_CLOSED)
                 break
