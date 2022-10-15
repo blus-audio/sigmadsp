@@ -177,8 +177,8 @@ class SigmaStudioRequestHandler(socketserver.BaseRequestHandler):
         read_response: ReadResponse = self.server.send_queue.get()
 
         # Build a response header, based on the content of the request header.
-        response_header = self.server.packet_header_generator.new_header_from_operation(
-            OperationKey.READ_RESPONSE_KEY.value, template=packet.header
+        response_header = self.server.packet_header_generator.new_header_from_operation_key(
+            OperationKey.READ_RESPONSE_KEY, template=packet.header
         )
 
         response_packet = Packet(response_header, read_response.data)
@@ -190,7 +190,7 @@ class SigmaStudioRequestHandler(socketserver.BaseRequestHandler):
         """Create a new packet from a request."""
         # First, get the operation key. It is always the first received byte.
         operation_byte: bytes = self.read(1)
-        header = self.server.packet_header_generator.new_header_from_operation(operation_byte)
+        header = self.server.packet_header_generator.new_header_from_operation_byte(operation_byte)
 
         logger.debug("Received operation key 0x%02x.", header["operation"].value)
 
@@ -237,7 +237,7 @@ class SigmaStudioRawRequestHandler(SigmaStudioRequestHandler):
         """Create a new packet from a request."""
         # First, get the operation key. It is always the first received byte.
         operation_byte: bytes = self.read(1)
-        header = self.server.packet_header_generator.new_header_from_operation(operation_byte)
+        header = self.server.packet_header_generator.new_header_from_operation_byte(operation_byte)
 
         # Read the rest of the header.
         remaining_header_bytes = self.read(header.size - 1)
