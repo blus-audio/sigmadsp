@@ -135,11 +135,11 @@ class SigmaStudioRequestHandler(socketserver.BaseRequestHandler):
         request: WriteRequest
 
         if packet.header.is_safeload:
-            logger.info("[safeload] %s bytes to address 0x%04x", packet.header["data_length"], packet.header["address"])
+            logger.info("[safeload] %s bytes to address 0x%04x", packet.header["data_length"].value, packet.header["address"].value)
             request = SafeloadRequest(packet.header["address"].value, packet.payload)
 
         else:
-            logger.info("[write] %s bytes to address 0x%04x", packet.header["data_length"], packet.header["address"])
+            logger.info("[write] %s bytes to address 0x%04x", packet.header["data_length"].value, packet.header["address"].value)
             request = WriteRequest(packet.header["address"].value, packet.payload)
 
         self.server.receive_queue.put(request)
