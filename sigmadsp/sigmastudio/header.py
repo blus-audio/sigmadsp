@@ -3,6 +3,8 @@
 Headers contain individual fields that follow each other in a certain sequence.
 """
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 from dataclasses import dataclass
@@ -108,6 +110,16 @@ class PacketHeader:
 
         for field in fields:
             self.add_field(field)
+
+    def copy_from_template(self, template: PacketHeader):
+        """Copy the content of all matching fields from the template to this header.
+
+        Args:
+            template (PacketHeader): The header to copy from.
+        """
+        for field in template:
+            if field.name in self:
+                self[field.name] = field.value
 
     @property
     def size(self) -> int:
@@ -273,20 +285,20 @@ class PacketHeaderGenerator(ABC):
 
     @staticmethod
     @abstractmethod
-    def new_write_header() -> PacketHeader:
+    def _new_write_header() -> PacketHeader:
         """Generate a new header for a write packet."""
 
     @staticmethod
     @abstractmethod
-    def new_read_request_header() -> PacketHeader:
+    def _new_read_request_header() -> PacketHeader:
         """Generate a new header for a read request packet."""
 
     @staticmethod
     @abstractmethod
-    def new_read_response_header() -> PacketHeader:
+    def _new_read_response_header() -> PacketHeader:
         """Generate a new header for a read response packet."""
 
-    def new_header_from_operation_byte(self, operation_byte: bytes) -> PacketHeader:
+    def new_header_from_operation(self, operation_byte: bytes, template: PacketHeader = None) -> PacketHeader:
         """Generate a header from an operation byte.
 
         Args:
@@ -304,16 +316,20 @@ class PacketHeaderGenerator(ABC):
 
         header: PacketHeader
         if operation_key == OperationKey.READ_REQUEST_KEY:
-            header = self.new_read_request_header()
+            header = self._new_read_request_header()
 
         elif operation_key == OperationKey.READ_RESPONSE_KEY:
-            header = self.new_read_response_header()
+            header = self._new_read_response_header()
 
         elif operation_key == OperationKey.WRITE_KEY:
-            header = self.new_write_header()
+            header = self._new_write_header()
 
         else:
             raise ValueError(f"Unknown operation key {operation_key}.")
 
+        if template is not None:
+            header.copy_from_template(template)
+
         header["operation"] = operation_byte
+
         return header
