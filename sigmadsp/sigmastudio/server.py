@@ -30,10 +30,12 @@ class Packet:
 
         Args:
             header (PacketHeader): The packet header object.
-            payload (Union[None, bytes]): The optional payload.
+            payload (bytes): An optional payload.
         """
         self._header = header
-        self.payload = payload
+
+        if self.header.carries_payload:
+            self.payload = payload
 
     @property
     def header(self) -> PacketHeader:
@@ -47,6 +49,13 @@ class Packet:
 
     @payload.setter
     def payload(self, new_payload: bytes):
+        """Set payload for this packet.
+
+        On packet initialization, this only happens, if the packet is supposed to carry payload.
+
+        Args:
+            new_payload (bytes): The payload to store in the packet.
+        """
         if self.header["data_length"].value == 0:
             self._payload = new_payload
             self.header["data_length"].value = len(self._payload)
