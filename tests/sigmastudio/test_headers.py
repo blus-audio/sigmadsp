@@ -38,15 +38,15 @@ def test_adau1x01_header_generator():
     assert "not_in_there" not in write_header
 
     # Test the generation of headers from an operation byte.
-    read_request_header = header_generator.new_header_from_operation(
+    read_request_header = header_generator.new_header_from_operation_byte(
         int8_to_bytes(OperationKey.READ_REQUEST_KEY.value)
     )
     assert read_request_header.is_read_request
 
-    another_write_header = header_generator.new_header_from_operation(int8_to_bytes(OperationKey.WRITE_KEY.value))
+    another_write_header = header_generator.new_header_from_operation_byte(int8_to_bytes(OperationKey.WRITE_KEY.value))
     assert another_write_header.is_write_request
 
-    read_response_header = header_generator.new_header_from_operation(
+    read_response_header = header_generator.new_header_from_operation_byte(
         int8_to_bytes(OperationKey.READ_RESPONSE_KEY.value)
     )
     assert read_response_header.is_read_response

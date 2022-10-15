@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Iterator, List, Literal, Union
 
-from sigmadsp.helper.conversion import bytes_to_int, int_to_bytes
+from sigmadsp.helper.conversion import bytes_to_int, int8_to_bytes, int_to_bytes
 
 
 class OperationKey(Enum):
@@ -298,17 +298,15 @@ class PacketHeaderGenerator(ABC):
     def _new_read_response_header() -> PacketHeader:
         """Generate a new header for a read response packet."""
 
-    def new_header_from_operation(self, operation_byte: bytes, template: PacketHeader = None) -> PacketHeader:
+    def new_header_from_operation_byte(self, operation_byte: bytes, template: PacketHeader = None) -> PacketHeader:
         """Generate a header from an operation byte.
 
         Args:
-            operation_byte (bytes): The operation byte to decide on the header.
-
-        Raises:
-            ValueError: If the operation key, extracted from the operation byte, is not known.
+            operation_key (bytes): The operation byte that determines the header composition.
+            template (PacketHeader, optional): The template, if any, from which to copy fields that fit the new header. Defaults to None.
 
         Returns:
-            PacketHeader: A new packet header.
+            PacketHeader: The new packet header.
         """
         assert len(operation_byte) == 1, "Operation byte must have a length of 1."
 
@@ -333,3 +331,15 @@ class PacketHeaderGenerator(ABC):
         header["operation"] = operation_byte
 
         return header
+
+    def new_header_from_operation_key(self, operation_key: OperationKey, template: PacketHeader = None) -> PacketHeader:
+        """Generate a header from an operation key.
+
+        Args:
+            operation_key (OperationKey): The operation key that determines the header composition.
+            template (PacketHeader, optional): The template, if any, from which to copy fields that fit the new header. Defaults to None.
+
+        Returns:
+            PacketHeader: The new packet header.
+        """
+        self.new_header_from_operation_byte(int8_to_bytes(operation_key.value), template=template)
