@@ -303,7 +303,8 @@ class PacketHeaderGenerator(ABC):
 
         Args:
             operation_key (bytes): The operation byte that determines the header composition.
-            template (PacketHeader, optional): The template, if any, from which to copy fields that fit the new header. Defaults to None.
+            template (PacketHeader, optional): The template, if any, from which to copy fields that fit the new header.
+                Defaults to None.
 
         Returns:
             PacketHeader: The new packet header.
@@ -337,9 +338,10 @@ class PacketHeaderGenerator(ABC):
 
         Args:
             operation_key (OperationKey): The operation key that determines the header composition.
-            template (PacketHeader, optional): The template, if any, from which to copy fields that fit the new header. Defaults to None.
+            template (PacketHeader, optional): The template, if any, from which to copy fields that fit the new header.
+                Defaults to None.
 
         Returns:
             PacketHeader: The new packet header.
         """
-        self.new_header_from_operation_byte(int8_to_bytes(operation_key.value), template=template)
+        return self.new_header_from_operation_byte(int8_to_bytes(operation_key.value), template=template)

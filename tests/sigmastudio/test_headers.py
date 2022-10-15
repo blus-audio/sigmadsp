@@ -26,7 +26,7 @@ def test_adau1x01_header_generator():
         + int16_to_bytes(address)  # address
     )
 
-    write_header = header_generator._new_write_header()
+    write_header = header_generator.new_header_from_operation_key(OperationKey.WRITE_KEY)
     write_header.parse(header_message)
 
     assert write_header.is_continuous
@@ -38,17 +38,13 @@ def test_adau1x01_header_generator():
     assert "not_in_there" not in write_header
 
     # Test the generation of headers from an operation byte.
-    read_request_header = header_generator.new_header_from_operation_byte(
-        int8_to_bytes(OperationKey.READ_REQUEST_KEY.value)
-    )
+    read_request_header = header_generator.new_header_from_operation_key(OperationKey.READ_REQUEST_KEY)
     assert read_request_header.is_read_request
 
-    another_write_header = header_generator.new_header_from_operation_byte(int8_to_bytes(OperationKey.WRITE_KEY.value))
+    another_write_header = header_generator.new_header_from_operation_key(OperationKey.WRITE_KEY)
     assert another_write_header.is_write_request
 
-    read_response_header = header_generator.new_header_from_operation_byte(
-        int8_to_bytes(OperationKey.READ_RESPONSE_KEY.value)
-    )
+    read_response_header = header_generator.new_header_from_operation_key(OperationKey.READ_RESPONSE_KEY)
     assert read_response_header.is_read_response
 
 
