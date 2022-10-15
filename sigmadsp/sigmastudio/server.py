@@ -178,15 +178,17 @@ class SigmaStudioRequestHandler(socketserver.BaseRequestHandler):
         operation_byte: bytes = self.read(1)
         header = self.server.packet_header_generator.new_header_from_operation_byte(operation_byte)
 
+        logger.debug("Received operation key 0x%02x.", header["operation"].value)
+
         # Read the rest of the header.
         remaining_header_bytes = self.read(header.size - 1)
         header.parse(operation_byte + remaining_header_bytes)
 
-        payload: bytes = bytes()
         if header.carries_payload:
-            payload = self.read(header["data_length"].value)
+            Packet(header, self.read(header["data_length"].value))
 
-        return Packet(header, payload)
+        else:
+            return Packet(header)
 
     def handle(self):
         """Called, when the TCP server has to handle a request.
