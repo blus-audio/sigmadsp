@@ -54,7 +54,8 @@ class Packet:
         else:
             assert (
                 len(new_payload) == self.header["data_length"].value
-            ), "Payload length does not match the expected length."
+            ), f'Payload length {len(new_payload)} does not match the expected length {self.header["data_length"].value}.'
+"
             self._payload = new_payload
 
     def as_bytes(self) -> bytes:
