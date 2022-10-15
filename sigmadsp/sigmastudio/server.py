@@ -178,7 +178,7 @@ class SigmaStudioRequestHandler(socketserver.BaseRequestHandler):
 
         # Build a response header, based on the content of the request header.
         response_header = self.server.packet_header_generator.new_header_from_operation(
-            OperationKey.READ_RESPONSE_KEY, template=packet.header
+            OperationKey.READ_RESPONSE_KEY.value, template=packet.header
         )
 
         response_packet = Packet(response_header, read_response.data)
