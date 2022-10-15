@@ -61,9 +61,10 @@ class Packet:
             self.header["data_length"].value = len(self._payload)
 
         else:
-            assert (
-                len(new_payload) == self.header["data_length"].value
-            ), f'Payload length {len(new_payload)} does not match the expected length {self.header["data_length"].value}.'
+            assert len(new_payload) == self.header["data_length"].value, (
+                f"Payload length {len(new_payload)} does not match "
+                f'the expected length {self.header["data_length"].value}.'
+            )
 
             self._payload = new_payload
 
@@ -199,7 +200,7 @@ class SigmaStudioRequestHandler(socketserver.BaseRequestHandler):
         header.parse(operation_byte + remaining_header_bytes)
 
         if header.carries_payload:
-            Packet(header, self.read(header["data_length"].value))
+            return Packet(header, self.read(header["data_length"].value))
 
         else:
             return Packet(header)
