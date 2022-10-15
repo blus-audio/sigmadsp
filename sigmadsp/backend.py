@@ -61,7 +61,8 @@ class BackendService(BackendServicer):
         Args:
             settings (SigmadspSettings): The settings object.
             dsp_from_config_fn (Callable[[Dict], Dsp]): The function to use for generating new Dsp objects
-                from a config.
+                from a config. The callable takes the config dictionary as an argument, and creates a new Dsp. Optional,
+                defaults to ``dsp_from_config``.
         """
         super().__init__()
 

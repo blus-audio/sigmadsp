@@ -3,7 +3,7 @@ import logging
 from typing import Dict, List
 
 from sigmadsp.protocols.common import DspProtocol
-from sigmadsp.sigmastudio.common import WriteRequest
+from sigmadsp.sigmastudio.common import ReadRequest, WriteRequest
 
 # A logger for this module
 logger = logging.getLogger(__name__)
@@ -13,6 +13,7 @@ class DummyProtocol(DspProtocol):
     """Handle dummy transfers."""
 
     _write_requests: List[WriteRequest]
+    _read_requests: List[ReadRequest]
 
     def __init__(self):
         """Initialize the Dummy protocol."""
@@ -22,7 +23,8 @@ class DummyProtocol(DspProtocol):
     def reset(self):
         """Empty all recorded data."""
         self._memory: Dict[int, bytes] = {}
-        self._write_requests: List[WriteRequest] = []
+        self._write_requests = []
+        self._read_requests = []
 
     def _read(self, address: int, length: int) -> bytes:
         """Read dummy data from the internal memory.
@@ -34,6 +36,8 @@ class DummyProtocol(DspProtocol):
         Returns:
             bytes: Data with the required length.
         """
+        self._read_requests.append(ReadRequest(address, length))
+
         try:
             data = self._memory[address]
 
@@ -50,8 +54,13 @@ class DummyProtocol(DspProtocol):
             address (int): Address to write to
             data (bytes): Data to write
         """
-        self._memory[address] = data
         self._write_requests.append(WriteRequest(address, data))
+        self._memory[address] = data
+
+    @property
+    def read_requests(self) -> List[ReadRequest]:
+        """All read requests that were handled."""
+        return self._read_requests
 
     @property
     def write_requests(self) -> List[WriteRequest]:
