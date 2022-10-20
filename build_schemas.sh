@@ -1,6 +1,6 @@
 #!/bin/bash
 
-OUTPUT_DIR=src/sigmadsp/generated/backend_service/
+OUTPUT_DIR=sigmadsp/generated/backend_service
 
 echo "=== Building protobuf schemas..."
 
