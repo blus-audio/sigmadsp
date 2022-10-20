@@ -2,10 +2,14 @@
 
 It can control the backend via the command line.
 """
-import argparse
+from __future__ import annotations
+
 import logging
+from io import TextIOWrapper
+from ipaddress import IPv4Address
 from typing import Union
 
+import click
 import grpc
 
 from sigmadsp.generated.backend_service.control_pb2 import (
@@ -16,117 +20,155 @@ from sigmadsp.generated.backend_service.control_pb2 import (
 from sigmadsp.generated.backend_service.control_pb2_grpc import BackendStub
 
 
-def main():
-    """The main frontend command-line application, which controls the SigmaDSP backend."""
-    logging.basicConfig(level=logging.INFO)
+class Channel:
+    """Opens a channel to and handles control of the backend."""
 
-    argument_parser = argparse.ArgumentParser()
+    stub = BackendStub
 
-    argument_parser.add_argument(
-        "-p",
-        "--port",
-        required=False,
-        type=int,
-        help="Set the port, on which the backend listens for requests.",
-    )
+    def __init__(self, backend_address: IPv4Address, backend_port: int):
+        """Initialize the channel.
 
-    argument_parser.add_argument(
-        "-a",
-        "--address",
-        required=False,
-        type=str,
-        help="Set the IP address, on which the backend listens for requests.",
-    )
+        Args:
+            backend_address (ip_address): The IP address of the backend.
+            backend_port (int): The backend port.
+        """
+        self.address = f"{backend_address}:{backend_port}"
 
-    argument_parser.add_argument(
-        "-av",
-        "--adjust_volume",
-        required=False,
-        type=float,
-        help="Adjust the volume by a certain value in dB (positive or negative).",
-    )
+    def _emit(self, request: ControlRequest | ControlParameterRequest):
+        """Emits a request towards the backend.
 
-    argument_parser.add_argument(
-        "-sv",
-        "--set_volume",
-        required=False,
-        type=float,
-        help="Sets the volume to a certain value in dB (zero or lower).",
-    )
+        During emission, the channel is opened.
 
-    argument_parser.add_argument(
-        "-r",
-        "--reset",
-        required=False,
-        help="Soft-reset the DSP.",
-        action="store_true",
-    )
+        Args:
+            request (ControlRequest | ControlParameterRequest): The request to emit.
+        """
+        with grpc.insecure_channel(self.address) as channel:
+            stub = BackendStub(channel)
+            response: Union[ControlResponse, None] = None
 
-    argument_parser.add_argument(
-        "-R",
-        "--hard-reset",
-        required=False,
-        help="hard-reset the DSP.",
-        action="store_true",
-    )
+            if isinstance(request, ControlRequest):
+                response = stub.control(request)
 
-    argument_parser.add_argument(
-        "-lp",
-        "--load_parameters",
-        required=False,
-        help="Load new parameter file",
-    )
+            elif isinstance(request, ControlParameterRequest):
+                response = stub.control_parameter(request)
 
-    arguments = argument_parser.parse_args()
+            if response is not None:
+                logging.info(response and response.message)
 
-    backend_port = 50051
-    backend_address = "localhost"
+    def read_register(self, address: int, length: int):
+        """Read a DSP register.
 
-    if arguments.port is not None:
-        backend_port = arguments.port
+        Args:
+            address (int): The address to read from.
+            length (int): The length of data to read in bytes.
+        """
+        request = ControlRequest()
+        request.read_register.address = address
+        request.read_register.length = length
+        self._emit(request)
 
-    if arguments.address is not None:
-        backend_address = arguments.address
+    def change_volume(self, volume: float, relative: bool):
+        """Change the DSP volume by a certain amount.
 
-    response: Union[ControlResponse, None] = None
-    control_request = ControlRequest()
-    control_parameter_request = ControlParameterRequest()
+        Args:
+            volume (float): The volume change in dB.
+            relative (bool): If True, performs a relative change. If False, sets the provided volume.
+        """
+        request = ControlParameterRequest()
+        request.change_volume.name_tokens[:] = ["main"]
+        request.change_volume.value = volume
+        request.change_volume.relative = relative
+        self._emit(request)
 
-    with grpc.insecure_channel(f"{backend_address}:{backend_port}") as channel:
-        stub = BackendStub(channel)
+    def reset(self, hard: bool):
+        """Reset the DSP.
 
-        if arguments.adjust_volume is not None:
-            control_parameter_request.change_volume.name_tokens[:] = ["main"]
-            control_parameter_request.change_volume.value = arguments.adjust_volume
-            control_parameter_request.change_volume.relative = True
+        Args:
+            hard (bool): If True, performs a hard reset. If False, performs a soft reset.
+        """
+        request = ControlRequest()
 
-            response = stub.control_parameter(control_parameter_request)
+        if hard:
+            request.hard_reset_dsp = True
 
-        if arguments.set_volume is not None:
-            control_parameter_request.change_volume.name_tokens[:] = ["main"]
-            control_parameter_request.change_volume.value = arguments.set_volume
-            control_parameter_request.change_volume.relative = False
+        else:
+            request.reset_dsp = True
 
-            response = stub.control_parameter(control_parameter_request)
+        self._emit(request)
 
-        if arguments.load_parameters is not None:
-            with open(arguments.load_parameters, "r", encoding="utf8") as parameter_file:
-                control_request.load_parameters.content[:] = parameter_file.readlines()
+    def load_parameters(self, file: TextIOWrapper):
+        """Load a parameter file to the backend.
 
-            response = stub.control(control_request)
+        Args:
+            file (TextIOWrapper): The file to load.
+        """
+        request = ControlRequest()
+        request.load_parameters.content[:] = file.readlines()
+        self._emit(request)
 
-        if arguments.reset is True:
-            control_request.reset_dsp = True
 
-            response = stub.control(control_request)
+@click.group()
+@click.pass_context
+@click.option(
+    "--port",
+    default=50051,
+    show_default=True,
+    type=int,
+    help="Set the port, on which the backend listens for requests.",
+)
+@click.option(
+    "--ip",
+    default=IPv4Address("127.0.0.1"),
+    show_default=True,
+    type=IPv4Address,
+    help="Set the IP address, on which the backend listens for requests.",
+)
+def sigmadsp(ctx: click.Context, port: int, ip: IPv4Address):
+    """Command-line tool for controlling the sigmadsp-backend."""
+    logging.basicConfig(level=logging.DEBUG)
+    ctx.obj = Channel(ip, port)
 
-        if arguments.hard_reset is True:
-            control_request.hard_reset_dsp = True
 
-            response = stub.control(control_request)
+@sigmadsp.command(context_settings={"ignore_unknown_options": True})
+@click.pass_obj
+@click.argument("file", type=click.File("r"))
+def load_parameters(channel: Channel, file: TextIOWrapper):
+    """Load a parameter file."""
+    channel.load_parameters(file)
 
-        logging.info(response and response.message)
+
+@sigmadsp.command(context_settings={"ignore_unknown_options": True})
+@click.pass_obj
+@click.argument("volume", type=float)
+def set_volume(channel: Channel, volume: float):
+    """Sets the volume to a certain value in dB."""
+    channel.change_volume(volume, False)
+
+
+@sigmadsp.command(context_settings={"ignore_unknown_options": True})
+@click.pass_obj
+@click.argument("change", type=float)
+def change_volume(channel: Channel, change: float):
+    """Changes the volume by a certain amount in dB."""
+    channel.change_volume(change, True)
+
+
+@sigmadsp.command()
+@click.pass_obj
+@click.option("--hard", is_flag=True)
+def reset(channel: Channel, hard: bool):
+    """Resets the DSP."""
+    channel.reset(hard)
+
+
+@sigmadsp.command()
+@click.pass_obj
+@click.argument("address", type=int)
+@click.argument("length", type=int)
+def read_register(channel: Channel, address: int, length: int):
+    """Reads a DSP register."""
+    channel.read_register(address, length)
 
 
 if __name__ == "__main__":
-    main()
+    sigmadsp()  # pylint: disable=no-value-for-parameter
