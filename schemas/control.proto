@@ -18,11 +18,19 @@ message LoadParameters {
   repeated string content = 1;
 }
 
+message Register {
+  uint32 address = 1;
+  uint32 length = 2;
+  repeated bytes data = 3;
+}
+
 message ControlRequest {
   oneof command {
     bool reset_dsp = 1;
     bool hard_reset_dsp = 2;
     LoadParameters load_parameters = 3;
+    Register read_register = 4;
+    Register write_register = 5;
   }
 }
 

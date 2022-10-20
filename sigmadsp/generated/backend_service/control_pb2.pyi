@@ -3,88 +3,137 @@
 isort:skip_file
 """
 import builtins
+import collections.abc
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
 import google.protobuf.message
-import typing
-import typing_extensions
+import sys
+
+if sys.version_info >= (3, 8):
+    import typing as typing_extensions
+else:
+    import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class ChangeVolume(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     NAME_TOKENS_FIELD_NUMBER: builtins.int
     VALUE_FIELD_NUMBER: builtins.int
     RELATIVE_FIELD_NUMBER: builtins.int
     @property
-    def name_tokens(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
+    def name_tokens(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
     value: builtins.float
     relative: builtins.bool
-    def __init__(self,
+    def __init__(
+        self,
         *,
-        name_tokens: typing.Optional[typing.Iterable[typing.Text]] = ...,
+        name_tokens: collections.abc.Iterable[builtins.str] | None = ...,
         value: builtins.float = ...,
         relative: builtins.bool = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["name_tokens",b"name_tokens","relative",b"relative","value",b"value"]) -> None: ...
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["name_tokens", b"name_tokens", "relative", b"relative", "value", b"value"]) -> None: ...
+
 global___ChangeVolume = ChangeVolume
 
 class ControlParameterRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CHANGE_VOLUME_FIELD_NUMBER: builtins.int
     @property
     def change_volume(self) -> global___ChangeVolume: ...
-    def __init__(self,
+    def __init__(
+        self,
         *,
-        change_volume: typing.Optional[global___ChangeVolume] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["change_volume",b"change_volume","command",b"command"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["change_volume",b"change_volume","command",b"command"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["command",b"command"]) -> typing.Optional[typing_extensions.Literal["change_volume"]]: ...
+        change_volume: global___ChangeVolume | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["change_volume", b"change_volume", "command", b"command"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["change_volume", b"change_volume", "command", b"command"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["command", b"command"]) -> typing_extensions.Literal["change_volume"] | None: ...
+
 global___ControlParameterRequest = ControlParameterRequest
 
 class LoadParameters(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CONTENT_FIELD_NUMBER: builtins.int
     @property
-    def content(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
-    def __init__(self,
+    def content(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
+    def __init__(
+        self,
         *,
-        content: typing.Optional[typing.Iterable[typing.Text]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["content",b"content"]) -> None: ...
+        content: collections.abc.Iterable[builtins.str] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["content", b"content"]) -> None: ...
+
 global___LoadParameters = LoadParameters
+
+class Register(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    ADDRESS_FIELD_NUMBER: builtins.int
+    LENGTH_FIELD_NUMBER: builtins.int
+    DATA_FIELD_NUMBER: builtins.int
+    address: builtins.int
+    length: builtins.int
+    @property
+    def data(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bytes]: ...
+    def __init__(
+        self,
+        *,
+        address: builtins.int = ...,
+        length: builtins.int = ...,
+        data: collections.abc.Iterable[builtins.bytes] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["address", b"address", "data", b"data", "length", b"length"]) -> None: ...
+
+global___Register = Register
 
 class ControlRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     RESET_DSP_FIELD_NUMBER: builtins.int
     HARD_RESET_DSP_FIELD_NUMBER: builtins.int
     LOAD_PARAMETERS_FIELD_NUMBER: builtins.int
+    READ_REGISTER_FIELD_NUMBER: builtins.int
+    WRITE_REGISTER_FIELD_NUMBER: builtins.int
     reset_dsp: builtins.bool
     hard_reset_dsp: builtins.bool
     @property
     def load_parameters(self) -> global___LoadParameters: ...
-    def __init__(self,
+    @property
+    def read_register(self) -> global___Register: ...
+    @property
+    def write_register(self) -> global___Register: ...
+    def __init__(
+        self,
         *,
         reset_dsp: builtins.bool = ...,
         hard_reset_dsp: builtins.bool = ...,
-        load_parameters: typing.Optional[global___LoadParameters] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["command",b"command","hard_reset_dsp",b"hard_reset_dsp","load_parameters",b"load_parameters","reset_dsp",b"reset_dsp"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["command",b"command","hard_reset_dsp",b"hard_reset_dsp","load_parameters",b"load_parameters","reset_dsp",b"reset_dsp"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["command",b"command"]) -> typing.Optional[typing_extensions.Literal["reset_dsp","hard_reset_dsp","load_parameters"]]: ...
+        load_parameters: global___LoadParameters | None = ...,
+        read_register: global___Register | None = ...,
+        write_register: global___Register | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["command", b"command", "hard_reset_dsp", b"hard_reset_dsp", "load_parameters", b"load_parameters", "read_register", b"read_register", "reset_dsp", b"reset_dsp", "write_register", b"write_register"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["command", b"command", "hard_reset_dsp", b"hard_reset_dsp", "load_parameters", b"load_parameters", "read_register", b"read_register", "reset_dsp", b"reset_dsp", "write_register", b"write_register"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["command", b"command"]) -> typing_extensions.Literal["reset_dsp", "hard_reset_dsp", "load_parameters", "read_register", "write_register"] | None: ...
+
 global___ControlRequest = ControlRequest
 
 class ControlResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     SUCCESS_FIELD_NUMBER: builtins.int
     MESSAGE_FIELD_NUMBER: builtins.int
     success: builtins.bool
-    message: typing.Text
-    def __init__(self,
+    message: builtins.str
+    def __init__(
+        self,
         *,
         success: builtins.bool = ...,
-        message: typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["message",b"message","success",b"success"]) -> None: ...
+        message: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["message", b"message", "success", b"success"]) -> None: ...
+
 global___ControlResponse = ControlResponse

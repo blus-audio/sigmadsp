@@ -336,6 +336,16 @@ class BackendService(BackendServicer):
                 response.message = "Safety check failed, parameters cannot be adjusted."
                 response.success = False
 
+        elif "read_register" == command:
+            value: bytes = self.dsp.read(request.read_register.address, request.read_register.length)
+
+            response.message = f"0x{value.hex()}"
+            response.success = True
+
+        else:
+            response.message = f"Unknown command '{command}'."
+            response.success = False
+
         return response
 
 
