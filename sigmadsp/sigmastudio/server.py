@@ -6,17 +6,18 @@ import logging
 import socket
 import socketserver
 from multiprocessing import Queue
-from typing import Tuple, Type, Union
+from typing import Tuple
+from typing import Type
+from typing import Union
 
-from sigmadsp.sigmastudio.common import (
-    CONNECTION_CLOSED,
-    ReadRequest,
-    ReadResponse,
-    SafeloadRequest,
-    WriteRequest,
-)
-
-from .header import OperationKey, PacketHeader, PacketHeaderGenerator
+from .header import OperationKey
+from .header import PacketHeader
+from .header import PacketHeaderGenerator
+from sigmadsp.sigmastudio.common import CONNECTION_CLOSED
+from sigmadsp.sigmastudio.common import ReadRequest
+from sigmadsp.sigmastudio.common import ReadResponse
+from sigmadsp.sigmastudio.common import SafeloadRequest
+from sigmadsp.sigmastudio.common import WriteRequest
 
 # A logger for this module
 logger = logging.getLogger(__name__)

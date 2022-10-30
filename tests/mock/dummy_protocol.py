@@ -1,9 +1,11 @@
 """This module implements a dummy protocol handler for testing purposes."""
 import logging
-from typing import Dict, List
+from typing import Dict
+from typing import List
 
 from sigmadsp.protocols.common import DspProtocol
-from sigmadsp.sigmastudio.common import ReadRequest, WriteRequest
+from sigmadsp.sigmastudio.common import ReadRequest
+from sigmadsp.sigmastudio.common import WriteRequest
 
 # A logger for this module
 logger = logging.getLogger(__name__)

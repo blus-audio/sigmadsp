@@ -14,32 +14,32 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing import Queue
-from typing import Callable, Dict
+from typing import Callable
+from typing import Dict
 
 import grpc
 from retry.api import retry_call
 
 import sigmadsp
-from sigmadsp.dsp.common import ConfigurationError, Dsp, SafetyCheckError
+from sigmadsp.dsp.common import ConfigurationError
+from sigmadsp.dsp.common import Dsp
+from sigmadsp.dsp.common import SafetyCheckError
 from sigmadsp.dsp.factory import dsp_from_config
-from sigmadsp.generated.backend_service.control_pb2 import (
-    ControlParameterRequest,
-    ControlRequest,
-    ControlResponse,
-)
+from sigmadsp.generated.backend_service.control_pb2 import ControlParameterRequest
+from sigmadsp.generated.backend_service.control_pb2 import ControlRequest
+from sigmadsp.generated.backend_service.control_pb2 import ControlResponse
 from sigmadsp.generated.backend_service.control_pb2_grpc import (
-    BackendServicer,
     add_BackendServicer_to_server,
 )
+from sigmadsp.generated.backend_service.control_pb2_grpc import BackendServicer
 from sigmadsp.helper.settings import SigmadspSettings
-from sigmadsp.sigmastudio.common import (
-    CONNECTION_CLOSED,
-    ReadRequest,
-    ReadResponse,
-    SafeloadRequest,
-    WriteRequest,
-)
-from sigmadsp.sigmastudio.server import SigmaStudioRequestHandler, SigmaStudioTcpServer
+from sigmadsp.sigmastudio.common import CONNECTION_CLOSED
+from sigmadsp.sigmastudio.common import ReadRequest
+from sigmadsp.sigmastudio.common import ReadResponse
+from sigmadsp.sigmastudio.common import SafeloadRequest
+from sigmadsp.sigmastudio.common import WriteRequest
+from sigmadsp.sigmastudio.server import SigmaStudioRequestHandler
+from sigmadsp.sigmastudio.server import SigmaStudioTcpServer
 
 # A logger for this module
 logger = logging.getLogger(__name__)
@@ -55,7 +55,11 @@ class BackendService(BackendServicer):
     send_queue: Queue
     receive_queue: Queue
 
-    def __init__(self, settings: SigmadspSettings, dsp_from_config_fn: Callable[[Dict], Dsp] = dsp_from_config):
+    def __init__(
+        self,
+        settings: SigmadspSettings,
+        dsp_from_config_fn: Callable[[Dict], Dsp] = dsp_from_config,
+    ):
         """Initialize service and start all relevant threads (TCP, SPI).
 
         Args:
@@ -67,7 +71,6 @@ class BackendService(BackendServicer):
         super().__init__()
 
         self._active = True
-
         self.send_queue = Queue()
         self.receive_queue = Queue()
 
@@ -121,11 +124,17 @@ class BackendService(BackendServicer):
         )
 
         self.sigma_tcp_server_worker_thread = threading.Thread(
-            target=self.sigma_tcp_server_worker, daemon=True, name="Sigma TCP server worker"
+            target=self.sigma_tcp_server_worker,
+            daemon=True,
+            name="Sigma TCP server worker",
         )
         self.sigma_tcp_server_worker_thread.start()
 
-        logger.info("Sigma TCP server started on [%s]:%d.", self.config["host"]["ip"], self.config["host"]["port"])
+        logger.info(
+            "Sigma TCP server started on [%s]:%d.",
+            self.config["host"]["ip"],
+            self.config["host"]["port"],
+        )
 
         # Create the request worker thread.
         self.sigma_studio_worker_thread = threading.Thread(
@@ -261,7 +270,8 @@ class BackendService(BackendServicer):
 
         if "change_volume" == command:
             volume_cells_to_adjust = self.settings.parameter_parser.get_matching_cells_by_name_tokens(
-                self.settings.parameter_parser.volume_cells, list(request.change_volume.name_tokens)
+                self.settings.parameter_parser.volume_cells,
+                list(request.change_volume.name_tokens),
             )
 
             if not volume_cells_to_adjust:

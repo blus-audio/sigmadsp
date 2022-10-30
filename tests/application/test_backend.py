@@ -2,7 +2,10 @@
 import pickle
 import time
 import typing
-from typing import Dict, List, Tuple, Union
+from typing import Dict
+from typing import List
+from typing import Tuple
+from typing import Union
 
 from pytest import fixture
 
@@ -11,7 +14,8 @@ from sigmadsp.dsp.adau14xx import Adau14xx
 from sigmadsp.dsp.common import Dsp
 from sigmadsp.helper.conversion import int32_to_bytes
 from sigmadsp.helper.settings import SigmadspSettings
-from sigmadsp.sigmastudio.common import ReadRequest, WriteRequest
+from sigmadsp.sigmastudio.common import ReadRequest
+from sigmadsp.sigmastudio.common import WriteRequest
 from tests.mock.dummy_protocol import DummyProtocol
 from tests.mock.sigma_studio import SigmaTcpClient
 

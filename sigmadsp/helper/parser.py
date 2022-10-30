@@ -1,8 +1,11 @@
 """A module that parses SigmaStudio project files and extracts adjustable cells."""
 import logging
 from dataclasses import dataclass
-from itertools import dropwhile, takewhile
-from typing import ClassVar, List, Union
+from itertools import dropwhile
+from itertools import takewhile
+from typing import ClassVar
+from typing import List
+from typing import Union
 
 # A logger for this module
 logger = logging.getLogger(__name__)

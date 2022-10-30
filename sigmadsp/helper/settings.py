@@ -1,6 +1,7 @@
 """This module contains a class that handles settings for this application."""
 import logging
-from typing import List, Union
+from typing import List
+from typing import Union
 
 import yaml
 

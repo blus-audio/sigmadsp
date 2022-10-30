@@ -4,16 +4,16 @@ import pickle
 import threading
 from multiprocessing import Queue
 from pathlib import Path
-from typing import List, Union
+from typing import List
+from typing import Union
 
 from sigmadsp.sigmastudio.adau14xx import Adau14xxHeaderGenerator
-from sigmadsp.sigmastudio.common import (
-    CONNECTION_CLOSED,
-    ReadRequest,
-    ReadResponse,
-    WriteRequest,
-)
-from sigmadsp.sigmastudio.server import SigmaStudioRequestHandler, SigmaStudioTcpServer
+from sigmadsp.sigmastudio.common import CONNECTION_CLOSED
+from sigmadsp.sigmastudio.common import ReadRequest
+from sigmadsp.sigmastudio.common import ReadResponse
+from sigmadsp.sigmastudio.common import WriteRequest
+from sigmadsp.sigmastudio.server import SigmaStudioRequestHandler
+from sigmadsp.sigmastudio.server import SigmaStudioTcpServer
 
 IP = "localhost"
 PORT = 8089
