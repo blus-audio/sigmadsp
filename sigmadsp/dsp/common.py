@@ -1,20 +1,22 @@
 """General definitions for interfacing DSPs."""
 import logging
 import time
-from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from abc import ABC
+from abc import abstractmethod
+from dataclasses import dataclass
+from dataclasses import field
 from math import nan
-from typing import List, Literal, Union
+from typing import List
+from typing import Literal
+from typing import Union
 
 import gpiozero
 
-from sigmadsp.helper.conversion import (
-    bytes_to_int32,
-    clamp,
-    db_to_linear,
-    int32_to_bytes,
-    linear_to_db,
-)
+from sigmadsp.helper.conversion import bytes_to_int32
+from sigmadsp.helper.conversion import clamp
+from sigmadsp.helper.conversion import db_to_linear
+from sigmadsp.helper.conversion import int32_to_bytes
+from sigmadsp.helper.conversion import linear_to_db
 from sigmadsp.protocols.common import DspProtocol
 from sigmadsp.sigmastudio.header import PacketHeaderGenerator
 

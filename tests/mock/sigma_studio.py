@@ -1,5 +1,4 @@
 """A mockup for Sigma Studio, for testing the backend."""
-
 import logging
 import socket
 import sys

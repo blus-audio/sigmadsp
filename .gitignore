@@ -6,3 +6,5 @@ dist
 build
 .*.sw[po]
 .hypothesis
+.venv
+.virtual*

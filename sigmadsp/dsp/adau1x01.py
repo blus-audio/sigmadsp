@@ -1,15 +1,14 @@
 """This module provides functionality for controlling SigmaDSP ADAU1x01 hardware."""
 import logging
 import math
-from typing import List, Tuple
+from typing import List
+from typing import Tuple
 
 from sigmadsp.dsp.common import Dsp
-from sigmadsp.helper.conversion import (
-    bytes_to_int16,
-    float_to_frac_5_23,
-    frac_5_23_to_float,
-    int16_to_bytes,
-)
+from sigmadsp.helper.conversion import bytes_to_int16
+from sigmadsp.helper.conversion import float_to_frac_5_23
+from sigmadsp.helper.conversion import frac_5_23_to_float
+from sigmadsp.helper.conversion import int16_to_bytes
 from sigmadsp.sigmastudio.adau1x01 import Adau1x01HeaderGenerator
 
 # A logger for this module

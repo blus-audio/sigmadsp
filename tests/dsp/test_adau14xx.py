@@ -1,12 +1,16 @@
 """Tests for different Dsp classes."""
 import math
-from typing import Callable, Union
+from typing import Callable
+from typing import Union
 
 from hypothesis import given
 from hypothesis.strategies import floats
 
-from sigmadsp.dsp.factory import VALID_ADAU14XX, dsp_factory
-from sigmadsp.helper.conversion import db_to_linear, int32_to_bytes, linear_to_db
+from sigmadsp.dsp.factory import dsp_factory
+from sigmadsp.dsp.factory import VALID_ADAU14XX
+from sigmadsp.helper.conversion import db_to_linear
+from sigmadsp.helper.conversion import int32_to_bytes
+from sigmadsp.helper.conversion import linear_to_db
 from tests.mock.dummy_protocol import DummyProtocol
 
 TEST_ADDRESS = 123

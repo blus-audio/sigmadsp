@@ -1,10 +1,12 @@
 """This module implements the base class for I2C and SPI communication handlers."""
 import logging
 import threading
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
 from multiprocessing import Queue
 
-from sigmadsp.sigmastudio.common import ReadRequest, WriteRequest
+from sigmadsp.sigmastudio.common import ReadRequest
+from sigmadsp.sigmastudio.common import WriteRequest
 
 # A logger for this module
 logger = logging.getLogger(__name__)

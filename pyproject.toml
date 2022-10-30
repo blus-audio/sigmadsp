@@ -32,6 +32,7 @@ grpcio-tools = "^1.48.2"
 pytest = "^7.1.2"
 hypothesis = "^6.47.5"
 mypy-protobuf = "^3.3.0"
+debugpy = "^1.6.3"
 
 [tool.poetry-dynamic-versioning]
 enable = true

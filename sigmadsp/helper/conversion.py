@@ -5,7 +5,8 @@
 - Conversion from integers to bytes-like objects of specified length
 """
 import math
-from typing import Literal, Union
+from typing import Literal
+from typing import Union
 
 BIT_LENGTH_8_24 = 31
 BIT_LENGTH_5_23 = 27
