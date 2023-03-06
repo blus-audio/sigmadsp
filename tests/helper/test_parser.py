@@ -6,7 +6,7 @@ from sigmadsp.helper.parser import Parser
 TEST_FILE_PATH = os.path.join(os.path.dirname(__file__), "test_parameter_file.params")
 
 
-def test_parser():
+def test_parser() -> None:
     """Test the parser for correct extraction of parameters from a file."""
     p = Parser()
     p.run(TEST_FILE_PATH)
@@ -26,6 +26,7 @@ def test_parser():
 
     # Test safety hash register
     safety_hash = p.safety_hash_cell
+    assert safety_hash is not None
     assert safety_hash.is_safety_hash
     assert not safety_hash.is_volume_cell
     assert not safety_hash.is_adjustable

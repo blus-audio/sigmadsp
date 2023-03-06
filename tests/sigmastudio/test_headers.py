@@ -1,5 +1,5 @@
 """Tests for the sigmastudio header generators."""
-import pytest
+import pytest  # type: ignore
 
 from sigmadsp.helper.conversion import int16_to_bytes
 from sigmadsp.helper.conversion import int8_to_bytes
@@ -8,7 +8,7 @@ from sigmadsp.sigmastudio.header import Field
 from sigmadsp.sigmastudio.header import OperationKey
 
 
-def test_adau1x01_header_generator():
+def test_adau1x01_header_generator() -> None:
     """Test the adau1x01 write headers."""
     header_generator = Adau1x01HeaderGenerator()
 
@@ -37,7 +37,9 @@ def test_adau1x01_header_generator():
     assert write_header.as_bytes() == header_message
 
     assert "operation" in write_header
-    assert "not_in_there" not in write_header
+
+    # Mypy will catch this error already.
+    assert "not_in_there" not in write_header  # type: ignore
 
     # Test the generation of headers from an operation byte.
     read_request_header = header_generator.new_header_from_operation_key(OperationKey.READ_REQUEST_KEY)
@@ -50,15 +52,17 @@ def test_adau1x01_header_generator():
     assert read_response_header.is_read_response
 
 
-def test_field():
+def test_field() -> None:
     """Test setting values in fields."""
     operation_field = Field("operation", 0, 1)
 
     with pytest.raises(AssertionError) as _:
         # Does not fit in one byte
-        operation_field.value = b"\x1234"
+        # FIXME: Type is correct, see https://github.com/python/mypy/issues/3004.
+        operation_field.value = b"\x1234"  # type: ignore
 
-    operation_field.value = b"\x90"
+    # FIXME: Type is correct, see https://github.com/python/mypy/issues/3004.
+    operation_field.value = b"\x90"  # type: ignore
 
     with pytest.raises(AssertionError) as _:
         # 256 does not fit in one byte

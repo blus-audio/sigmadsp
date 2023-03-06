@@ -9,8 +9,8 @@ from io import TextIOWrapper
 from ipaddress import IPv4Address
 from typing import Union
 
-import click
-import grpc
+import click  # type: ignore
+import grpc  # type: ignore
 
 from sigmadsp.generated.backend_service.control_pb2 import ControlParameterRequest
 from sigmadsp.generated.backend_service.control_pb2 import ControlRequest

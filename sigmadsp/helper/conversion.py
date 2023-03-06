@@ -145,7 +145,7 @@ def bytes_to_int(data: bytes, offset: int = 0, length: Union[int, None] = None) 
             where the complete length of data (after offset) is used.
 
     Returns:
-        int: Integer representation of the input data stream
+        int: Integer representation of the input data stream.
     """
     if length is not None:
         return int.from_bytes(data[offset : offset + length], byteorder=SIGMADSP_ENDIANNESS)
@@ -158,11 +158,11 @@ def bytes_to_int8(data: bytes, offset: int = 0) -> int:
     """Convert one byte to an 8 bit integer value.
 
     Args:
-        data (bytes): Input byte
-        offset (int, optional): Offset in number of bytes, from the beginning of the data buffer
+        data (bytes): Input byte.
+        offset (int, optional): Offset in number of bytes, from the beginning of the data buffer.
 
     Returns:
-        int: 8 bit integer representation of the input data stream
+        int: 8 bit integer representation of the input data stream.
     """
     return bytes_to_int(data, offset, length=1)
 
@@ -171,11 +171,11 @@ def bytes_to_int16(data: bytes, offset: int = 0) -> int:
     """Convert two bytes to a 16 bit integer value.
 
     Args:
-        data (bytes): Input bytes
-        offset (int, optional): Offset in number of bytes, from the beginning of the data buffer
+        data (bytes): Input bytes.
+        offset (int, optional): Offset in number of bytes, from the beginning of the data buffer.
 
     Returns:
-        int: 16 bit integer representation of the input data stream
+        int: 16 bit integer representation of the input data stream.
     """
     return bytes_to_int(data, offset, length=2)
 
@@ -184,23 +184,23 @@ def bytes_to_int32(data: bytes, offset: int = 0) -> int:
     """Convert four bytes to a 32 bit integer value.
 
     Args:
-        data (bytes): Input bytes
-        offset (int, optional): Offset in number of bytes, from the beginning of the data buffer
+        data (bytes): Input bytes.
+        offset (int, optional): Offset in number of bytes, from the beginning of the data buffer.
 
     Returns:
-        int: 32 bit integer representation of the input data stream
+        int: 32 bit integer representation of the input data stream.
     """
     return bytes_to_int(data, offset, length=4)
 
 
-def int_to_bytes(value: int, buffer: bytearray = None, offset: int = 0, length: int = 1):
+def int_to_bytes(value: int, buffer: bytearray | None = None, offset: int = 0, length: int = 1):
     """Fill a buffer with values. If no buffer is provided, a new one is created.
 
     Args:
-        buffer (bytearray): The buffer to fill
-        value (int): The value to pack into the buffer
-        offset (int, optional): Offset in number of bytes, from the beginning of the data buffer
-        length (int): Number of bytes to be written
+        buffer (bytearray | None): The buffer to fill, or None, for creating a new one.
+        value (int): The value to pack into the buffer.
+        offset (int, optional): Offset in number of bytes, from the beginning of the data buffer.
+        length (int): Number of bytes to be written.
     """
     if buffer is None:
         buffer = bytearray(length + offset)

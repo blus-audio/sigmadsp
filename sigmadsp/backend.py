@@ -17,7 +17,7 @@ from multiprocessing import Queue
 from typing import Callable
 from typing import Dict
 
-import grpc
+import grpc  # type: ignore
 from retry.api import retry_call
 
 import sigmadsp
@@ -395,10 +395,7 @@ def main():
         "-s",
         "--settings",
         required=False,
-        help=(
-            "specifies the settings file path for configuring ",
-            "the sigmadsp backend application",
-        ),
+        help=("specifies the settings file path for configuring the sigmadsp backend application"),
     )
     arguments = argument_parser.parse_args()
 

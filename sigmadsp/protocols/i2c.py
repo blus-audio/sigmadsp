@@ -1,8 +1,8 @@
 """This module implements an I2C handler that talks to Sigma DSP devices."""
 import logging
 
-from smbus2 import i2c_msg
-from smbus2 import SMBus
+from smbus2 import i2c_msg  # type: ignore
+from smbus2 import SMBus  # type: ignore
 
 from .common import DspProtocol
 from sigmadsp.helper.conversion import int16_to_bytes

@@ -15,6 +15,9 @@ logger = logging.getLogger(__name__)
 class DspProtocol(ABC):
     """Base class for communication handlers talking to SigmaDSP chipsets."""
 
+    transmit_queue: Queue
+    receive_queue: Queue
+
     def run(self):
         """Start the DSP protocol thread."""
         # Generate queues, for communicating with the protocol handler thread within this class.

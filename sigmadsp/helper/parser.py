@@ -144,11 +144,9 @@ class Parser:
 
             if split_line:
                 if split_line[0] == "Cell" and split_line[1] == "Name":
-
                     name = " ".join(split_line[3:])
 
                 elif split_line[0] == "Parameter":
-
                     if split_line[1] == "Name":
                         parameter_name = " ".join(split_line[3:])
 
