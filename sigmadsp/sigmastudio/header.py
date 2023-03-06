@@ -27,7 +27,7 @@ class OperationKey(Enum):
     WRITE_KEY = 0x09
 
 
-ValidFieldNames = Literal[
+FieldName = Literal[
     "operation", "safeload", "channel", "total_length", "chip_address", "data_length", "address", "success", "reserved"
 ]
 
@@ -37,7 +37,7 @@ class Field:
     """A class that represents a single field in the header."""
 
     # The name of the field.
-    name: ValidFieldNames
+    name: FieldName
 
     # The offset of the field in bytes from the start of the header.
     offset: int
@@ -159,7 +159,7 @@ class PacketHeader:
         """Sorts the fields in this header by their offset."""
         self._fields = OrderedDict(sorted(self._fields.items(), key=lambda item: item[1].offset))
 
-    def add(self, name: ValidFieldNames, offset: int, size: int):
+    def add(self, name: FieldName, offset: int, size: int):
         """Create and add a new field.
 
         Args:
@@ -246,7 +246,7 @@ class PacketHeader:
         for item in self._fields.values():
             yield item
 
-    def __setitem__(self, name: ValidFieldNames, value: Union[int, bytes, bytearray]):
+    def __setitem__(self, name: FieldName, value: Union[int, bytes, bytearray]):
         """Set a field value.
 
         Args:
@@ -259,7 +259,7 @@ class PacketHeader:
         # FIXME: Type is correct, see https://github.com/python/mypy/issues/3004.
         self._fields[name].value = value  # type: ignore
 
-    def __getitem__(self, name: ValidFieldNames) -> Field:
+    def __getitem__(self, name: FieldName) -> Field:
         """Get a field by its name.
 
         Args:
@@ -273,7 +273,7 @@ class PacketHeader:
         """
         return self._fields[name]
 
-    def __contains__(self, name: ValidFieldNames) -> bool:
+    def __contains__(self, name: FieldName) -> bool:
         """Magic methods for using ``in``.
 
         Args:
@@ -303,13 +303,15 @@ class PacketHeaderGenerator(ABC):
     def _new_read_response_header() -> PacketHeader:
         """Generate a new header for a read response packet."""
 
-    def new_header_from_operation_byte(self, operation_byte: bytes, template: PacketHeader = None) -> PacketHeader:
+    def new_header_from_operation_byte(
+        self, operation_byte: bytes, template: PacketHeader | None = None
+    ) -> PacketHeader:
         """Generate a header from an operation byte.
 
         Args:
             operation_key (bytes): The operation byte that determines the header composition.
-            template (PacketHeader, optional): The template, if any, from which to copy fields that fit the new header.
-                Defaults to None.
+            template (PacketHeader | None, optional): The template, if any, from which to copy fields that fit the
+                new header. Defaults to None.
 
         Returns:
             PacketHeader: The new packet header.
@@ -338,13 +340,15 @@ class PacketHeaderGenerator(ABC):
 
         return header
 
-    def new_header_from_operation_key(self, operation_key: OperationKey, template: PacketHeader = None) -> PacketHeader:
+    def new_header_from_operation_key(
+        self, operation_key: OperationKey, template: PacketHeader | None = None
+    ) -> PacketHeader:
         """Generate a header from an operation key.
 
         Args:
             operation_key (OperationKey): The operation key that determines the header composition.
-            template (PacketHeader, optional): The template, if any, from which to copy fields that fit the new header.
-                Defaults to None.
+            template (PacketHeader | None, optional): The template, if any, from which to copy fields that fit the
+                new header. Defaults to None.
 
         Returns:
             PacketHeader: The new packet header.

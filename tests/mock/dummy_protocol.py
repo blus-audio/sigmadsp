@@ -22,7 +22,7 @@ class DummyProtocol(DspProtocol):
         self.reset()
         self.run()
 
-    def reset(self):
+    def reset(self) -> None:
         """Empty all recorded data."""
         self._memory: Dict[int, bytes] = {}
         self._write_requests = []

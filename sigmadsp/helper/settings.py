@@ -16,13 +16,13 @@ class SigmadspSettings:
 
     default_config_path = "/var/lib/sigmadsp/config.yaml"
 
-    def __init__(self, config_path: str = None):
+    def __init__(self, config_path: str | None = None):
         """Load a config file in *.yaml format from a specified path.
 
         If no file is provided, the default path is used for loading settings.
 
         Args:
-            config_path (str, optional): The input path of the settings file.
+            config_path (str | None, optional): The input path of the settings file.
                 Defaults to None.
         """
         if config_path is None:

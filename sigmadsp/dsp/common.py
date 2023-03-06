@@ -10,7 +10,7 @@ from typing import List
 from typing import Literal
 from typing import Union
 
-import gpiozero
+import gpiozero  # type: ignore
 
 from sigmadsp.helper.conversion import bytes_to_int32
 from sigmadsp.helper.conversion import clamp

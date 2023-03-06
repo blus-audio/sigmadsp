@@ -7,7 +7,7 @@ from typing import List
 from typing import Tuple
 from typing import Union
 
-from pytest import fixture
+from pytest import fixture  # type: ignore
 
 from sigmadsp.backend import BackendService
 from sigmadsp.dsp.adau14xx import Adau14xx
