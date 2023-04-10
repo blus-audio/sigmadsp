@@ -10,7 +10,7 @@ repos:
     -   id: reorder-python-imports
 
 -   repo: https://github.com/psf/black
-    rev: 23.1.0
+    rev: 23.3.0
     hooks:
     -   id: black
 
@@ -30,7 +30,7 @@ repos:
     -   id: codespell
 
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.1.1
+    rev: v1.2.0
     hooks:
     -   id: mypy
         additional_dependencies: [types-protobuf, types-PyYAML, types-retry]
@@ -49,7 +49,7 @@ repos:
     -   id: flake8
 
 -   repo: https://github.com/PyCQA/pylint
-    rev: v2.17.1
+    rev: v3.0.0a6
     hooks:
     -   id: pylint
         args:
