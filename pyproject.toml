@@ -17,7 +17,7 @@ sigmadsp-backend = "sigmadsp.backend:main"
 sigmadsp = "sigmadsp.frontend:sigmadsp"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.9"
 PyYAML = "^6.0"
 spidev = "^3.5"
 retry = "^0.9.2"
