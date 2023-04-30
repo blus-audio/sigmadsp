@@ -15,7 +15,7 @@ function yes_or_no {
 
 ### Uninstall happens below
 echo "=== Uninstall $SIGMADSP."
-sudo pip3 uninstall $SIGMADSP --quiet
+pipx uninstall $SIGMADSP
 
 yes_or_no "Delete configuration folder '$CONFIGURATION_FOLDER?'" && sudo rm -rf $CONFIGURATION_FOLDER
 
