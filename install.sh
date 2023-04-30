@@ -8,10 +8,14 @@ echo "=== Install required packages."
 sudo apt-get -qq update
 
 # Install the prerequisite pip3.
-sudo apt-get -qq install -y python3-pip
+sudo apt-get -qq install -y python3-pip python3-venv
+
+# Install pipx for running sigmadsp in a virtual environment.
+python3 -m pip install --user pipx
+python3 -m pipx ensurepath
 
 # Install the package itself, along with its executable scripts.
-sudo pip3 install $SIGMADSP --upgrade --quiet
+pipx install $SIGMADSP
 
 echo "=== Stopping existing '$SIGMADSP_BACKEND' service."
 sudo systemctl stop $SIGMADSP_BACKEND
