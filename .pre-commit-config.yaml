@@ -49,7 +49,7 @@ repos:
     -   id: flake8
 
 -   repo: https://github.com/PyCQA/pylint
-    rev: v2.17.2
+    rev: v2.17.3
     hooks:
     -   id: pylint
         args:
