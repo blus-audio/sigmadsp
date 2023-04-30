@@ -21,11 +21,16 @@ echo "=== Stopping existing '$SIGMADSP_BACKEND' service."
 sudo systemctl stop $SIGMADSP_BACKEND
 sudo systemctl disable $SIGMADSP_BACKEND
 
-echo "=== Generate new configuration for '$SIGMADSP' in '$CONFIGURATION_FOLDER/$CONFIGURATION_FILE'."
-sudo mkdir -p $CONFIGURATION_FOLDER
+if [ -f "$CONFIGURATION_FOLDER/$CONFIGURATION_FILE" ]
+then
+    echo "=== Existing configuration found for '$SIGMADSP' in '$CONFIGURATION_FOLDER/$CONFIGURATION_FILE'. Skip creation."
+else
+    echo "=== Create new configuration for '$SIGMADSP' in '$CONFIGURATION_FOLDER/$CONFIGURATION_FILE'."
+    sudo mkdir -p $CONFIGURATION_FOLDER
 
-envsubst < ./templates/config.yaml.template > $TEMP_FOLDER/$CONFIGURATION_FILE
-sudo mv $TEMP_FOLDER/$CONFIGURATION_FILE $CONFIGURATION_FOLDER/$CONFIGURATION_FILE
+    envsubst < ./templates/config.yaml.template > $TEMP_FOLDER/$CONFIGURATION_FILE
+    sudo mv $TEMP_FOLDER/$CONFIGURATION_FILE $CONFIGURATION_FOLDER/$CONFIGURATION_FILE
+fi
 
 # Create systemd config for the service.
 # This location looks for the service executable, which was previously installed with the Python package.
