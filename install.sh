@@ -2,6 +2,15 @@
 
 # Load configuration for installation.
 source ./templates/.env
+source ./common_functions.sh
+
+function create_new_config_file {
+    echo "=== Create new configuration for '$SIGMADSP' in '$CONFIGURATION_FOLDER/$CONFIGURATION_FILE'."
+    sudo mkdir -p $CONFIGURATION_FOLDER
+
+    envsubst < ./templates/config.yaml.template > $TEMP_FOLDER/$CONFIGURATION_FILE
+    sudo mv $TEMP_FOLDER/$CONFIGURATION_FILE $CONFIGURATION_FOLDER/$CONFIGURATION_FILE
+}
 
 ### Installation starts below. ###
 echo "=== Install required packages."
@@ -23,13 +32,12 @@ sudo systemctl disable $SIGMADSP_BACKEND
 
 if [ -f "$CONFIGURATION_FOLDER/$CONFIGURATION_FILE" ]
 then
-    echo "=== Existing configuration found for '$SIGMADSP' in '$CONFIGURATION_FOLDER/$CONFIGURATION_FILE'. Skip creation."
+    echo "=== Existing configuration found for '$SIGMADSP' in '$CONFIGURATION_FOLDER/$CONFIGURATION_FILE'."
+    yes_or_no "Backup and overwrite existing configuration?" && \
+    sudo mv $CONFIGURATION_FOLDER/$CONFIGURATION_FILE $CONFIGURATION_FOLDER/$CONFIGURATION_FILE.bak && \
+    create_new_config_file
 else
-    echo "=== Create new configuration for '$SIGMADSP' in '$CONFIGURATION_FOLDER/$CONFIGURATION_FILE'."
-    sudo mkdir -p $CONFIGURATION_FOLDER
-
-    envsubst < ./templates/config.yaml.template > $TEMP_FOLDER/$CONFIGURATION_FILE
-    sudo mv $TEMP_FOLDER/$CONFIGURATION_FILE $CONFIGURATION_FOLDER/$CONFIGURATION_FILE
+    create_new_config_file
 fi
 
 # Create systemd config for the service.
