@@ -54,9 +54,7 @@ It also sets up a system service, which runs `sigmadsp-backend` in the backgroun
 
 ## Upgrading
 
-For upgrading, the installation procedure can be repeated, but may overwrite the current configuration file, if selected.
-
-Instead, simply upgrade the Python package and restart the backend service:
+For upgrading, use `pipx` to upgrade the Python package and restart the backend service afterwards:
 
 ```bash
 pipx upgrade sigmadsp &&
