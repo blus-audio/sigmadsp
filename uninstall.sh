@@ -10,9 +10,8 @@ pipx uninstall $SIGMADSP
 
 yes_or_no "Delete configuration folder '$CONFIGURATION_FOLDER?'" && sudo rm -rf $CONFIGURATION_FOLDER
 
-echo "=== Stopping '$SIGMADSP_BACKEND' service."
-sudo systemctl stop $SIGMADSP_BACKEND
-sudo systemctl disable $SIGMADSP_BACKEND
+stop_and_disable_sigmadsp_service
+
 yes_or_no "Delete service configuration '/usr/lib/systemd/system/$SIGMADSP_BACKEND.service'?" && sudo rm /usr/lib/systemd/system/$SIGMADSP_BACKEND.service
 
 echo "=== Uninstalled $SIGMADSP."
