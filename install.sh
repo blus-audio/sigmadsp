@@ -31,7 +31,8 @@ install_pipx
 # Install the package itself, along with its executable scripts.
 pipx install $SIGMADSP_EXECUTABLE
 
-stop_and_disable_sigmadsp_service
+# Optional: stop and disable any old existing service.
+stop_and_disable_sigmadsp_service || true
 
 if [ -f "$SIGMADSP_CONFIGURATION_FOLDER/$SIGMADSP_CONFIGURATION_FILE" ]
 then
