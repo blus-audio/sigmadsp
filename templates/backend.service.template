@@ -4,7 +4,7 @@ Wants=network-online.target
 After=network.target network-online.target
 [Service]
 Type=simple
-ExecStart=$SERVICE_LOCATION -s $CONFIGURATION_FOLDER/$CONFIGURATION_FILE
+ExecStart=$SIGMADSP_SERVICE_LOCATION -s $SIGMADSP_CONFIGURATION_FOLDER/$SIGMADSP_CONFIGURATION_FILE
 StandardOutput=journal
 [Install]
 WantedBy=multi-user.target

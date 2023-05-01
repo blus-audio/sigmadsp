@@ -15,15 +15,15 @@ parameters:
   # The parameter file path, which contains DSP application parameters,
   # such as cell names, addresses and other information. This parameter file is required
   # for the backend, in order to be able to control DSP functionality at runtime, e.g. volume.
-  path: "$CONFIGURATION_FOLDER/$PARAMETER_FILE"
+  path: "$SIGMADSP_CONFIGURATION_FOLDER/$SIGMADSP_PARAMETER_FILE"
 
 dsp:
   # The type of the DSP to control with the $SIGMADSP_BACKEND service.
-  type: "$DSP_TYPE"
+  type: "$SIGMADSP_DSP_TYPE"
   # the protocol used to communicate (spi or i2c)
-  protocol: "$DSP_PROTOCOL"
-  bus_number: "$BUS_NUMBER"
-  device_address: "$DEVICE_ADDRESS"
+  protocol: "$SIGMADSP_DSP_PROTOCOL"
+  bus_number: "$SIGMADSP_BUS_NUMBER"
+  device_address: "$SIGMADSP_DEVICE_ADDRESS"
 
   pins:
     # The DSP's hardware reset pin.

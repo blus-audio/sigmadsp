@@ -1,5 +1,12 @@
 #!/bin/bash
 
+if [ "$(id -u)" -eq 0 ]; then
+    echo "Do not run this script as root."
+    exit 1
+fi
+
+set -e
+
 # Ask the user a yes/no question. Returns zero for yes, one for no.
 function yes_or_no {
     while true; do

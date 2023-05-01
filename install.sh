@@ -6,11 +6,11 @@ source ./common_functions.sh
 
 # Creates a new sigmadsp configuration file. This overwrites an old file with the same name.
 function create_new_config_file {
-    echo "=== Create new configuration for '$SIGMADSP' in '$CONFIGURATION_FOLDER/$CONFIGURATION_FILE'."
-    sudo mkdir -p $CONFIGURATION_FOLDER
+    echo "=== Create new configuration for '$SIGMADSP_EXECUTABLE' in '$SIGMADSP_CONFIGURATION_FOLDER/$SIGMADSP_CONFIGURATION_FILE'."
+    sudo mkdir -p $SIGMADSP_CONFIGURATION_FOLDER
 
-    envsubst < ./templates/config.yaml.template > $TEMP_FOLDER/$CONFIGURATION_FILE
-    sudo mv $TEMP_FOLDER/$CONFIGURATION_FILE $CONFIGURATION_FOLDER/$CONFIGURATION_FILE
+    envsubst < ./templates/config.yaml.template > $SIGMADSP_TEMP_FOLDER/$SIGMADSP_CONFIGURATION_FILE
+    sudo mv $SIGMADSP_TEMP_FOLDER/$SIGMADSP_CONFIGURATION_FILE $SIGMADSP_CONFIGURATION_FOLDER/$SIGMADSP_CONFIGURATION_FILE
 }
 
 # Install pipx, for later installing the sigmadsp package.
@@ -29,11 +29,11 @@ sudo apt-get -qq update
 install_pipx
 
 # Install the package itself, along with its executable scripts.
-pipx install $SIGMADSP
+pipx install $SIGMADSP_EXECUTABLE
 
 stop_and_disable_sigmadsp_service
 
-if [ -f "$CONFIGURATION_FOLDER/$CONFIGURATION_FILE" ]
+if [ -f "$SIGMADSP_CONFIGURATION_FOLDER/$SIGMADSP_CONFIGURATION_FILE" ]
 then
     echo "=== Existing configuration found for '$SIGMADSP' in '$CONFIGURATION_FOLDER/$CONFIGURATION_FILE'."
     yes_or_no "Backup and overwrite existing configuration?" && \
@@ -45,12 +45,12 @@ fi
 
 # Create systemd config for the service.
 # This location looks for the service executable, which was previously installed with the Python package.
-SERVICE_LOCATION=`which $SIGMADSP_BACKEND`
-export SERVICE_LOCATION
+SIGMADSP_SERVICE_LOCATION=`which $SIGMADSP_BACKEND`
+export SIGMADSP_SERVICE_LOCATION
 
 echo "=== Setup '$SIGMADSP_BACKEND' service."
-envsubst < ./templates/backend.service.template > $TEMP_FOLDER/$SIGMADSP_BACKEND.service
-sudo mv $TEMP_FOLDER/$SIGMADSP_BACKEND.service /usr/lib/systemd/system/$SIGMADSP_BACKEND.service
+envsubst < ./templates/backend.service.template > $SIGMADSP_TEMP_FOLDER/$SIGMADSP_BACKEND.service
+sudo mv $SIGMADSP_TEMP_FOLDER/$SIGMADSP_BACKEND.service /usr/lib/systemd/system/$SIGMADSP_BACKEND.service
 
 sudo systemctl daemon-reload
 sudo systemctl start $SIGMADSP_BACKEND
@@ -58,7 +58,7 @@ sudo systemctl enable $SIGMADSP_BACKEND
 
 # Enable SPI for controlling DSP chipsets.
 CONFIG=/boot/config.txt
-TEMP_CONFIG=$TEMP_FOLDER/config.txt
+TEMP_CONFIG=$SIGMADSP_TEMP_FOLDER/config.txt
 
 cat $CONFIG | grep -v "dtparam=spi" > $TEMP_CONFIG
 echo "dtparam=spi=on # SPI enabled for $SIGMADSP_BACKEND" >> $TEMP_CONFIG
@@ -68,4 +68,4 @@ sudo chown --reference=$CONFIG $TEMP_CONFIG
 
 sudo mv $TEMP_CONFIG $CONFIG
 
-echo "=== Finished installation of '$SIGMADSP' and its backend service '$SIGMADSP_BACKEND'."
+echo "=== Finished installation of '$SIGMADSP_EXECUTABLE' and its backend service '$SIGMADSP_BACKEND'."
