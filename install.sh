@@ -4,6 +4,7 @@
 source ./templates/.env
 source ./common_functions.sh
 
+# Creates a new sigmadsp configuration file. This overwrites an old file with the same name.
 function create_new_config_file {
     echo "=== Create new configuration for '$SIGMADSP' in '$CONFIGURATION_FOLDER/$CONFIGURATION_FILE'."
     sudo mkdir -p $CONFIGURATION_FOLDER
@@ -12,23 +13,25 @@ function create_new_config_file {
     sudo mv $TEMP_FOLDER/$CONFIGURATION_FILE $CONFIGURATION_FOLDER/$CONFIGURATION_FILE
 }
 
+# Install pipx, for later installing the sigmadsp package.
+function install_pipx {
+    # Install the prerequisite pip3.
+    sudo apt-get -qq install -y python3-pip python3-venv
+
+    # Install pipx for running sigmadsp in a virtual environment.
+    python3 -m pip install --user pipx
+    python3 -m pipx ensurepath
+}
+
 ### Installation starts below. ###
 echo "=== Install required packages."
 sudo apt-get -qq update
-
-# Install the prerequisite pip3.
-sudo apt-get -qq install -y python3-pip python3-venv
-
-# Install pipx for running sigmadsp in a virtual environment.
-python3 -m pip install --user pipx
-python3 -m pipx ensurepath
+install_pipx
 
 # Install the package itself, along with its executable scripts.
 pipx install $SIGMADSP
 
-echo "=== Stopping existing '$SIGMADSP_BACKEND' service."
-sudo systemctl stop $SIGMADSP_BACKEND
-sudo systemctl disable $SIGMADSP_BACKEND
+stop_and_disable_sigmadsp_service
 
 if [ -f "$CONFIGURATION_FOLDER/$CONFIGURATION_FILE" ]
 then

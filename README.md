@@ -50,17 +50,18 @@ cd sigmadsp &&
 The script installs the Python package, which includes the `sigmadsp-backend` (the backend) and `sigmadsp` (the frontend) executables.
 It also sets up a system service, which runs `sigmadsp-backend` in the background.
 
+[pipx](https://pypa.github.io/pipx/) is used for installing the Python package in an isolated way, without having to use `sudo pip install <package>`.
+
 ## Upgrading
 
-For upgrading, the installation procedure can be repeated, but will overwrite the current configuration file.
+For upgrading, the installation procedure can be repeated, but may overwrite the current configuration file, if selected.
 
 Instead, simply upgrade the Python package and restart the backend service:
 
 ```bash
-sudo pip3 install sigmadsp --upgrade &&
+pipx upgrade sigmadsp &&
 sudo systemctl restart sigmadsp-backend.service
 ```
-
 
 ## Removal
 
@@ -70,13 +71,15 @@ From within the previously cloned repository folder `sigmadsp` run
 ./uninstall.sh
 ```
 
+If you find that this removal procedure leaves any files unremoved, please open an issue.
+
 ## Configuration
 
 Configuration of `sigmadsp` is done via a `*.yaml` file, which is created during installation. Its default path is `/var/lib/sigmadsp/config.yaml`.
 
 ## Usage
 
-For a list of commands that can be emitted by the frontend, simply type
+For a list of commands that can be emitted by the frontend, please type
 
 ```bash
 sigmadsp -h

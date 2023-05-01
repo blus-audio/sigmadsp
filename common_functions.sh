@@ -10,3 +10,10 @@ function yes_or_no {
         esac
     done
 }
+
+# Stops and disables the sigmadsp backend service.
+function stop_and_disable_sigmadsp_service {
+    echo "=== Stopping and disabling existing '$SIGMADSP_BACKEND' service."
+    sudo systemctl stop $SIGMADSP_BACKEND
+    sudo systemctl disable $SIGMADSP_BACKEND
+}
