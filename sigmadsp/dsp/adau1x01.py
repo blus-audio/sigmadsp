@@ -15,7 +15,7 @@ from sigmadsp.sigmastudio.adau1x01 import Adau1x01HeaderGenerator
 logger = logging.getLogger(__name__)
 
 
-class Adau1x01(Dsp):
+class Adau1x0x(Dsp):
     """A class for controlling functionality of Analog Devices Sigma DSPs, especially ADAU1x01 series parts."""
 
     # Addresses and sizes of important registers
@@ -68,16 +68,16 @@ class Adau1x01(Dsp):
 
         # load up the address and data in safeload registers
         for sd in range(0, word_count):
-            address_register, data_register = Adau1x01.SAFELOAD_REGISTERS[sd]
+            address_register, data_register = Adau1x0x.SAFELOAD_REGISTERS[sd]
             address_bytes = int16_to_bytes(address)
-            data_buf = bytearray(Adau1x01.SAFELOAD_SD_LENGTH)
+            data_buf = bytearray(Adau1x0x.SAFELOAD_SD_LENGTH)
 
-            data_buf[1:] = data[sd * Adau1x01.FIXPOINT_REGISTER_LENGTH : (sd + 1) * Adau1x01.FIXPOINT_REGISTER_LENGTH]
+            data_buf[1:] = data[sd * Adau1x0x.FIXPOINT_REGISTER_LENGTH : (sd + 1) * Adau1x0x.FIXPOINT_REGISTER_LENGTH]
 
             self.write(address_register, address_bytes)
             self.write(data_register, data_buf)
 
-        control_bytes = self.read(Adau1x01.CONTROL_REGISTER, Adau1x01.CONTROL_REGISTER_LENGTH)
+        control_bytes = self.read(Adau1x0x.CONTROL_REGISTER, Adau1x0x.CONTROL_REGISTER_LENGTH)
         control_reg = bytes_to_int16(control_bytes)
 
         ist_mask = 1 << 5
@@ -85,4 +85,4 @@ class Adau1x01(Dsp):
         control_reg |= ist_mask
 
         # start safe load
-        self.write(Adau1x01.CONTROL_REGISTER, int16_to_bytes(control_reg))
+        self.write(Adau1x0x.CONTROL_REGISTER, int16_to_bytes(control_reg))

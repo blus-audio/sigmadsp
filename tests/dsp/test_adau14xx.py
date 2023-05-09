@@ -6,8 +6,8 @@ from typing import Union
 from hypothesis import given  # type: ignore
 from hypothesis.strategies import floats  # type: ignore
 
+from sigmadsp.dsp.factory import ADAU14XX
 from sigmadsp.dsp.factory import dsp_factory
-from sigmadsp.dsp.factory import VALID_ADAU14XX
 from sigmadsp.helper.conversion import db_to_linear
 from sigmadsp.helper.conversion import int32_to_bytes
 from sigmadsp.helper.conversion import linear_to_db
@@ -48,7 +48,7 @@ def test_adau14xx_adjust_volume(test_volume: float, volume_change_db: float):
     test_volume_db = linear_to_db(test_volume)
 
     # Do not use safeload while testing. The dummy protocol does not support it.
-    adau14xx = dsp_factory(VALID_ADAU14XX[0])(False, dummy_protocol)
+    adau14xx = dsp_factory(ADAU14XX)(False, dummy_protocol)
 
     dummy_protocol.write(TEST_ADDRESS, int32_to_bytes(adau14xx.float_to_frac(test_volume)))
 
@@ -77,7 +77,7 @@ def test_adau14xx_set_volume(test_volume_db: float):
     dummy_protocol = DummyProtocol()
 
     # Do not use safeload while testing. The dummy protocol does not support it.
-    adau14xx = dsp_factory(VALID_ADAU14XX[0])(False, dummy_protocol)
+    adau14xx = dsp_factory(ADAU14XX)(False, dummy_protocol)
 
     current_volume_db = round_value_db_dsp(test_volume_db, adau14xx.float_to_frac, adau14xx.frac_to_float)
     if current_volume_db is None:

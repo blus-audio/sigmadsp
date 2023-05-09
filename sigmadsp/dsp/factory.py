@@ -5,7 +5,7 @@ from typing import Type
 from typing import Union
 
 from .adau14xx import Adau14xx
-from .adau1x01 import Adau1x01
+from .adau1x01 import Adau1x0x
 from .common import ConfigurationError
 from .common import Dsp
 from .common import InputPin
@@ -15,8 +15,8 @@ from sigmadsp.protocols.spi import SpiProtocol
 
 logger = logging.getLogger(__name__)
 
-VALID_ADAU14XX = ["adau14xx", "adau145x", "adau146x", "adau147x"]
-VALID_ADAU1X01 = ["adau1x01", "adau1401", "adau1701"]
+ADAU_14XX = "adau14xx"
+ADAU_1X0X = "adau1x0x"
 
 
 def dsp_factory(dsp_type_name: str) -> Type[Dsp]:
@@ -28,11 +28,11 @@ def dsp_factory(dsp_type_name: str) -> Type[Dsp]:
     Returns:
         Type[Dsp]: The matching DSP class.
     """
-    if dsp_type_name in VALID_ADAU14XX:
+    if dsp_type_name == ADAU_14XX:
         return Adau14xx
 
-    elif dsp_type_name in VALID_ADAU1X01:
-        return Adau1x01
+    elif dsp_type_name == ADAU_1X0X:
+        return Adau1x0x
 
     else:
         raise TypeError("DSP type {dsp_type} is not known.")
