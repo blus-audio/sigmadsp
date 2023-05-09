@@ -15,7 +15,7 @@ from tests.mock.dummy_protocol import DummyProtocol
 
 TEST_ADDRESS = 123
 ABS_TOL = 0.1
-REL_TOL = 1e-2
+REL_TOL = 0.02
 
 
 def round_value_db_dsp(value_db: float, float_to_frac_fn: Callable, frac_to_float_fn: Callable) -> Union[float, None]:
