@@ -1,10 +1,11 @@
 """A module that parses SigmaStudio project files and extracts adjustable cells."""
+from __future__ import annotations
+
 import logging
 from dataclasses import dataclass
 from itertools import dropwhile
 from itertools import takewhile
 from typing import ClassVar
-from typing import Union
 
 # A logger for this module
 logger = logging.getLogger(__name__)
@@ -24,7 +25,7 @@ class Cell:
     parameter_name: str
 
     # The value of the parameter, if any.
-    parameter_value: Union[int, float, None]
+    parameter_value: int | float | None
 
     # This string separates prefixes within a cell name.
     PREFIX_SEPARATOR: ClassVar[str] = "_"
@@ -77,7 +78,7 @@ class Cell:
         For example ['adjustable', 'volume'] for a full cell name 'adjustable_volume_main_left'.
 
         Returns:
-            Union[List[str], None]: The list of tokens, if they are valid prefixes, None otherwise.
+            list[str]: The list of tokens, if they are valid prefixes, None otherwise.
         """
         if Cell.PREFIX_SEPARATOR in self.full_name:
             return [prefix for prefix in self.full_name_tokens if prefix in Cell.VALID_PREFIX_TOKENS]
@@ -124,16 +125,16 @@ class Parser:
         """Initialize the parameter file parser with an empty list of cells."""
         self.cells: list[Cell] = []
 
-    def extract_cell(self, cell_lines: list[str]) -> Union[Cell, None]:
+    def extract_cell(self, cell_lines: list[str]) -> Cell | None:
         """Read a block of data from the parameter listing, and creates a new Cell from it.
 
         Args:
             cell_lines (List[str]): The lines from the listing to read from.
 
         Returns:
-            Union[Cell, None]: The new Cell, if the data from the listing is valid, None otherwise.
+            Cell | None: The new Cell, if the data from the listing is valid, None otherwise.
         """
-        parameter_value: Union[float, int, None] = None
+        parameter_value: float | int | None = None
         parameter_name: str
         parameter_address: int
 
@@ -211,7 +212,7 @@ class Parser:
             logger.info("Parameter file %s not found.", file_path)
 
     @property
-    def safety_hash_cell(self) -> Union[Cell, None]:
+    def safety_hash_cell(self) -> Cell | None:
         """Find and return the safety hash cell, if it exists.
 
         Returns:

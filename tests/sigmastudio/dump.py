@@ -1,10 +1,11 @@
 """Helper functionality for dumping data from SigmaStudio."""
+from __future__ import annotations
+
 import logging
 import pickle
 import threading
 from multiprocessing import Queue
 from pathlib import Path
-from typing import Union
 
 from sigmadsp.sigmastudio.adau14xx import Adau14xxHeaderGenerator
 from sigmadsp.sigmastudio.common import CONNECTION_CLOSED
@@ -50,7 +51,7 @@ def dump_sigma_studio(output_path: Path):
     sigma_tcp_server_thread = threading.Thread(target=server_worker, args=(server,), daemon=True)
     sigma_tcp_server_thread.start()
 
-    requests: list[Union[ReadRequest, WriteRequest]] = []
+    requests: list[ReadRequest | WriteRequest] = []
     raw_requests: list[bytes] = []
 
     with server:

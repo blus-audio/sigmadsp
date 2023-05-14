@@ -1,8 +1,9 @@
 """Tests for the backend service."""
+from __future__ import annotations
+
 import pickle
 import time
 import typing
-from typing import Union
 
 from pytest import fixture
 
@@ -53,7 +54,7 @@ def test_backend_service(settings: SigmadspSettings):
     protocol.write(safety_hash_cell.parameter_address, int32_to_bytes(safety_hash_cell.parameter_value))
 
     with open("sigma_studio_dump.pkl", "rb") as dump_file:
-        dump: tuple[list[bytes], list[Union[ReadRequest, WriteRequest]]] = pickle.load(dump_file)
+        dump: tuple[list[bytes], list[ReadRequest | WriteRequest]] = pickle.load(dump_file)
         raw_requests, requests = dump
 
     client = SigmaTcpClient(ip=settings.config["host"]["ip"], port=settings.config["host"]["port"])

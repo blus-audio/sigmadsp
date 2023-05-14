@@ -142,7 +142,7 @@ def bytes_to_int(data: bytes, offset: int = 0, length: int | None = None) -> int
     Args:
         data (bytes): Input bytes
         offset (int, optional): Offset in number of bytes, from the beginning of the data buffer
-        length (Union[int, None], optional): Number of bytes to convert. Defaults to None,
+        length (int | None, optional): Number of bytes to convert. Defaults to None,
             where the complete length of data (after offset) is used.
 
     Returns:
