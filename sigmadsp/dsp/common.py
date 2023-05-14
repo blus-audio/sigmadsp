@@ -1,4 +1,6 @@
 """General definitions for interfacing DSPs."""
+from __future__ import annotations
+
 import logging
 import time
 from abc import ABC
@@ -6,11 +8,9 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from dataclasses import field
 from math import nan
-from typing import List
 from typing import Literal
-from typing import Union
 
-import gpiozero  # type: ignore
+import gpiozero
 
 from sigmadsp.helper.conversion import bytes_to_int32
 from sigmadsp.helper.conversion import clamp
@@ -52,7 +52,7 @@ class InputPin(Pin):
 
     pull_up: bool
     active_state: bool
-    bounce_time: Union[float, None]
+    bounce_time: float | None
 
     def __post_init__(self):
         """Initialize the input device, based on the configured parameters."""
@@ -78,7 +78,7 @@ class Dsp(ABC):
 
     use_safeload: bool
     dsp_protocol: DspProtocol
-    pins: List[Pin] = field(default_factory=list)
+    pins: list[Pin] = field(default_factory=list)
 
     # All fixpoint (parameter) registers are four bytes long
     FIXPOINT_REGISTER_LENGTH = 4
@@ -98,14 +98,14 @@ class Dsp(ABC):
     def frac_to_float(value: int) -> float:
         """The method that converts fractional integers to floating-point values on this Dsp."""
 
-    def get_pin_by_name(self, name: str) -> Union[Pin, None]:
+    def get_pin_by_name(self, name: str) -> Pin | None:
         """Get a pin by its name.
 
         Args:
             name (str): The name of the pin.
 
         Returns:
-            Union[Pin, None]: The pin, if one matches, None otherwise.
+            Pin | None: The pin, if one matches, None otherwise.
         """
         for pin in self.pins:
             if pin.name == name:
@@ -267,15 +267,15 @@ class Dsp(ABC):
             data (bytes): Data to write
         """
 
-    def set_parameter_value(self, value: Union[float, int], address: int, data_format: ParameterType) -> None:
+    def set_parameter_value(self, value: float | int, address: int, data_format: ParameterType) -> None:
         """Set a parameter value for a chosen register address. Registers are 32 bits wide.
 
         Args:
-            value (float): The value to store in the register
+            value (float | int): The value to store in the register
             address (int): The target address
             data_format (PARAMETER_TYPE): The data type of value. Can be ``float`` or ``int``.
         """
-        data_register: Union[bytes, None] = None
+        data_register: bytes | None = None
 
         if data_format == "float":
             data_register = int32_to_bytes(self.float_to_frac(value))
@@ -290,7 +290,7 @@ class Dsp(ABC):
             else:
                 self.write(address, data_register)
 
-    def get_parameter_value(self, address: int, data_format: Literal["int", "float"]) -> Union[float, int, None]:
+    def get_parameter_value(self, address: int, data_format: Literal["int", "float"]) -> float | int | None:
         """Get a parameter value from a chosen register address.
 
         Args:
@@ -298,7 +298,7 @@ class Dsp(ABC):
             data_format (Literal["int", "float"]): The data type to return the register in. Can be ``float`` or ``int``.
 
         Returns:
-            Union[float, int, None]: Representation of the register content in the specified format.
+            float | int | None: Representation of the register content in the specified format.
         """
         data_register = self.read(address, Dsp.FIXPOINT_REGISTER_LENGTH)
         data_integer = bytes_to_int32(data_register)

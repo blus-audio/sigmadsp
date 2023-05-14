@@ -1,5 +1,5 @@
 """Test conversion functions."""
-import pytest  # type: ignore
+import pytest
 
 from sigmadsp.helper.conversion import clamp
 

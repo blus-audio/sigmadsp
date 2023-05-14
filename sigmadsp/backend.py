@@ -15,9 +15,8 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing import Queue
 from typing import Callable
-from typing import Dict
 
-import grpc  # type: ignore
+import grpc
 from retry.api import retry_call
 
 import sigmadsp
@@ -58,7 +57,7 @@ class BackendService(BackendServicer):
     def __init__(
         self,
         settings: SigmadspSettings,
-        dsp_from_config_fn: Callable[[Dict], Dsp] = dsp_from_config,
+        dsp_from_config_fn: Callable[[dict], Dsp] = dsp_from_config,
     ):
         """Initialize service and start all relevant threads (TCP, SPI).
 

@@ -3,8 +3,8 @@ import math
 from typing import Callable
 from typing import Union
 
-from hypothesis import given  # type: ignore
-from hypothesis.strategies import floats  # type: ignore
+from hypothesis import given
+from hypothesis.strategies import floats
 
 from sigmadsp.dsp.factory import ADAU_14XX
 from sigmadsp.dsp.factory import dsp_factory

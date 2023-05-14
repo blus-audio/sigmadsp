@@ -41,12 +41,16 @@ latest-tag = true
 vcs = "git"
 style = "semver"
 
-[tool.isort]
-profile = "black"
+[build-system]
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 120
 
-[build-system]
-requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
-build-backend = "poetry.core.masonry.api"
+[tool.ruff]
+line-length = 120
+target-version = "py39"
+
+[tool.mypy]
+ignore_missing_imports = true

@@ -1,9 +1,16 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 
-exclude: (generated)
+exclude: (generated|.params)
 
 repos:
+-   repo: https://github.com/asottile/pyupgrade
+    rev: v3.4.0
+    hooks:
+    -   id: pyupgrade
+        args:
+        - --py39-plus
+
 -   repo: https://github.com/asottile/reorder_python_imports
     rev: v3.9.0
     hooks:
@@ -24,34 +31,24 @@ repos:
     -   id: check-ast
     -   id: check-case-conflict
 
--   repo: https://github.com/codespell-project/codespell
-    rev: v2.2.4
+-   repo: https://github.com/crate-ci/typos
+    rev: v1.14.9
     hooks:
-    -   id: codespell
+      - id: typos
+        args:
+            []
 
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.2.0
+    rev: v1.3.0
     hooks:
     -   id: mypy
         additional_dependencies: [types-protobuf, types-PyYAML, types-retry]
-
--   repo: https://github.com/PyCQA/pydocstyle
-    rev: 6.3.0
-    hooks:
-    -   id: pydocstyle
-        additional_dependencies: [toml]
         args:
-        - --convention=google
+        - --check-untyped-defs
 
--   repo: https://github.com/PyCQA/flake8
-    rev: 6.0.0
+-   repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: 'v0.0.267'
     hooks:
-    -   id: flake8
-
--   repo: https://github.com/PyCQA/pylint
-    rev: v2.17.3
-    hooks:
-    -   id: pylint
-        args:
-        - --ignore-imports=yes
-        - --jobs=8
+    -   id: ruff
+        # args:
+        # - --fix
