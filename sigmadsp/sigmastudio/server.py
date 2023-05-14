@@ -6,8 +6,6 @@ import logging
 import socket
 import socketserver
 from multiprocessing import Queue
-from typing import Tuple
-from typing import Type
 from typing import Union
 
 from .header import OperationKey
@@ -51,7 +49,7 @@ class Packet:
 
         except AttributeError:
             # There is no payload for this packet.
-            return bytes()
+            return b""
 
     @payload.setter
     def payload(self, new_payload: bytes):
@@ -86,8 +84,8 @@ class SigmaStudioTcpServer(socketserver.TCPServer):
 
     def __init__(
         self,
-        server_address: Tuple[str, int],
-        request_handler_type: Type[socketserver.BaseRequestHandler],
+        server_address: tuple[str, int],
+        request_handler_type: type[socketserver.BaseRequestHandler],
         packet_header_generator: PacketHeaderGenerator,
         send_queue: Queue,
         receive_queue: Queue,

@@ -4,7 +4,6 @@ import pickle
 import threading
 from multiprocessing import Queue
 from pathlib import Path
-from typing import List
 from typing import Union
 
 from sigmadsp.sigmastudio.adau14xx import Adau14xxHeaderGenerator
@@ -51,8 +50,8 @@ def dump_sigma_studio(output_path: Path):
     sigma_tcp_server_thread = threading.Thread(target=server_worker, args=(server,), daemon=True)
     sigma_tcp_server_thread.start()
 
-    requests: List[Union[ReadRequest, WriteRequest]] = []
-    raw_requests: List[bytes] = []
+    requests: list[Union[ReadRequest, WriteRequest]] = []
+    raw_requests: list[bytes] = []
 
     with server:
         while True:

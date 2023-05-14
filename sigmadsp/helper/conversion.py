@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import math
 from typing import Literal
-from typing import Union
 
 BIT_LENGTH_8_24 = 31
 BIT_LENGTH_5_23 = 27
@@ -135,7 +134,7 @@ def linear_to_db(value_linear: float) -> float:
     return 20 * math.log10(value_linear)
 
 
-def bytes_to_int(data: bytes, offset: int = 0, length: Union[int, None] = None) -> int:
+def bytes_to_int(data: bytes, offset: int = 0, length: int | None = None) -> int:
     """Convert a number of bytes to their integer representation.
 
     Uses "length" bytes from the "data" input, starting at "offset".

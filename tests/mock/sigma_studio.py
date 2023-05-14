@@ -20,7 +20,7 @@ class SigmaTcpClient:
         try:
             self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        except socket.error:
+        except OSError:
             logger.error("Failed to create socket.")
             sys.exit()
 
@@ -28,7 +28,7 @@ class SigmaTcpClient:
             try:
                 self.s.connect((ip, port))
 
-            except socket.error:
+            except OSError:
                 logger.warning("Could not connect to socket.")
                 time.sleep(0.01)
 

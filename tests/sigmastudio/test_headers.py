@@ -1,5 +1,5 @@
 """Tests for the sigmastudio header generators."""
-import pytest  # type: ignore
+import pytest
 
 from sigmadsp.helper.conversion import int16_to_bytes
 from sigmadsp.helper.conversion import int8_to_bytes

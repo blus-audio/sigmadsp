@@ -1,8 +1,8 @@
 """This module provides functionality for controlling SigmaDSP ADAU1x01 hardware."""
+from __future__ import annotations
+
 import logging
 import math
-from typing import List
-from typing import Tuple
 
 from sigmadsp.dsp.common import Dsp
 from sigmadsp.helper.conversion import bytes_to_int16
@@ -19,11 +19,14 @@ class Adau1x0x(Dsp):
     """A class for controlling functionality of Analog Devices Sigma DSPs, especially ADAU1x01 series parts."""
 
     # Addresses and sizes of important registers
-    CONTROL_REGISTER = 0x081C
-    CONTROL_REGISTER_LENGTH = 2
+    DSP_CORE_CONTROL_REGISTER = 0x081C
+    DSP_CORE_CONTROL_REGISTER_LENGTH = 2
+
+    DSP_CORE_CONTROL_REGISTER_IST_POS = 5
+    DSP_CORE_CONTROL_REGISTER_IST_MASK = 1 << DSP_CORE_CONTROL_REGISTER_IST_POS
 
     # Safeload registers (address, data)
-    SAFELOAD_REGISTERS: List[Tuple[int, int]] = [
+    SAFELOAD_REGISTERS: list[tuple[int, int]] = [
         (0x0815, 0x810),
         (0x0816, 0x811),
         (0x0815, 0x812),
@@ -32,8 +35,8 @@ class Adau1x0x(Dsp):
     ]
 
     # Safeload register length
-    SAFELOAD_SA_LENGTH = 2
-    SAFELOAD_SD_LENGTH = 5
+    SAFELOAD_ADDRESS_REGISTER_LENGTH = 2
+    SAFELOAD_DATA_REGISTER_LENGTH = 5
 
     header_generator = Adau1x01HeaderGenerator()
 
@@ -70,19 +73,17 @@ class Adau1x0x(Dsp):
         for sd in range(0, word_count):
             address_register, data_register = Adau1x0x.SAFELOAD_REGISTERS[sd]
             address_bytes = int16_to_bytes(address)
-            data_buf = bytearray(Adau1x0x.SAFELOAD_SD_LENGTH)
+            data_buf = bytearray(Adau1x0x.SAFELOAD_DATA_REGISTER_LENGTH)
 
             data_buf[1:] = data[sd * Adau1x0x.FIXPOINT_REGISTER_LENGTH : (sd + 1) * Adau1x0x.FIXPOINT_REGISTER_LENGTH]
 
             self.write(address_register, address_bytes)
             self.write(data_register, data_buf)
 
-        control_bytes = self.read(Adau1x0x.CONTROL_REGISTER, Adau1x0x.CONTROL_REGISTER_LENGTH)
+        control_bytes = self.read(Adau1x0x.DSP_CORE_CONTROL_REGISTER, Adau1x0x.DSP_CORE_CONTROL_REGISTER_LENGTH)
         control_reg = bytes_to_int16(control_bytes)
 
-        ist_mask = 1 << 5
-
-        control_reg |= ist_mask
+        control_reg |= Adau1x0x.DSP_CORE_CONTROL_REGISTER_IST_MASK
 
         # start safe load
-        self.write(Adau1x0x.CONTROL_REGISTER, int16_to_bytes(control_reg))
+        self.write(Adau1x0x.DSP_CORE_CONTROL_REGISTER, int16_to_bytes(control_reg))

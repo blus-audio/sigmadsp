@@ -2,8 +2,6 @@
 from __future__ import annotations
 
 import logging
-from typing import List
-from typing import Union
 
 import yaml
 
@@ -32,7 +30,7 @@ class SigmadspSettings:
 
         try:
             # Open settings file, in order to configure the application
-            with open(config_path, "r", encoding="utf8") as settings_file:
+            with open(config_path, encoding="utf8") as settings_file:
                 self.config = yaml.safe_load(settings_file)
                 logger.info("Settings file %s was loaded.", config_path)
 
@@ -41,7 +39,7 @@ class SigmadspSettings:
             raise
 
         # A parser for parameters, defined in the config file.
-        self.parameter_parser: Union[Parser, None] = None
+        self.parameter_parser: Parser | None = None
 
         self.load_parameters()
 
@@ -56,7 +54,7 @@ class SigmadspSettings:
         except (IndexError, TypeError):
             logger.info("No parameter path was defined in the configuration file.")
 
-    def store_parameters(self, lines: List[str]):
+    def store_parameters(self, lines: list[str]):
         """Store parameters to the parameter file.
 
         Args:

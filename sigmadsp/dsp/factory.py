@@ -1,11 +1,9 @@
 """Factory module for generating DSP objects."""
 import logging
-from typing import Dict
-from typing import Type
 from typing import Union
 
 from .adau14xx import Adau14xx
-from .adau1x01 import Adau1x0x
+from .adau1x0x import Adau1x0x
 from .common import ConfigurationError
 from .common import Dsp
 from .common import InputPin
@@ -19,7 +17,7 @@ ADAU_14XX = "adau14xx"
 ADAU_1X0X = "adau1x0x"
 
 
-def dsp_factory(dsp_type_name: str) -> Type[Dsp]:
+def dsp_factory(dsp_type_name: str) -> type[Dsp]:
     """Creates Dsp objects, based on the name of the DSP.
 
     Args:
@@ -38,7 +36,7 @@ def dsp_factory(dsp_type_name: str) -> Type[Dsp]:
         raise TypeError("DSP type {dsp_type} is not known.")
 
 
-def dsp_from_config(config: Dict) -> Dsp:
+def dsp_from_config(config: dict) -> Dsp:
     """Parse a configuration dictionary and create a new DSP from it.
 
     Args:
@@ -73,7 +71,7 @@ def dsp_from_config(config: Dict) -> Dsp:
             raise TypeError(f"Unknown DSP protocol {dsp_protocol_name}.")
 
         # Then, generate the dsp itself.
-        dsp_type: Type[Dsp] = dsp_factory(dsp_type_name)
+        dsp_type: type[Dsp] = dsp_factory(dsp_type_name)
 
         # Use safeload by default.
         dsp = dsp_type(True, dsp_protocol)

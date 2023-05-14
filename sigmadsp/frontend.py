@@ -7,10 +7,9 @@ from __future__ import annotations
 import logging
 from io import TextIOWrapper
 from ipaddress import IPv4Address
-from typing import Union
 
-import click  # type: ignore
-import grpc  # type: ignore
+import click
+import grpc
 
 from sigmadsp.generated.backend_service.control_pb2 import ControlParameterRequest
 from sigmadsp.generated.backend_service.control_pb2 import ControlRequest
@@ -42,7 +41,7 @@ class Channel:
         """
         with grpc.insecure_channel(self.address) as channel:
             stub = BackendStub(channel)
-            response: Union[ControlResponse, None] = None
+            response: ControlResponse | None = None
 
             if isinstance(request, ControlRequest):
                 response = stub.control(request)

@@ -7,12 +7,10 @@ from __future__ import annotations
 from abc import ABC
 from abc import abstractmethod
 from collections import OrderedDict
+from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import Enum
-from typing import Iterator
-from typing import List
 from typing import Literal
-from typing import Union
 
 from sigmadsp.helper.conversion import bytes_to_int
 from sigmadsp.helper.conversion import int8_to_bytes
@@ -51,7 +49,7 @@ class Field:
         return self._value
 
     @value.setter
-    def value(self, new_value: Union[int, bytes, bytearray]):
+    def value(self, new_value: int | bytes | bytearray):
         """Store a new value and convert it before storage, if required.
 
         Args:
@@ -96,7 +94,7 @@ class Field:
 class PacketHeader:
     """An iterable collection of Field objects that forms the packet header."""
 
-    def __init__(self, fields: List[Field]):
+    def __init__(self, fields: list[Field]):
         """Initialize the header fields. Add more fields to it by means of ``add()``.
 
         Instantiate via:
@@ -129,7 +127,7 @@ class PacketHeader:
     @property
     def size(self) -> int:
         """The total size of the header in bytes."""
-        return sum((field.size for field in self))
+        return sum(field.size for field in self)
 
     @property
     def is_continuous(self) -> bool:
@@ -191,7 +189,7 @@ class PacketHeader:
 
         return bytes(buffer)
 
-    def as_list(self) -> List[Field]:
+    def as_list(self) -> list[Field]:
         """The fields as a list.
 
         Returns:
@@ -237,16 +235,15 @@ class PacketHeader:
         return self.is_write_request or self.is_read_response
 
     @property
-    def names(self) -> List[str]:
+    def names(self) -> list[str]:
         """All field names in a list."""
         return [field.name for field in self]
 
     def __iter__(self) -> Iterator[Field]:
         """The iterator for fields."""
-        for item in self._fields.values():
-            yield item
+        yield from self._fields.values()
 
-    def __setitem__(self, name: FieldName, value: Union[int, bytes, bytearray]):
+    def __setitem__(self, name: FieldName, value: int | bytes | bytearray):
         """Set a field value.
 
         Args:

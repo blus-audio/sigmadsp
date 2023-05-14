@@ -2,12 +2,9 @@
 import pickle
 import time
 import typing
-from typing import Dict
-from typing import List
-from typing import Tuple
 from typing import Union
 
-from pytest import fixture  # type: ignore
+from pytest import fixture
 
 from sigmadsp.backend import BackendService
 from sigmadsp.dsp.adau14xx import Adau14xx
@@ -20,7 +17,7 @@ from tests.mock.dummy_protocol import DummyProtocol
 from tests.mock.sigma_studio import SigmaTcpClient
 
 
-def dsp_from_config(config: Dict) -> Dsp:
+def dsp_from_config(config: dict) -> Dsp:
     """DSP factory, for testing purposes.
 
     Args:
@@ -56,7 +53,7 @@ def test_backend_service(settings: SigmadspSettings):
     protocol.write(safety_hash_cell.parameter_address, int32_to_bytes(safety_hash_cell.parameter_value))
 
     with open("sigma_studio_dump.pkl", "rb") as dump_file:
-        dump: Tuple[List[bytes], List[Union[ReadRequest, WriteRequest]]] = pickle.load(dump_file)
+        dump: tuple[list[bytes], list[Union[ReadRequest, WriteRequest]]] = pickle.load(dump_file)
         raw_requests, requests = dump
 
     client = SigmaTcpClient(ip=settings.config["host"]["ip"], port=settings.config["host"]["port"])

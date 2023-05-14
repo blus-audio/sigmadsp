@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from itertools import dropwhile
 from itertools import takewhile
 from typing import ClassVar
-from typing import List
 from typing import Union
 
 # A logger for this module
@@ -44,10 +43,10 @@ class Cell:
     SAFETY_HASH: ClassVar[str] = "safety_hash"
 
     # A complete list of valid prefixes, which are understood by the parser.
-    VALID_PREFIX_TOKENS: ClassVar[List[str]] = [ADJUSTABLE_PREFIX, VOLUME_PREFIX]
+    VALID_PREFIX_TOKENS: ClassVar[list[str]] = [ADJUSTABLE_PREFIX, VOLUME_PREFIX]
 
     @property
-    def full_name_tokens(self) -> List[str]:
+    def full_name_tokens(self) -> list[str]:
         """Extract the separated full name, where the separator string is removed.
 
         For example 'adjustable_volume_main_left' is converted to ['adjustable', 'volume', 'main', 'left']
@@ -58,7 +57,7 @@ class Cell:
         return self.full_name.split(Cell.PREFIX_SEPARATOR)
 
     @property
-    def name_tokens(self) -> List[str]:
+    def name_tokens(self) -> list[str]:
         """Return the name tokens of the cell without prefix tokens.
 
         For example ['main', 'left'] for a full cell name 'adjustable_volume_main_left'.
@@ -72,7 +71,7 @@ class Cell:
         return self.full_name_tokens[len(self.prefix_tokens) :]
 
     @property
-    def prefix_tokens(self) -> List[str]:
+    def prefix_tokens(self) -> list[str]:
         """Return only the prefix tokens of the cell.
 
         For example ['adjustable', 'volume'] for a full cell name 'adjustable_volume_main_left'.
@@ -123,9 +122,9 @@ class Parser:
 
     def __init__(self):
         """Initialize the parameter file parser with an empty list of cells."""
-        self.cells: List[Cell] = []
+        self.cells: list[Cell] = []
 
-    def extract_cell(self, cell_lines: List[str]) -> Union[Cell, None]:
+    def extract_cell(self, cell_lines: list[str]) -> Union[Cell, None]:
         """Read a block of data from the parameter listing, and creates a new Cell from it.
 
         Args:
@@ -184,7 +183,7 @@ class Parser:
 
         # Proceed with opening the file
         try:
-            with open(file_path, "r", encoding="utf8") as file:
+            with open(file_path, encoding="utf8") as file:
                 logger.info("Using parameter file path %s.", file_path)
 
                 line_iterator = iter(file.readlines())
@@ -228,7 +227,7 @@ class Parser:
             return safety_hash_cells[0]
 
     @property
-    def volume_cells(self) -> List[Cell]:
+    def volume_cells(self) -> list[Cell]:
         """Return all cells that can be used for volume adjustment. These are user defined with a certain name pattern.
 
         Returns:
@@ -236,7 +235,7 @@ class Parser:
         """
         return [cell for cell in self.cells if cell.is_volume_cell]
 
-    def get_matching_cells_by_name_tokens(self, all_cells: List[Cell], name_tokens: List[str]) -> List[Cell]:
+    def get_matching_cells_by_name_tokens(self, all_cells: list[Cell], name_tokens: list[str]) -> list[Cell]:
         """Find cells in a list of cells, whose names match the specified name tokens.
 
         Args:
@@ -249,8 +248,8 @@ class Parser:
         return [cell for cell in all_cells if name_tokens == cell.name_tokens]
 
     def get_matching_cells_by_parameter_name(
-        self, all_cells: List[Cell], parameter_name: str, match_substring=False
-    ) -> List[Cell]:
+        self, all_cells: list[Cell], parameter_name: str, match_substring=False
+    ) -> list[Cell]:
         """Find cells in a list of cells, whose parameter names match the specified string.
 
         Args:
