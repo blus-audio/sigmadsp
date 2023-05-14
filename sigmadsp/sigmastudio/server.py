@@ -2,11 +2,12 @@
 
 It can receive read/write requests and return with read response packets.
 """
+from __future__ import annotations
+
 import logging
 import socket
 import socketserver
 from multiprocessing import Queue
-from typing import Union
 
 from .header import OperationKey
 from .header import PacketHeader
@@ -24,12 +25,12 @@ logger = logging.getLogger(__name__)
 class Packet:
     """A packet for data exchange with SigmaStudio."""
 
-    def __init__(self, header: PacketHeader, payload: Union[bytes, None] = None):
+    def __init__(self, header: PacketHeader, payload: bytes | None = None):
         """Initialize a new packet from a header and payload.
 
         Args:
             header (PacketHeader): The packet header object.
-            payload (Union[bytes, None]): An optional payload. Defaults to None.
+            payload (bytes | None): An optional payload. Defaults to None.
         """
         self._header = header
 
@@ -89,7 +90,7 @@ class SigmaStudioTcpServer(socketserver.TCPServer):
         packet_header_generator: PacketHeaderGenerator,
         send_queue: Queue,
         receive_queue: Queue,
-        raw_receive_queue: Union[Queue, None] = None,
+        raw_receive_queue: Queue | None = None,
         bind_and_activate=True,
     ):
         """Initialize the ThreadedTCPServer with a Pipe for communicating with the TCP server worker thread.
@@ -101,7 +102,7 @@ class SigmaStudioTcpServer(socketserver.TCPServer):
             bind_and_activate (bool, optional): Whether to bind and activate the TCP server. Defaults to True.
             send_queue (Queue): The queue for data to send to SigmaStudio.
             receive_queue (Queue): The queue for data that was received by SigmaStudio.
-            raw_receive_queue (Union[Queue, None]): The queue for raw binary data, as received by SigmaStudio.
+            raw_receive_queue (Queue | None): The queue for raw binary data, as received by SigmaStudio.
                 Used for debugging. Optional, defaults to None.
         """
         self.send_queue = send_queue

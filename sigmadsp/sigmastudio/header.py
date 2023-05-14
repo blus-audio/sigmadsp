@@ -53,7 +53,7 @@ class Field:
         """Store a new value and convert it before storage, if required.
 
         Args:
-            new_value (Union[int, bytes, bytearray]): The new value to set. If ``int``, it is stored without conversion.
+            new_value (int | bytes | bytearray): The new value to set. If ``int``, it is stored without conversion.
                 If ``bytes`` or ``bytearray``, it is first converted to int.
 
         Raises:
@@ -248,7 +248,7 @@ class PacketHeader:
 
         Args:
             name (ValidFieldNames): Field name.
-            value (Union[int, bytes, bytearray]): Field value.
+            value (int | bytes | bytearray): Field value.
         """
         if name not in self.names:
             raise ValueError(f"Invalid field name {name}; valid names are {', '.join(self.names)}")
@@ -263,7 +263,7 @@ class PacketHeader:
             name (ValidFieldNames): The name of the field.
 
         Returns:
-            Union[Field, None]: The field, or None, if no field was found.
+            Field: The field, or None, if no field was found.
 
         Raises:
             IndexError: If the field does not exist.

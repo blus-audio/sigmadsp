@@ -1,6 +1,7 @@
 """Factory module for generating DSP objects."""
+from __future__ import annotations
+
 import logging
-from typing import Union
 
 from .adau14xx import Adau14xx
 from .adau1x0x import Adau1x0x
@@ -59,7 +60,7 @@ def dsp_from_config(config: dict) -> Dsp:
 
     else:
         # Generate the protocol first (e.g. SPI or I2C).
-        dsp_protocol: Union[SpiProtocol, I2cProtocol]
+        dsp_protocol: SpiProtocol | I2cProtocol
 
         if dsp_protocol_name == "spi":
             dsp_protocol = SpiProtocol(bus=bus, device=device)
