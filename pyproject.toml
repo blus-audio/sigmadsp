@@ -52,5 +52,8 @@ line-length = 120
 line-length = 120
 target-version = "py39"
 
+[tool.ruff.pydocstyle]
+convention = "google"
+
 [tool.mypy]
 ignore_missing_imports = true
