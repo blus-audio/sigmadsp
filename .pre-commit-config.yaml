@@ -11,7 +11,7 @@ repos:
         args:
         - --py39-plus
 
--   repo: https://github.com/asottile/reorder_python_imports
+-   repo: https://github.com/asottile/reorder-python-imports
     rev: v3.9.0
     hooks:
     -   id: reorder-python-imports
@@ -32,7 +32,7 @@ repos:
     -   id: check-case-conflict
 
 -   repo: https://github.com/crate-ci/typos
-    rev: v1.14.9
+    rev: v1.14.11
     hooks:
       - id: typos
         args:
@@ -47,6 +47,6 @@ repos:
         - --check-untyped-defs
 
 -   repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: 'v0.0.267'
+    rev: 'v0.0.269'
     hooks:
     -   id: ruff
