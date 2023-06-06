@@ -32,7 +32,7 @@ repos:
     -   id: check-case-conflict
 
 -   repo: https://github.com/crate-ci/typos
-    rev: v1.14.11
+    rev: v1.14.12
     hooks:
       - id: typos
         args:
