@@ -5,14 +5,14 @@ exclude: (generated|.params)
 
 repos:
 -   repo: https://github.com/asottile/pyupgrade
-    rev: v3.6.0
+    rev: v3.7.0
     hooks:
     -   id: pyupgrade
         args:
         - --py39-plus
 
 -   repo: https://github.com/asottile/reorder-python-imports
-    rev: v3.9.0
+    rev: v3.10.0
     hooks:
     -   id: reorder-python-imports
 
@@ -32,7 +32,7 @@ repos:
     -   id: check-case-conflict
 
 -   repo: https://github.com/crate-ci/typos
-    rev: v1.15.0
+    rev: typos-dict-v0.10.1
     hooks:
       - id: typos
         args:
