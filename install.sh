@@ -13,20 +13,23 @@ function create_new_config_file {
     sudo mv $SIGMADSP_TEMP_FOLDER/$SIGMADSP_CONFIGURATION_FILE $SIGMADSP_CONFIGURATION_FOLDER/$SIGMADSP_CONFIGURATION_FILE
 }
 
-# Install pipx, for later installing the sigmadsp package.
-function install_pipx {
+# Install pipx with Python, for later installing the sigmadsp package.
+function install_pipx_python {
     # Install the prerequisite pip3.
     sudo apt-get -qq install -y python3-pip python3-venv
 
     # Install pipx for running sigmadsp in a virtual environment.
     python3 -m pip install --user pipx
     python3 -m pipx ensurepath
+
+    # Use updated paths in current shell.
+    source ~/.bashrc
 }
 
 ### Installation starts below. ###
 echo "=== Install required packages."
 sudo apt-get -qq update
-install_pipx
+install_pipx_python
 
 # Install the package itself, along with its executable scripts.
 pipx install $SIGMADSP_EXECUTABLE
