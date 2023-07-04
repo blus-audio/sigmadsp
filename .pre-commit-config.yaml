@@ -5,7 +5,7 @@ exclude: (generated|.params)
 
 repos:
 -   repo: https://github.com/asottile/pyupgrade
-    rev: v3.7.0
+    rev: v3.8.0
     hooks:
     -   id: pyupgrade
         args:
@@ -32,7 +32,7 @@ repos:
     -   id: check-case-conflict
 
 -   repo: https://github.com/crate-ci/typos
-    rev: typos-dict-v0.10.3
+    rev: typos-dict-v0.10.6
     hooks:
       - id: typos
         args:
@@ -46,7 +46,7 @@ repos:
         args:
         - --check-untyped-defs
 
--   repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: 'v0.0.275'
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: 'v0.0.276'
     hooks:
     -   id: ruff
