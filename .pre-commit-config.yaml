@@ -32,7 +32,7 @@ repos:
     -   id: check-case-conflict
 
 -   repo: https://github.com/crate-ci/typos
-    rev: v1.16.1
+    rev: typos-dict-v0.10.8
     hooks:
       - id: typos
         args:
@@ -47,6 +47,6 @@ repos:
         - --check-untyped-defs
 
 -   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 'v0.0.281'
+    rev: 'v0.0.282'
     hooks:
     -   id: ruff
