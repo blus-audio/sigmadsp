@@ -5,7 +5,7 @@ exclude: (generated|.params)
 
 repos:
 -   repo: https://github.com/asottile/pyupgrade
-    rev: v3.14.0
+    rev: v3.15.0
     hooks:
     -   id: pyupgrade
         args:
@@ -22,7 +22,7 @@ repos:
     -   id: black
 
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
     -   id: trailing-whitespace
     -   id: end-of-file-fixer
@@ -32,7 +32,7 @@ repos:
     -   id: check-case-conflict
 
 -   repo: https://github.com/crate-ci/typos
-    rev: v1.16.17
+    rev: v1.16.18
     hooks:
       - id: typos
         args:
