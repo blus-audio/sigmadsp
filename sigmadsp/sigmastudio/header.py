@@ -63,11 +63,17 @@ class Field:
             new_value = bytes(new_value)
 
         if isinstance(new_value, bytes):
-            assert len(new_value) == self.size
+            assert len(new_value) == self.size, (
+                f"New value {new_value!r} for '{self.name}' does not match expected size: "
+                f"expected {self.size}, got {len(new_value)}"
+            )
             self._value = bytes_to_int(new_value, 0)
 
         elif isinstance(new_value, int):
-            assert new_value.bit_length() <= self.size * 8
+            assert new_value.bit_length() <= self.size * 8, (
+                f"New value {new_value} for '{self.name}' exceeds expected size: "
+                f"expected <={self.size * 8}, got {new_value.bit_length()}"
+            )
             self._value = new_value
 
         else:
