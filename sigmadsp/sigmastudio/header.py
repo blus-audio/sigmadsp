@@ -6,7 +6,6 @@ from __future__ import annotations
 
 from abc import ABC
 from abc import abstractmethod
-from collections import OrderedDict
 from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import Enum
@@ -115,7 +114,7 @@ class PacketHeader:
         Args:
             fields (List[Field]): The list of fields to add initially.
         """
-        self._fields: OrderedDict[str, Field] = OrderedDict()  # pylint: disable=E1136
+        self._fields: dict[FieldName, Field] = {}
 
         for field in fields:
             self.add_field(field)
@@ -157,7 +156,7 @@ class PacketHeader:
 
     def _sort_fields_by_offset(self):
         """Sorts the fields in this header by their offset."""
-        self._fields = OrderedDict(sorted(self._fields.items(), key=lambda item: item[1].offset))
+        self._fields = dict(sorted(self._fields.items(), key=lambda item: item[1].offset))
 
     def add(self, name: FieldName, offset: int, size: int):
         """Create and add a new field.
@@ -214,32 +213,27 @@ class PacketHeader:
     @property
     def is_write_request(self) -> bool:
         """Whether this is a write request."""
-        return self._fields["operation"].value == OperationKey.WRITE_KEY.value
+        return self["operation"].value == OperationKey.WRITE_KEY.value
 
     @property
     def is_read_request(self) -> bool:
         """Whether this is a read request."""
-        return self._fields["operation"].value == OperationKey.READ_REQUEST_KEY.value
+        return self["operation"].value == OperationKey.READ_REQUEST_KEY.value
 
     @property
     def is_read_response(self) -> bool:
         """Whether this is a read response."""
-        return self._fields["operation"].value == OperationKey.READ_RESPONSE_KEY.value
+        return self["operation"].value == OperationKey.READ_RESPONSE_KEY.value
 
     @property
     def is_safeload(self) -> bool:
         """Whether this is a software-safeload write request."""
-        return self.is_write_request and self._fields["safeload"].value == 1
+        return self.is_write_request and self["safeload"].value == 1
 
     @property
     def carries_payload(self) -> bool:
         """Whether the corresponding packet carries a payload."""
         return self.is_write_request or self.is_read_response
-
-    @property
-    def names(self) -> list[str]:
-        """All field names in a list."""
-        return [field.name for field in self]
 
     def __iter__(self) -> Iterator[Field]:
         """The iterator for fields."""
@@ -252,10 +246,10 @@ class PacketHeader:
             name (ValidFieldNames): Field name.
             value (int | bytes | bytearray): Field value.
         """
-        if name not in self.names:
-            raise ValueError(f"Invalid field name {name}; valid names are {', '.join(self.names)}")
+        assert name in self, f"Invalid field name {name}; valid names are '{self._fields.keys()}'"
 
         # FIXME: Type is correct, see https://github.com/python/mypy/issues/3004.
+        # The value attribute has different types for setting and getting. During setting, there is a conversion step.
         self._fields[name].value = value  # type: ignore
 
     def __getitem__(self, name: FieldName) -> Field:
@@ -270,6 +264,8 @@ class PacketHeader:
         Raises:
             IndexError: If the field does not exist.
         """
+        assert name in self, f"Invalid field name {name}; valid names are '{self._fields.keys()}'"
+
         return self._fields[name]
 
     def __contains__(self, name: FieldName) -> bool:
