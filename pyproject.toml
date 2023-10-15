@@ -52,7 +52,7 @@ line-length = 120
 line-length = 120
 target-version = "py39"
 
-select = ["E", "W", "F", "D", "UP", "N", "PL", "PTH", "SLF", "RET", "RSE", "SIM", "PT", "LOG"]
+select = ["E", "W", "F", "D", "UP", "N", "PL", "PTH", "SLF", "RET", "RSE", "SIM", "PT"]
 ignore = ["PLR0913"]
 
 [tool.ruff.pydocstyle]

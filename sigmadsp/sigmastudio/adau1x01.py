@@ -41,7 +41,7 @@ class Adau1x01HeaderGenerator(PacketHeaderGenerator):
         return PacketHeader(
             [
                 Field("operation", 0, 1),
-                Field("total_length", 1, 2),
+                Field("data_length", 1, 2),
                 Field("success", 3, 1),
             ]
         )

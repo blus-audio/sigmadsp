@@ -5,6 +5,7 @@ import logging
 from dataclasses import dataclass
 from itertools import dropwhile
 from itertools import takewhile
+from pathlib import Path
 from typing import ClassVar
 
 # A logger for this module
@@ -83,8 +84,7 @@ class Cell:
         if Cell.PREFIX_SEPARATOR in self.full_name:
             return [prefix for prefix in self.full_name_tokens if prefix in Cell.VALID_PREFIX_TOKENS]
 
-        else:
-            return []
+        return []
 
     @property
     def is_adjustable(self) -> bool:
@@ -170,21 +170,21 @@ class Parser:
             # This fails, if any of the required parameters were not extracted successfully.
             return None
 
-    def run(self, file_path: str) -> None:
+    def run(self, file_path: Path) -> None:
         """Parse an input file that was exported from Sigma Studio.
 
         Args:
-            file_path (str): The path to the input file
+            file_path (Path): The path to the input file
         """
         self.cells.clear()
 
-        if not file_path.endswith(".params"):
+        if file_path.suffix != ".params":
             logger.error("The parameter file is not a *.params file! Aborting.")
             return
 
         # Proceed with opening the file
         try:
-            with open(file_path, encoding="utf8") as file:
+            with file_path.open(encoding="utf8") as file:
                 logger.info("Using parameter file path %s.", file_path)
 
                 line_iterator = iter(file.readlines())
@@ -203,7 +203,7 @@ class Parser:
                     if cell is None:
                         continue
 
-                    elif cell not in self.cells:
+                    if cell not in self.cells:
                         self.cells.append(cell)
 
                 logger.info("Found a total number of %d unique parameter cells.", len(self.cells))
@@ -220,12 +220,11 @@ class Parser:
         """
         safety_hash_cells = [cell for cell in self.cells if cell.is_safety_hash]
 
-        if 1 != len(safety_hash_cells):
+        if len(safety_hash_cells) != 1:
             # There must be exactly one safety hash cell.
             return None
 
-        else:
-            return safety_hash_cells[0]
+        return safety_hash_cells[0]
 
     @property
     def volume_cells(self) -> list[Cell]:
@@ -265,5 +264,4 @@ class Parser:
         if match_substring:
             return [cell for cell in all_cells if parameter_name in cell.parameter_name]
 
-        else:
-            return [cell for cell in all_cells if parameter_name == cell.parameter_name]
+        return [cell for cell in all_cells if parameter_name == cell.parameter_name]

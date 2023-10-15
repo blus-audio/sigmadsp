@@ -6,6 +6,7 @@ and an SPI handler that controls a DSP.
 Commands from Sigma Studio are received, and translated to SPI read/write requests.
 """
 import argparse
+import contextlib
 import logging
 import os
 import sched
@@ -181,9 +182,8 @@ class BackendService(BackendServicer):
                 self.configuration_unlocked = False
                 raise SafetyCheckError
 
-            else:
-                logger.info("Safety check successful. Configuration unlocked.")
-                self.configuration_unlocked = True
+            logger.info("Safety check successful. Configuration unlocked.")
+            self.configuration_unlocked = True
 
     def close(self):
         """Close the backend service and terminate its threads."""
@@ -267,7 +267,7 @@ class BackendService(BackendServicer):
             response.message = "Configuration is currently locked, parameters cannot be changed."
             return response
 
-        if "change_volume" == command:
+        if command == "change_volume":
             volume_cells_to_adjust = self.settings.parameter_parser.get_matching_cells_by_name_tokens(
                 self.settings.parameter_parser.volume_cells,
                 list(request.change_volume.name_tokens),
@@ -313,29 +313,26 @@ class BackendService(BackendServicer):
         # Determine the type of control request.
         command = request.WhichOneof("command")
 
-        if "reset_dsp" == command:
+        if command == "reset_dsp":
             self.dsp.soft_reset()
             self.trigger_retry_safety_check()
 
             response.message = "Soft-reset DSP."
             response.success = True
 
-        elif "hard_reset_dsp" == command:
+        elif command == "hard_reset_dsp":
             self.dsp.hard_reset()
             self.trigger_retry_safety_check()
 
             response.message = "Hard-reset DSP."
             response.success = True
 
-        elif "load_parameters" == command:
+        elif command == "load_parameters":
             self.settings.store_parameters(list(request.load_parameters.content))
 
             # Repeat safety check after loading a new set of parameters
-            try:
+            with contextlib.suppress(SafetyCheckError):
                 self.safety_check()
-
-            except SafetyCheckError:
-                pass
 
             if self.configuration_unlocked:
                 response.message = "Loaded parameters, control is unlocked."
@@ -345,7 +342,7 @@ class BackendService(BackendServicer):
                 response.message = "Safety check failed, parameters cannot be adjusted."
                 response.success = False
 
-        elif "read_register" == command:
+        elif command == "read_register":
             value: bytes = self.dsp.read(request.read_register.address, request.read_register.length)
 
             response.message = f"0x{value.hex()}"

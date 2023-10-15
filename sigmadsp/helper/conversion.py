@@ -48,7 +48,7 @@ def frac_8_24_to_float(value: int) -> float:
     Returns:
         float: Output in float format
     """
-    if BIT_LENGTH_8_24 < value.bit_length():
+    if value.bit_length() > BIT_LENGTH_8_24:
         raise OverflowError
 
     return value / 2**24
@@ -66,7 +66,7 @@ def float_to_frac_8_24(value: float) -> int:
         int: Output in DSP fractional format
     """
     frac = int(value * 2**24)
-    if BIT_LENGTH_8_24 < frac.bit_length():
+    if frac.bit_length() > BIT_LENGTH_8_24:
         raise OverflowError
 
     return frac
@@ -83,7 +83,7 @@ def frac_5_23_to_float(value: int) -> float:
     Returns:
         float: Output in float format
     """
-    if BIT_LENGTH_5_23 < value.bit_length():
+    if value.bit_length() > BIT_LENGTH_5_23:
         raise OverflowError
 
     return value / 2**23
@@ -101,7 +101,7 @@ def float_to_frac_5_23(value: float) -> int:
         int: Output in DSP fractional format
     """
     frac = int(value * 2**23)
-    if BIT_LENGTH_5_23 < frac.bit_length():
+    if frac.bit_length() > BIT_LENGTH_5_23:
         raise OverflowError
 
     return frac
@@ -111,7 +111,7 @@ def db_to_linear(value_db: float) -> float:
     """Convert a dB-scale value (e.g. voltage) to a linear-scale value.
 
     Args:
-        value (float): Input dB value
+        value_db (float): Input dB value
 
     Returns:
         float: Output linear value
@@ -151,8 +151,7 @@ def bytes_to_int(data: bytes, offset: int = 0, length: int | None = None) -> int
     if length is not None:
         return int.from_bytes(data[offset : offset + length], byteorder=SIGMADSP_ENDIANNESS)
 
-    else:
-        return int.from_bytes(data[offset:], byteorder=SIGMADSP_ENDIANNESS)
+    return int.from_bytes(data[offset:], byteorder=SIGMADSP_ENDIANNESS)
 
 
 def bytes_to_int8(data: bytes, offset: int = 0) -> int:

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 
 import yaml
 
@@ -14,15 +15,15 @@ logger = logging.getLogger(__name__)
 class SigmadspSettings:
     """This class holds and manages settings for the SigmaDSP application."""
 
-    default_config_path = "/var/lib/sigmadsp/config.yaml"
+    default_config_path = Path("/var/lib/sigmadsp/config.yaml")
 
-    def __init__(self, config_path: str | None = None):
+    def __init__(self, config_path: Path | None = None):
         """Load a config file in *.yaml format from a specified path.
 
         If no file is provided, the default path is used for loading settings.
 
         Args:
-            config_path (str | None, optional): The input path of the settings file.
+            config_path (Path | None, optional): The input path of the settings file.
                 Defaults to None.
         """
         if config_path is None:
@@ -30,7 +31,7 @@ class SigmadspSettings:
 
         try:
             # Open settings file, in order to configure the application
-            with open(config_path, encoding="utf8") as settings_file:
+            with config_path.open(encoding="utf8") as settings_file:
                 self.config = yaml.safe_load(settings_file)
                 logger.info("Settings file %s was loaded.", config_path)
 
@@ -47,7 +48,7 @@ class SigmadspSettings:
         """Load parameter cells, according to the parameter file path that is defined in the settings object."""
         try:
             parser = Parser()
-            parser.run(self.config["parameters"]["path"])
+            parser.run(Path(self.config["parameters"]["path"]))
 
             self.parameter_parser = parser
 
@@ -60,7 +61,7 @@ class SigmadspSettings:
         Args:
             lines (List[str]): [description]
         """
-        with open(self.config["parameters"]["path"], "w", encoding="UTF8") as parameter_file:
+        with Path(self.config["parameters"]["path"]).open("w", encoding="UTF8") as parameter_file:
             parameter_file.writelines(lines)
 
         self.load_parameters()

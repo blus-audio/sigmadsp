@@ -134,7 +134,7 @@ class SigmaStudioRequestHandler(socketserver.BaseRequestHandler):
             # Wait until the complete TCP payload was received.
             received = self.request.recv(amount - len(data))
 
-            if 0 == len(received):
+            if len(received) == 0:
                 # Give up, if no more data arrives.
                 # Close the socket.
                 self.request.shutdown(socket.SHUT_RDWR)
@@ -211,8 +211,7 @@ class SigmaStudioRequestHandler(socketserver.BaseRequestHandler):
         if header.carries_payload:
             return Packet(header, self.read(header["data_length"].value))
 
-        else:
-            return Packet(header)
+        return Packet(header)
 
     def handle(self):
         """Called, when the TCP server has to handle a request.

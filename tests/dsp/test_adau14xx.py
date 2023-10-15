@@ -32,9 +32,7 @@ def round_value_db_dsp(value_db: float, float_to_frac_fn: Callable, frac_to_floa
     """
     try:
         register_value = float_to_frac_fn(db_to_linear(value_db))
-        rounded_value_db = linear_to_db(frac_to_float_fn(register_value))
-
-        return rounded_value_db
+        return linear_to_db(frac_to_float_fn(register_value))
 
     except (ValueError, OverflowError):
         return None

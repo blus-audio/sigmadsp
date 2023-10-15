@@ -25,16 +25,15 @@ def dsp_factory(dsp_type_name: str) -> type[Dsp]:
         dsp_type_name (str): The name of the DSP.
 
     Returns:
-        Type[Dsp]: The matching DSP class.
+        type[Dsp]: The matching DSP class.
     """
     if dsp_type_name == ADAU_14XX:
         return Adau14xx
 
-    elif dsp_type_name == ADAU_1X0X:
+    if dsp_type_name == ADAU_1X0X:
         return Adau1x0x
 
-    else:
-        raise TypeError("DSP type {dsp_type} is not known.")
+    raise TypeError("DSP type {dsp_type} is not known.")
 
 
 def dsp_from_config(config: dict) -> Dsp:

@@ -211,11 +211,7 @@ class Dsp(ABC):
             logger.info("Volume value is nan.")
             return current_volume_db
 
-        if relative:
-            new_volume_value_db = volume_db + current_volume_db
-
-        else:
-            new_volume_value_db = volume_db
+        new_volume_value_db = volume_db + current_volume_db if relative else volume_db
 
         try:
             # Clamp set volume to safe levels
@@ -303,11 +299,10 @@ class Dsp(ABC):
         data_register = self.read(address, Dsp.FIXPOINT_REGISTER_LENGTH)
         data_integer = bytes_to_int32(data_register)
 
-        if "int" == data_format:
+        if data_format == "int":
             return data_integer
 
-        elif "float" == data_format:
+        if data_format == "float":
             return self.frac_to_float(data_integer)
 
-        else:
-            return None
+        return None

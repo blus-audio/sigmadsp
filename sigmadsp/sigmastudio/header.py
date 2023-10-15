@@ -140,11 +140,7 @@ class PacketHeader:
         """Whether or not there are spaces in the header that are not defined."""
         fields_entries = self.as_list()
 
-        for field, next_field in zip(fields_entries, fields_entries[1:]):
-            if (field.end + 1) != next_field.offset:
-                return False
-
-        return True
+        return all(field.end + 1 == next_field.offset for field, next_field in zip(fields_entries, fields_entries[1:]))
 
     def _check_for_overlaps(self):
         """Check for overlapping fields.
@@ -312,7 +308,7 @@ class PacketHeaderGenerator(ABC):
         """Generate a header from an operation byte.
 
         Args:
-            operation_key (bytes): The operation byte that determines the header composition.
+            operation_byte (bytes): The operation byte that determines the header composition.
             template (PacketHeader | None, optional): The template, if any, from which to copy fields that fit the
                 new header. Defaults to None.
 

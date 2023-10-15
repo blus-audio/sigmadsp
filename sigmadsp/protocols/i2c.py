@@ -47,9 +47,7 @@ class I2cProtocol(DspProtocol):
         msg_rd = i2c_msg.read(self._i2c_addr, length)
 
         self._bus.i2c_rdwr(msg_wr, msg_rd)
-        rd_list = bytes(msg_rd)
-
-        return rd_list
+        return bytes(msg_rd)
 
     def _write(self, address: int, data: bytes):
         """Write data over the I2C port onto a SigmaDSP.

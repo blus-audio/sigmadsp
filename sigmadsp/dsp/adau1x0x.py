@@ -42,12 +42,26 @@ class Adau1x0x(Dsp):
 
     @staticmethod
     def float_to_frac(value: float) -> int:
-        """The method that converts floating-point values to fractional integers on the Adau1x01."""
+        """The method that converts floating-point values to fractional integers on the Adau1x01.
+
+        Args:
+            value (float): The floating-point value.
+
+        Returns:
+            float: The fractional value.
+        """
         return float_to_frac_5_23(value)
 
     @staticmethod
     def frac_to_float(value: int) -> float:
-        """The method that converts fractional integers to floating-point values on the Adau1x01."""
+        """The method that converts fractional integers to floating-point values on the Adau1x01.
+
+        Args:
+            value (float): The fractional value.
+
+        Returns:
+            float: The float value.
+        """
         return frac_5_23_to_float(value)
 
     def soft_reset(self):

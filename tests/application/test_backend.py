@@ -4,8 +4,9 @@ from __future__ import annotations
 import pickle
 import time
 import typing
+from pathlib import Path
 
-from pytest import fixture
+import pytest
 
 from sigmadsp.backend import BackendService
 from sigmadsp.dsp.adau14xx import Adau14xx
@@ -31,10 +32,10 @@ def dsp_from_config(config: dict) -> Dsp:
     return Adau14xx(False, DummyProtocol(), [])
 
 
-@fixture(name="settings")
+@pytest.fixture(name="settings")
 def sigmadsp_settings():
     """Provides settings for integration tests."""
-    return SigmadspSettings("tests/application/test_config.yaml")
+    return SigmadspSettings(Path("tests/application/test_config.yaml"))
 
 
 def test_backend_service(settings: SigmadspSettings):
@@ -53,7 +54,7 @@ def test_backend_service(settings: SigmadspSettings):
     protocol: DummyProtocol = typing.cast(DummyProtocol, backend.dsp.dsp_protocol)
     protocol.write(safety_hash_cell.parameter_address, int32_to_bytes(safety_hash_cell.parameter_value))
 
-    with open("sigma_studio_dump.pkl", "rb") as dump_file:
+    with Path("sigma_studio_dump.pkl").open("rb") as dump_file:
         dump: tuple[list[bytes], list[ReadRequest | WriteRequest]] = pickle.load(dump_file)
         raw_requests, requests = dump
 
