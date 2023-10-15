@@ -1,15 +1,10 @@
 {
     "editor.formatOnSave": true,
     "files.insertFinalNewline": true,
-    "[python]": {
-        "editor.formatOnSave": false
-    },
     "editor.rulers": [
         80,
         120
     ],
-    "pre-commit-helper.runOnSaveRegex": "^(.*)\\.py$",
-    "pre-commit-helper.runOnSave": "fixes",
     "python.testing.pytestArgs": [
         "tests"
     ],
