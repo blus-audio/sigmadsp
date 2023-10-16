@@ -15,6 +15,7 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing import Queue
+from pathlib import Path
 from typing import Callable
 
 import grpc
@@ -395,7 +396,7 @@ def main():
     )
     arguments = argument_parser.parse_args()
 
-    settings = SigmadspSettings(arguments.settings)
+    settings = SigmadspSettings(Path(arguments.settings))
     launch(settings)
 
 
