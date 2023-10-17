@@ -17,48 +17,56 @@ class I2cProtocol(DspProtocol):
     Tested with ADAU1701
     """
 
-    def __init__(self, bus: int = 1, device: int = 0x38):
+    def __init__(self, bus_id: int = 1, device_address: int = 0x38):
         """Initialize the I2C hardware.
 
         Bus will be 1 for RaspberryPi hardware.
 
         Args:
-            bus (int, optional): Bus number. Defaults to 1.
-            device (int, optional): Device number. Defaults to 0x38. (ADAU145x default address)
+            bus_id (int, optional): Bus identifier. Defaults to 1.
+            device_address (int, optional): Device address. Defaults to 0x38 (ADAU145x default address).
         """
-        self._bus = SMBus(bus)
-        self._i2c_addr = device
+        self._bus_id = bus_id
+        self._device_address = device_address
 
         self.run()
 
     def _read(self, address: int, length: int) -> bytes:
-        """Read data over the i2c port from a SigmaDSP.
+        """Read data over the I2C port from a SigmaDSP.
 
         Args:
-            address (int): Address to read from
-            length (int): Number of bytes to read
+            address (int): Address to read from.
+            length (int): Number of bytes to read.
 
         Returns:
-            bytes: Data that was read from the DSP
+            bytes: Data that was read from the DSP.
         """
         address_bytes = list(int16_to_bytes(address))
 
-        msg_wr = i2c_msg.write(self._i2c_addr, address_bytes)
-        msg_rd = i2c_msg.read(self._i2c_addr, length)
+        write_message = i2c_msg.write(self._device_address, address_bytes)
+        read_message = i2c_msg.read(self._device_address, length)
 
-        self._bus.i2c_rdwr(msg_wr, msg_rd)
-        return bytes(msg_rd)
+        with SMBus(self._bus_id) as bus:
+            bus.i2c_rdwr(write_message, read_message)
 
-    def _write(self, address: int, data: bytes):
+        return bytes(read_message)
+
+    def _write(self, address: int, data: bytes) -> int:
         """Write data over the I2C port onto a SigmaDSP.
 
         Args:
-            address (int): Address to write to
-            data (bytes): Data to write
+            address (int): Address to write to.
+            data (bytes): Data to write.
+
+        Returns:
+            int: Number of written bytes.
         """
-        wr_content = list(int16_to_bytes(address))
-        wr_content.extend(list(data))
+        payload = list(int16_to_bytes(address))
+        payload.extend(list(data))
 
-        msg_wr = i2c_msg.write(self._i2c_addr, wr_content)
+        write_message = i2c_msg.write(self._device_address, payload)
 
-        self._bus.i2c_rdwr(msg_wr)
+        with SMBus(self._bus_id) as bus:
+            bus.i2c_rdwr(write_message)
+
+        return len(data)

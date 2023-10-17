@@ -65,7 +65,7 @@ def dsp_from_config(config: dict) -> Dsp:
             dsp_protocol = SpiProtocol(bus=bus, device=device)
 
         elif dsp_protocol_name == "i2c":
-            dsp_protocol = I2cProtocol(bus=bus, device=device)
+            dsp_protocol = I2cProtocol(bus_id=bus, device_address=device)
 
         else:
             raise TypeError(f"Unknown DSP protocol {dsp_protocol_name}.")

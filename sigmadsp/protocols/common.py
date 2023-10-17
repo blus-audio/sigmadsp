@@ -78,11 +78,11 @@ class DspProtocol(ABC):
         """Read data from a SigmaDSP.
 
         Args:
-            address (int): Address to read from
-            length (int): Number of bytes to read
+            address (int): Address to read from.
+            length (int): Number of bytes to read.
 
         Returns:
-            bytes: Data that was read from the DSP
+            bytes: Data that was read from the DSP.
         """
 
     @abstractmethod
@@ -90,8 +90,8 @@ class DspProtocol(ABC):
         """Write data onto a SigmaDSP.
 
         Args:
-            address (int): Address to write to
-            data (bytes): Data to write
+            address (int): Address to write to.
+            data (bytes): Data to write.
 
         Returns:
             int: Number of written bytes.
