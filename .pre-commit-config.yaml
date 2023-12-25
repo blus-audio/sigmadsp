@@ -17,7 +17,7 @@ repos:
     -   id: reorder-python-imports
 
 -   repo: https://github.com/psf/black
-    rev: 23.11.0
+    rev: 23.12.1
     hooks:
     -   id: black
 
@@ -32,14 +32,14 @@ repos:
     -   id: check-case-conflict
 
 -   repo: https://github.com/crate-ci/typos
-    rev: v1.16.23
+    rev: v1.16.25
     hooks:
       - id: typos
         args:
             [] # Do not auto-fix
 
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.7.1
+    rev: v1.8.0
     hooks:
     -   id: mypy
         additional_dependencies: [types-protobuf, types-PyYAML, types-retry]
@@ -47,7 +47,7 @@ repos:
         - --check-untyped-defs
 
 -   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 'v0.1.6'
+    rev: 'v0.1.9'
     hooks:
     -   id: ruff
         args:
