@@ -4,6 +4,7 @@
 - Conversion from bytes-like objects of varying length to integers
 - Conversion from integers to bytes-like objects of specified length
 """
+
 from __future__ import annotations
 
 import math

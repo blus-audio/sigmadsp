@@ -1,4 +1,5 @@
 """General definitions for interfacing DSPs."""
+
 from __future__ import annotations
 
 import logging

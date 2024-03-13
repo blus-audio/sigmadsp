@@ -5,6 +5,7 @@ and an SPI handler that controls a DSP.
 
 Commands from Sigma Studio are received, and translated to SPI read/write requests.
 """
+
 import argparse
 import contextlib
 import logging

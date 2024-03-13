@@ -1,4 +1,5 @@
 """Tests for the backend service."""
+
 from __future__ import annotations
 
 import pickle

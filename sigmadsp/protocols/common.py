@@ -1,4 +1,5 @@
 """This module implements the base class for I2C and SPI communication handlers."""
+
 import logging
 import threading
 from abc import ABC

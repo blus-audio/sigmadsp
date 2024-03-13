@@ -1,4 +1,5 @@
 """Tests for different Dsp classes."""
+
 from __future__ import annotations
 
 import math
