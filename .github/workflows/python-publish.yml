@@ -8,28 +8,26 @@ on:
 
 jobs:
   deploy:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install poetry
-        pip install poetry-dynamic-versioning
+      - name: Install poetry
+        run: |
+          pipx install poetry
+          pipx inject poetry poetry-dynamic-versioning
 
-    - name: Build package
-      # Only build the source distribution, as the wheel is going to be built by piwheels.
-      run: poetry build --format sdist
+      - name: Build package
+        # Only build the source distribution, as the wheel is going to be built by piwheels.
+        run: poetry build --format sdist
 
-    - name: Publish package
-      run: |
-        poetry config http-basic.pypi "__token__" "${{ secrets.PYPI_API_TOKEN }}"
-        poetry publish
+      - name: Publish package
+        run: |
+          poetry config http-basic.pypi "__token__" "${{ secrets.PYPI_API_TOKEN }}"
+          poetry publish
