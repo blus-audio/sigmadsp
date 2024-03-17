@@ -1,4 +1,5 @@
 """This module provides functionality for controlling SigmaDSP ADAU14xx hardware."""
+
 import logging
 import math
 

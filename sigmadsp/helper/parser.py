@@ -1,4 +1,5 @@
 """A module that parses SigmaStudio project files and extracts adjustable cells."""
+
 from __future__ import annotations
 
 import logging

@@ -1,8 +1,9 @@
 """Tests for different Dsp classes."""
+
 from __future__ import annotations
 
 import math
-from typing import Callable
+from collections.abc import Callable
 
 from hypothesis import given
 from hypothesis.strategies import floats

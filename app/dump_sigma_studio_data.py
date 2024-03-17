@@ -1,4 +1,5 @@
 """Helper functionality for dumping data from SigmaStudio."""
+
 from __future__ import annotations
 
 import datetime

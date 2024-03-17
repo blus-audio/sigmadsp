@@ -1,4 +1,5 @@
 """This module implements an I2C handler that talks to Sigma DSP devices."""
+
 import logging
 
 from smbus2 import i2c_msg

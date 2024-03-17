@@ -1,4 +1,5 @@
 """This module implements a dummy protocol handler for testing purposes."""
+
 import logging
 
 from sigmadsp.protocols.common import DspProtocol

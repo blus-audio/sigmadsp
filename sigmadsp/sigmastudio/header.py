@@ -2,6 +2,7 @@
 
 Headers contain individual fields that follow each other in a certain sequence.
 """
+
 from __future__ import annotations
 
 from abc import ABC
