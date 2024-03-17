@@ -1,4 +1,5 @@
 """Tests the parser module."""
+
 from pathlib import Path
 
 from sigmadsp.helper.parser import Parser

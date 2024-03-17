@@ -1,4 +1,5 @@
 """Tests for the sigmastudio header generators."""
+
 import pytest
 
 from sigmadsp.helper.conversion import int16_to_bytes

@@ -1,4 +1,5 @@
 """This module contains a class that handles settings for this application."""
+
 from __future__ import annotations
 
 import logging

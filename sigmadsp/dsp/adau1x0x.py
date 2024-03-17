@@ -1,4 +1,5 @@
 """This module provides functionality for controlling SigmaDSP ADAU1x01 hardware."""
+
 from __future__ import annotations
 
 import logging

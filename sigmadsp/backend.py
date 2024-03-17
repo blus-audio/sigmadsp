@@ -5,6 +5,7 @@ and an SPI handler that controls a DSP.
 
 Commands from Sigma Studio are received, and translated to SPI read/write requests.
 """
+
 import argparse
 import contextlib
 import logging
@@ -16,7 +17,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing import Queue
 from pathlib import Path
-from typing import Callable
+from collections.abc import Callable
 
 import grpc
 from retry.api import retry_call

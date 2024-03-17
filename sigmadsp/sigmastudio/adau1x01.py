@@ -1,4 +1,5 @@
 """Header generator for ADAU1x01 parts."""
+
 from .header import Field
 from .header import PacketHeader
 from .header import PacketHeaderGenerator

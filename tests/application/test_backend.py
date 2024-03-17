@@ -1,4 +1,5 @@
 """Tests for the backend service."""
+
 from __future__ import annotations
 
 import pickle
@@ -10,7 +11,7 @@ import pytest
 
 from sigmadsp.backend import BackendService
 from sigmadsp.dsp.adau14xx import Adau14xx
-from sigmadsp.dsp.common import Dsp
+from sigmadsp.dsp.common import Dsp, OutputPin
 from sigmadsp.helper.conversion import int32_to_bytes
 from sigmadsp.helper.settings import SigmadspSettings
 from sigmadsp.sigmastudio.common import ReadRequest
@@ -29,7 +30,13 @@ def dsp_from_config(config: dict) -> Dsp:
         Dsp: The new DSP.
     """
     del config
-    return Adau14xx(False, DummyProtocol(), [])
+    reset_pin = OutputPin(
+        "reset",
+        10,
+        False,
+        True,
+    )
+    return Adau14xx(False, DummyProtocol(), [reset_pin])
 
 
 @pytest.fixture(name="settings")

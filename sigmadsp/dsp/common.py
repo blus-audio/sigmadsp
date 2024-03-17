@@ -1,4 +1,5 @@
 """General definitions for interfacing DSPs."""
+
 from __future__ import annotations
 
 import logging
@@ -11,6 +12,7 @@ from math import nan
 from typing import Literal
 
 import gpiozero
+from gpiozero.pins.mock import MockFactory
 
 from sigmadsp.helper.conversion import bytes_to_int32
 from sigmadsp.helper.conversion import clamp
@@ -24,6 +26,16 @@ from sigmadsp.sigmastudio.header import PacketHeaderGenerator
 logger = logging.getLogger(__name__)
 
 ParameterType = Literal["float", "int"]
+
+
+def check_gpiozero():
+    """Attempt to create a gpiozero device. If this fails, disable GPIO functionality."""
+    try:
+        gpiozero.Device()
+
+    except gpiozero.BadPinFactory:
+        gpiozero.Device.pin_factory = MockFactory()
+        logger.warning("Unable to control GPIOs. This can occur, if not on RaspberryPi hardware.")
 
 
 class SafetyCheckError(Exception):
@@ -71,8 +83,7 @@ class OutputPin(Pin):
         self.control = gpiozero.DigitalOutputDevice(self.number, self.active_high, self.initial_value)
 
 
-# see https://github.com/python/mypy/issues/5374
-@dataclass  # type: ignore
+@dataclass
 class Dsp(ABC):
     """A generic DSP class, to be extended by child classes."""
 
@@ -286,7 +297,7 @@ class Dsp(ABC):
             else:
                 self.write(address, data_register)
 
-    def get_parameter_value(self, address: int, data_format: Literal["int", "float"]) -> float | int | None:
+    def get_parameter_value(self, address: int, data_format: Literal["int", "float"]) -> float | int:
         """Get a parameter value from a chosen register address.
 
         Args:
@@ -294,7 +305,7 @@ class Dsp(ABC):
             data_format (Literal["int", "float"]): The data type to return the register in. Can be ``float`` or ``int``.
 
         Returns:
-            float | int | None: Representation of the register content in the specified format.
+            float | int: Representation of the register content in the specified format.
         """
         data_register = self.read(address, Dsp.FIXPOINT_REGISTER_LENGTH)
         data_integer = bytes_to_int32(data_register)
@@ -305,4 +316,4 @@ class Dsp(ABC):
         if data_format == "float":
             return self.frac_to_float(data_integer)
 
-        return None
+        raise ValueError("Unsupported data format.")

@@ -1,4 +1,5 @@
 """This module implements an SPI handler that talks to Sigma DSP devices."""
+
 import logging
 
 import spidev  # type: ignore

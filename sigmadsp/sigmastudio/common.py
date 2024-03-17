@@ -1,4 +1,5 @@
 """This module contains the common classes for SigmaStudio protocol handling."""
+
 from dataclasses import dataclass
 
 

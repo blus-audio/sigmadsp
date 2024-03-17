@@ -45,18 +45,28 @@ style = "semver"
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.black]
-line-length = 120
-
 [tool.ruff]
+# pycodestyle (E)
+# pyflakes (F)
+# pydocstyle (D)
+# pyupgrade (UP)
+# pylint (PL)
+# enforce use of pathlib (PTH)
+# disallow access to private members (SLF)
+# stricter return type handling (RET)
+# exception linting (RSE)
+# naming conventions (N)
+lint.select = ["E", "F", "D", "UP", "PL", "PTH", "SLF", "RET", "RSE", "N"]
+
+# Pylint refactor (PLR), pylint complexity warnings (PLC0414)
+lint.ignore = ["PLR", "PLC0414"]
+
 line-length = 120
-target-version = "py39"
+target-version = "py310"
 
-select = ["E", "W", "F", "D", "UP", "N", "PL", "PTH", "SLF", "RET", "RSE", "SIM", "PT"]
-ignore = ["PLR0913"]
-
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 
 [tool.mypy]
 ignore_missing_imports = true
+check_untyped_defs = true
