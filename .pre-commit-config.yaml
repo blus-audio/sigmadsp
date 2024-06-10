@@ -5,7 +5,7 @@ exclude: (generated|.params)
 
 repos:
     - repo: https://github.com/asottile/pyupgrade
-      rev: v3.15.2
+      rev: v3.16.0
       hooks:
           - id: pyupgrade
             args:
@@ -22,7 +22,7 @@ repos:
           - id: check-case-conflict
 
     - repo: https://github.com/astral-sh/ruff-pre-commit
-      rev: "v0.4.5"
+      rev: "v0.4.8"
       hooks:
           - id: ruff-format
             args:
@@ -32,7 +32,7 @@ repos:
                 - --config=./pyproject.toml
 
     - repo: https://github.com/crate-ci/typos
-      rev: v1.21.0
+      rev: v1.22.4
       hooks:
           - id: typos
             args: [] # Do not auto-fix
