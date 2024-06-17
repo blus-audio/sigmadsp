@@ -14,34 +14,25 @@ import sched
 import sys
 import threading
 import time
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing import Queue
 from pathlib import Path
-from collections.abc import Callable
 
 import grpc
 from retry.api import retry_call
 
 import sigmadsp
-from sigmadsp.dsp.common import ConfigurationError
-from sigmadsp.dsp.common import Dsp
-from sigmadsp.dsp.common import SafetyCheckError
+from sigmadsp.dsp.common import ConfigurationError, Dsp, SafetyCheckError
 from sigmadsp.dsp.factory import dsp_from_config
-from sigmadsp.generated.backend_service.control_pb2 import ControlParameterRequest
-from sigmadsp.generated.backend_service.control_pb2 import ControlRequest
-from sigmadsp.generated.backend_service.control_pb2 import ControlResponse
+from sigmadsp.generated.backend_service.control_pb2 import ControlParameterRequest, ControlRequest, ControlResponse
 from sigmadsp.generated.backend_service.control_pb2_grpc import (
+    BackendServicer,
     add_BackendServicer_to_server,
 )
-from sigmadsp.generated.backend_service.control_pb2_grpc import BackendServicer
 from sigmadsp.helper.settings import SigmadspSettings
-from sigmadsp.sigmastudio.common import CONNECTION_CLOSED
-from sigmadsp.sigmastudio.common import ReadRequest
-from sigmadsp.sigmastudio.common import ReadResponse
-from sigmadsp.sigmastudio.common import SafeloadRequest
-from sigmadsp.sigmastudio.common import WriteRequest
-from sigmadsp.sigmastudio.server import SigmaStudioRequestHandler
-from sigmadsp.sigmastudio.server import SigmaStudioTcpServer
+from sigmadsp.sigmastudio.common import CONNECTION_CLOSED, ReadRequest, ReadResponse, SafeloadRequest, WriteRequest
+from sigmadsp.sigmastudio.server import SigmaStudioRequestHandler, SigmaStudioTcpServer
 
 # A logger for this module
 logger = logging.getLogger(__name__)
@@ -254,6 +245,7 @@ class BackendService(BackendServicer):
         Returns:
             ControlResponse: A control response message, returned to the caller.
         """
+        del context
         response = ControlResponse()
 
         # Determine the type of control request.
@@ -310,6 +302,7 @@ class BackendService(BackendServicer):
         Returns:
             ControlResponse: A control response message, returned to the caller.
         """
+        del context
         response = ControlResponse()
 
         # Determine the type of control request.

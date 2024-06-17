@@ -10,14 +10,9 @@ import socket
 import socketserver
 from multiprocessing import Queue
 
-from .header import OperationKey
-from .header import PacketHeader
-from .header import PacketHeaderGenerator
-from sigmadsp.sigmastudio.common import CONNECTION_CLOSED
-from sigmadsp.sigmastudio.common import ReadRequest
-from sigmadsp.sigmastudio.common import ReadResponse
-from sigmadsp.sigmastudio.common import SafeloadRequest
-from sigmadsp.sigmastudio.common import WriteRequest
+from sigmadsp.sigmastudio.common import CONNECTION_CLOSED, ReadRequest, ReadResponse, SafeloadRequest, WriteRequest
+
+from .header import OperationKey, PacketHeader, PacketHeaderGenerator
 
 # A logger for this module
 logger = logging.getLogger(__name__)

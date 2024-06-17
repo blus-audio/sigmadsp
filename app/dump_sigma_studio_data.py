@@ -12,13 +12,9 @@ from multiprocessing import Queue
 from pathlib import Path
 
 from sigmadsp.sigmastudio.adau1x01 import Adau1x01HeaderGenerator
-from sigmadsp.sigmastudio.common import CONNECTION_CLOSED
-from sigmadsp.sigmastudio.common import ReadRequest
-from sigmadsp.sigmastudio.common import ReadResponse
-from sigmadsp.sigmastudio.common import WriteRequest
+from sigmadsp.sigmastudio.common import CONNECTION_CLOSED, ReadRequest, ReadResponse, WriteRequest
 from sigmadsp.sigmastudio.header import PacketHeaderGenerator
-from sigmadsp.sigmastudio.server import SigmaStudioRequestHandler
-from sigmadsp.sigmastudio.server import SigmaStudioTcpServer
+from sigmadsp.sigmastudio.server import SigmaStudioRequestHandler, SigmaStudioTcpServer
 
 # from sigmadsp.sigmastudio.adau14xx import Adau14xxHeaderGenerator
 

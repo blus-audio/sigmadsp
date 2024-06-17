@@ -6,10 +6,7 @@ import logging
 import math
 
 from sigmadsp.dsp.common import Dsp
-from sigmadsp.helper.conversion import bytes_to_int16
-from sigmadsp.helper.conversion import float_to_frac_5_23
-from sigmadsp.helper.conversion import frac_5_23_to_float
-from sigmadsp.helper.conversion import int16_to_bytes
+from sigmadsp.helper.conversion import bytes_to_int16, float_to_frac_5_23, frac_5_23_to_float, int16_to_bytes
 from sigmadsp.sigmastudio.adau1x01 import Adau1x01HeaderGenerator
 
 # A logger for this module
@@ -27,13 +24,13 @@ class Adau1x0x(Dsp):
     DSP_CORE_CONTROL_REGISTER_IST_MASK = 1 << DSP_CORE_CONTROL_REGISTER_IST_POS
 
     # Safeload registers (address, data)
-    SAFELOAD_REGISTERS: list[tuple[int, int]] = [
+    SAFELOAD_REGISTERS = (
         (0x0815, 0x810),
         (0x0816, 0x811),
         (0x0815, 0x812),
         (0x0818, 0x813),
         (0x0819, 0x814),
-    ]
+    )
 
     # Safeload register length
     SAFELOAD_ADDRESS_REGISTER_LENGTH = 2

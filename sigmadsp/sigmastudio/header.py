@@ -5,16 +5,13 @@ Headers contain individual fields that follow each other in a certain sequence.
 
 from __future__ import annotations
 
-from abc import ABC
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import Enum
 from typing import Literal
 
-from sigmadsp.helper.conversion import bytes_to_int
-from sigmadsp.helper.conversion import int8_to_bytes
-from sigmadsp.helper.conversion import int_to_bytes
+from sigmadsp.helper.conversion import bytes_to_int, int8_to_bytes, int_to_bytes
 
 
 class OperationKey(Enum):

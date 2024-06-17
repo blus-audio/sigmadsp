@@ -4,8 +4,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from itertools import dropwhile
-from itertools import takewhile
+from itertools import dropwhile, takewhile
 from pathlib import Path
 from typing import ClassVar
 

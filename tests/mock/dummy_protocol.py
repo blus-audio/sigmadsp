@@ -3,8 +3,7 @@
 import logging
 
 from sigmadsp.protocols.common import DspProtocol
-from sigmadsp.sigmastudio.common import ReadRequest
-from sigmadsp.sigmastudio.common import WriteRequest
+from sigmadsp.sigmastudio.common import ReadRequest, WriteRequest
 
 # A logger for this module
 logger = logging.getLogger(__name__)
