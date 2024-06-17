@@ -12,9 +12,7 @@ from ipaddress import IPv4Address
 import click
 import grpc
 
-from sigmadsp.generated.backend_service.control_pb2 import ControlParameterRequest
-from sigmadsp.generated.backend_service.control_pb2 import ControlRequest
-from sigmadsp.generated.backend_service.control_pb2 import ControlResponse
+from sigmadsp.generated.backend_service.control_pb2 import ControlParameterRequest, ControlRequest, ControlResponse
 from sigmadsp.generated.backend_service.control_pb2_grpc import BackendStub
 
 

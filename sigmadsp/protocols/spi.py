@@ -1,8 +1,12 @@
 """This module implements an SPI handler that talks to Sigma DSP devices."""
 
+from __future__ import annotations
+
 import logging
 
 import spidev  # type: ignore
+
+from sigmadsp.helper.conversion import int16_to_bytes
 
 from .common import DspProtocol
 
@@ -22,7 +26,7 @@ def build_spi_frame(address: int, data: bytes) -> bytearray:
     """
     frame = bytearray(SpiProtocol.HEADER_LENGTH)
     frame[0] = SpiProtocol.WRITE
-    frame[1:3] = address.to_bytes(SpiProtocol.ADDRESS_LENGTH, "big")
+    frame[1:3] = int16_to_bytes(address)
     frame += data
 
     return frame
@@ -34,21 +38,15 @@ class SpiProtocol(DspProtocol):
     Tested with ADAU145X
     """
 
-    # Length of addresses (in bytes) for accessing registers
-    ADDRESS_LENGTH = 2
-
     # Length of the SPI header for communicating with SigmaDSP chipsets
     HEADER_LENGTH = 3
 
     # Maximum number of bytes per SPI transfer
-    MAX_SPI_BYTES = 4096
+    MAX_SPI_BYTES = 1024
 
     # Maximum number of words (32 bit) that can be transferred with the
     # maximum number of allowed bytes per SPI transfer
     MAX_PAYLOAD_WORDS = int((MAX_SPI_BYTES - HEADER_LENGTH) / 4)
-
-    # Derive maximum payload (bytes) from number of maximum words
-    MAX_PAYLOAD_BYTES = MAX_PAYLOAD_WORDS * 4
 
     WRITE = 0
     READ = 1
@@ -86,6 +84,7 @@ class SpiProtocol(DspProtocol):
         Returns:
             bytes: Data that was read from the DSP
         """
+        logger.info("Reading %d bytes from SPI.", length)
         spi_request = bytearray(length + SpiProtocol.HEADER_LENGTH)
         spi_request[0] = SpiProtocol.READ
         spi_request[1:3] = address.to_bytes(SpiProtocol.ADDRESS_LENGTH, "big")
@@ -95,6 +94,18 @@ class SpiProtocol(DspProtocol):
 
         return bytes(spi_response[SpiProtocol.HEADER_LENGTH :])
 
+    def _write_spi(self, frame: bytearray):
+        """Low-level write function for SPI.
+
+        Args:
+            frame (bytearray): The data to write.
+        """
+        try:
+            self._spi.writebytes(frame)
+
+        except OSError as e:
+            logger.error("SPI failed to write frame %s with error: %s", str(frame), str(e))
+
     def _write(self, address: int, data: bytes):
         """Write data over the SPI port onto a SigmaDSP.
 
@@ -102,32 +113,6 @@ class SpiProtocol(DspProtocol):
             address (int): Address to write to
             data (bytes): Data to write
         """
-        remaining_data_length = len(data)
-        current_address = address
-        current_data = data
-
-        while remaining_data_length > 0:
-            # There is data remaining for writing
-
-            if remaining_data_length >= SpiProtocol.MAX_PAYLOAD_BYTES:
-                # Packet has to be split into smaller chunks,
-                # where the write address is advanced accordingly.
-                # DSP register addresses are counted in words (32 bit per increment).
-
-                # Build the frame from a subset of the input data, and write it
-                frame = build_spi_frame(
-                    current_address,
-                    current_data[: SpiProtocol.MAX_PAYLOAD_BYTES],
-                )
-                self._spi.writebytes(frame)
-
-                # Update address, data counter, and the binary data buffer
-                current_address += SpiProtocol.MAX_PAYLOAD_WORDS
-                remaining_data_length -= SpiProtocol.MAX_PAYLOAD_BYTES
-                current_data = current_data[SpiProtocol.MAX_PAYLOAD_BYTES :]
-
-            else:
-                # The packet fits into one transmission.
-                frame = build_spi_frame(current_address, current_data)
-                self._spi.writebytes(frame)
-                remaining_data_length = 0
+        for chunk_address, chunk_data in self.writable_data(address, data, self.MAX_PAYLOAD_WORDS):
+            frame = build_spi_frame(chunk_address, chunk_data)
+            self._write_spi(frame)

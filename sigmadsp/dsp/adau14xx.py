@@ -4,10 +4,7 @@ import logging
 import math
 
 from sigmadsp.dsp.common import Dsp
-from sigmadsp.helper.conversion import float_to_frac_8_24
-from sigmadsp.helper.conversion import frac_8_24_to_float
-from sigmadsp.helper.conversion import int16_to_bytes
-from sigmadsp.helper.conversion import int32_to_bytes
+from sigmadsp.helper.conversion import float_to_frac_8_24, frac_8_24_to_float, int16_to_bytes, int32_to_bytes
 from sigmadsp.sigmastudio.adau14xx import Adau14xxHeaderGenerator
 
 # A logger for this module
@@ -22,7 +19,7 @@ class Adau14xx(Dsp):
     RESET_REGISTER_LENGTH = 2
 
     # safeload registers - SigmaStudio 3.14 and newer
-    SAFELOAD_DATA_REGISTERS = [0x6000, 0x6001, 0x6002, 0x6003, 0x6004]
+    SAFELOAD_DATA_REGISTERS = (0x6000, 0x6001, 0x6002, 0x6003, 0x6004)
     SAFELOAD_ADDRESS_REGISTER = 0x6005
     SAFELOAD_COUNT_REGISTER = 0x6006
     SAFELOAD_DATA_REGISTER_LENGTH = 4

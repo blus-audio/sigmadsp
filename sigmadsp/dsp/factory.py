@@ -4,14 +4,12 @@ from __future__ import annotations
 
 import logging
 
-from .adau14xx import Adau14xx
-from .adau1x0x import Adau1x0x
-from .common import ConfigurationError
-from .common import Dsp
-from .common import InputPin
-from .common import OutputPin
 from sigmadsp.protocols.i2c import I2cProtocol
 from sigmadsp.protocols.spi import SpiProtocol
+
+from .adau1x0x import Adau1x0x
+from .adau14xx import Adau14xx
+from .common import ConfigurationError, Dsp, InputPin, OutputPin
 
 logger = logging.getLogger(__name__)
 

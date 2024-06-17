@@ -44,7 +44,15 @@ The last column denotes the string to put in the backend settings file (see [Con
 ## Installation
 :zap: **Running the installation can overwrite your existing configuration.** For upgrading, see [Upgrading](#upgrading)!
 
-For installing, please install git first, then clone this repository and run the installation script.
+These instructions are given for RaspberryPi hardware on Raspbperry Pi OS 12 (bookworm).
+
+First, enable I2C and/or SPI peripherals by running
+```
+sudo raspi-config nonint do_spi 1
+sudo raspi-config nonint do_ic2 1
+```
+
+For installing of `sigmadsp`, please install git first, then clone this repository and run the installation script.
 
 ```bash
 sudo apt install git &&

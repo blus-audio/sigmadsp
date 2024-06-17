@@ -2,11 +2,9 @@
 
 import pytest
 
-from sigmadsp.helper.conversion import int16_to_bytes
-from sigmadsp.helper.conversion import int8_to_bytes
+from sigmadsp.helper.conversion import int8_to_bytes, int16_to_bytes
 from sigmadsp.sigmastudio.adau1x01 import Adau1x01HeaderGenerator
-from sigmadsp.sigmastudio.header import Field
-from sigmadsp.sigmastudio.header import OperationKey
+from sigmadsp.sigmastudio.header import Field, OperationKey
 
 
 def test_adau1x01_header_generator() -> None:

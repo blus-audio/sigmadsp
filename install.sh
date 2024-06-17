@@ -15,21 +15,28 @@ function create_new_config_file {
 
 # Install pipx with Python, for later installing the sigmadsp package.
 function install_pipx_python {
-    # Install the prerequisite pip3.
-    sudo apt-get -qq install -y python3-pip python3-venv
+    echo "=== Installing pipx."
+    {
+        sudo apt install -y pipx
+        pipx ensurepath
+    } || {
+        echo "! Falling back to installation via pip."
+        # Install the prerequisite pip3.
+        sudo apt-get install -y python3-pip python3-venv
 
-    # Install pipx for running sigmadsp in a virtual environment.
-    python3 -m pip install --user pipx
-    python3 -m pipx ensurepath
-
-    # Use updated paths in current shell.
-    source ~/.bashrc
+        # Install pipx for running sigmadsp in a virtual environment.
+        python3 -m pip install --user pipx
+        python3 -m pipx ensurepath
+    }
 }
 
 ### Installation starts below. ###
 echo "=== Install required packages."
-sudo apt-get -qq update
+sudo apt-get update
 install_pipx_python
+
+# Use updated paths in current shell.
+source ~/.bashrc
 
 # Install the package itself, along with its executable scripts.
 pipx install $SIGMADSP_EXECUTABLE
@@ -59,17 +66,5 @@ sudo mv $SIGMADSP_TEMP_FOLDER/$SIGMADSP_BACKEND.service /usr/lib/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl start $SIGMADSP_BACKEND
 sudo systemctl enable $SIGMADSP_BACKEND
-
-# Enable SPI for controlling DSP chipsets.
-CONFIG=/boot/config.txt
-TEMP_CONFIG=$SIGMADSP_TEMP_FOLDER/config.txt
-
-cat $CONFIG | grep -v "dtparam=spi" > $TEMP_CONFIG
-echo "dtparam=spi=on # SPI enabled for $SIGMADSP_BACKEND" >> $TEMP_CONFIG
-
-sudo chmod --reference=$CONFIG $TEMP_CONFIG
-sudo chown --reference=$CONFIG $TEMP_CONFIG
-
-sudo mv $TEMP_CONFIG $CONFIG
 
 echo "=== Finished installation of '$SIGMADSP_EXECUTABLE' and its backend service '$SIGMADSP_BACKEND'."

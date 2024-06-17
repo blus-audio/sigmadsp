@@ -21,9 +21,9 @@ def test_parser() -> None:
     assert len(address_safeload) == 1
     assert len(num_safeload) == 1
 
-    assert data_safeload[0].parameter_address == 0x6000  # noqa: PLR2004
-    assert address_safeload[0].parameter_address == 0x6005  # noqa: PLR2004
-    assert num_safeload[0].parameter_address == 0x6006  # noqa: PLR2004
+    assert data_safeload[0].parameter_address == 0x6000
+    assert address_safeload[0].parameter_address == 0x6005
+    assert num_safeload[0].parameter_address == 0x6006
 
     # Test safety hash register
     safety_hash = p.safety_hash_cell
@@ -31,7 +31,7 @@ def test_parser() -> None:
     assert safety_hash.is_safety_hash
     assert not safety_hash.is_volume_cell
     assert not safety_hash.is_adjustable
-    assert safety_hash.parameter_value == 1661147736  # noqa: PLR2004
+    assert safety_hash.parameter_value == 1661147736
 
     # Test volume cells
     volume_cells = p.volume_cells

@@ -1,8 +1,6 @@
 """Header generator for ADAU14xx parts."""
 
-from .header import Field
-from .header import PacketHeader
-from .header import PacketHeaderGenerator
+from .header import Field, PacketHeader, PacketHeaderGenerator
 
 
 class Adau14xxHeaderGenerator(PacketHeaderGenerator):
