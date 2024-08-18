@@ -8,7 +8,7 @@ echo "=== Install '$SIGMADSP_EXECUTABLE'."
 
 # Creates a new sigmadsp configuration file. This overwrites an old file with the same name.
 function create_new_config_file {
-    echo "=== Create new configuration for '$SIGMADSP_EXECUTABLE' in '$SIGMADSP_CONFIGURATION_FOLDER/$SIGMADSP_CONFIGURATION_FILE'."
+    echo "> Create new configuration for '$SIGMADSP_EXECUTABLE' in '$SIGMADSP_CONFIGURATION_FOLDER/$SIGMADSP_CONFIGURATION_FILE'."
     sudo mkdir -p $SIGMADSP_CONFIGURATION_FOLDER
 
     envsubst < ./templates/config.yaml.template > $SIGMADSP_TEMP_FOLDER/$SIGMADSP_CONFIGURATION_FILE
@@ -57,6 +57,8 @@ then
     then
         sudo mv $SIGMADSP_CONFIGURATION_FOLDER/$SIGMADSP_CONFIGURATION_FILE $SIGMADSP_CONFIGURATION_FOLDER/$SIGMADSP_CONFIGURATION_FILE.bak
         create_new_config_file
+    else
+        echo "> Keep existing configuration."
     fi
 else
     create_new_config_file
@@ -70,7 +72,7 @@ echo "=== Setup '$SIGMADSP_BACKEND' service."
 # This location looks for the service executable, which was previously installed with the Python package.
 SIGMADSP_SERVICE_LOCATION=`which $SIGMADSP_BACKEND`
 
-echo "=== Found service executable at '$SIGMADSP_SERVICE_LOCATION'."
+echo "> Found service executable at '$SIGMADSP_SERVICE_LOCATION'."
 export SIGMADSP_SERVICE_LOCATION
 
 envsubst < ./templates/backend.service.template > $SIGMADSP_TEMP_FOLDER/$SIGMADSP_BACKEND.service
