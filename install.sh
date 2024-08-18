@@ -53,7 +53,7 @@ stop_and_disable_sigmadsp_service || true
 if [ -f "$SIGMADSP_CONFIGURATION_FOLDER/$SIGMADSP_CONFIGURATION_FILE" ]
 then
     echo "=== Existing configuration found for '$SIGMADSP_EXECUTABLE' in '$SIGMADSP_CONFIGURATION_FOLDER/$SIGMADSP_CONFIGURATION_FILE'."
-    if [ "$(yes_or_no "Backup and overwrite existing configuration?")" -eq "0" ]
+    if (( $(yes_or_no "Backup and overwrite existing configuration?") == 0 ))
     then
         sudo mv $SIGMADSP_CONFIGURATION_FOLDER/$SIGMADSP_CONFIGURATION_FILE $SIGMADSP_CONFIGURATION_FOLDER/$SIGMADSP_CONFIGURATION_FILE.bak
         create_new_config_file
