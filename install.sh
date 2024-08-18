@@ -4,6 +4,8 @@
 source ./templates/.env
 source ./common_functions.sh
 
+echo "=== Install '$SIGMADSP_EXECUTABLE'."
+
 # Creates a new sigmadsp configuration file. This overwrites an old file with the same name.
 function create_new_config_file {
     echo "=== Create new configuration for '$SIGMADSP_EXECUTABLE' in '$SIGMADSP_CONFIGURATION_FOLDER/$SIGMADSP_CONFIGURATION_FILE'."
@@ -33,6 +35,10 @@ function install_pipx_python {
 ### Installation starts below. ###
 echo "=== Install required packages."
 sudo apt-get update
+
+# Required for gpiod
+sudo apt-get install python3-dev
+
 install_pipx_python
 
 # Use updated paths in current shell.
@@ -46,20 +52,25 @@ stop_and_disable_sigmadsp_service || true
 
 if [ -f "$SIGMADSP_CONFIGURATION_FOLDER/$SIGMADSP_CONFIGURATION_FILE" ]
 then
-    echo "=== Existing configuration found for '$SIGMADSP' in '$CONFIGURATION_FOLDER/$CONFIGURATION_FILE'."
+    echo "=== Existing configuration found for '$SIGMADSP_EXECUTABLE' in '$SIGMADSP_CONFIGURATION_FOLDER/$SIGMADSP_CONFIGURATION_FILE'."
     yes_or_no "Backup and overwrite existing configuration?" && \
-    sudo mv $CONFIGURATION_FOLDER/$CONFIGURATION_FILE $CONFIGURATION_FOLDER/$CONFIGURATION_FILE.bak && \
+    sudo mv $SIGMADSP_CONFIGURATION_FOLDER/$SIGMADSP_CONFIGURATION_FILE $SIGMADSP_CONFIGURATION_FOLDER/$SIGMADSP_CONFIGURATION_FILE.bak && \
     create_new_config_file
 else
     create_new_config_file
 fi
 
+# Discover service.
+source ~/.bashrc
+
+echo "=== Setup '$SIGMADSP_BACKEND' service."
 # Create systemd config for the service.
 # This location looks for the service executable, which was previously installed with the Python package.
 SIGMADSP_SERVICE_LOCATION=`which $SIGMADSP_BACKEND`
+
+echo "=== Found service executable at '$SIGMADSP_SERVICE_LOCATION'."
 export SIGMADSP_SERVICE_LOCATION
 
-echo "=== Setup '$SIGMADSP_BACKEND' service."
 envsubst < ./templates/backend.service.template > $SIGMADSP_TEMP_FOLDER/$SIGMADSP_BACKEND.service
 sudo mv $SIGMADSP_TEMP_FOLDER/$SIGMADSP_BACKEND.service /usr/lib/systemd/system/$SIGMADSP_BACKEND.service
 
