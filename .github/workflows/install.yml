@@ -14,3 +14,7 @@ jobs:
       - name: Install
         run: |
           ./install.sh
+
+      - name: Uninstall
+        run: |
+          echo -e "yes\nyes\n" | ./uninstall.sh
