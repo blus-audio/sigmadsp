@@ -48,6 +48,9 @@ source ~/.bashrc
 # Install the package itself, along with its executable scripts.
 pipx install $SIGMADSP_EXECUTABLE
 
+# Upgrade package, in case it was already installed.
+pipx upgrade $SIGMADSP_EXECUTABLE
+
 # Optional: stop and disable any old existing service.
 stop_and_disable_sigmadsp_service || true
 
