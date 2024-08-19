@@ -1,0 +1,16 @@
+# This workflow will attempt to run the installation scripts.
+
+name: Install application
+
+on: push
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install
+        run: |
+          ./install.sh

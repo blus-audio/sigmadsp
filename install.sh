@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euxo pipefail
 
 # Load configuration for installation.
 source ./templates/.env
