@@ -8,7 +8,9 @@ behaves like a wired debug probe, but with an Ethernet connection. This source c
 as well as the [hifiberry-dsp](https://github.com/hifiberry/hifiberry-dsp) project. However, this application was written completely from scratch, in an effort to make it more efficient, stable, and faster.
 
 This software package contains two separate components: a backend service, as well as a frontend interface. It is meant
-to run on single-board computers that connect to an Analog Devices DSP via the serial peripheral interface ([SPI](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface)) - specifically the Raspberry Pi.
+to run on single-board computers that connect to an Analog Devices DSP via [SPI](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface) or [I2C](https://en.wikipedia.org/wiki/I%C2%B2C).
+
+The application specifically targets the Raspberry Pi hardware, but may run on other devices.
 
 ## Backend service
 
@@ -44,7 +46,7 @@ The last column denotes the string to put in the backend settings file (see [Con
 ## Installation
 :zap: **Running the installation can overwrite your existing configuration.** For upgrading, see [Upgrading](#upgrading)!
 
-These instructions are given for RaspberryPi hardware on Raspbperry Pi OS 12 (bookworm).
+These instructions are given for Raspberry Pi hardware (tested on Pi 4 and 5), running on Raspbperry Pi OS 12 (bookworm).
 
 First, enable I2C and/or SPI peripherals by running
 ```
@@ -52,7 +54,7 @@ sudo raspi-config nonint do_spi 1
 sudo raspi-config nonint do_ic2 1
 ```
 
-For installing of `sigmadsp`, please install git first, then clone this repository and run the installation script.
+For installing `sigmadsp`, please install git first, then clone this repository and run the installation script.
 
 ```bash
 sudo apt install git &&
