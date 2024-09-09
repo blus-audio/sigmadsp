@@ -27,13 +27,11 @@ class I2cProtocol(DspProtocol):
     MAX_I2C_BYTES = 1024
 
     # Maximum number of words (32 bit) that can be transferred with the
-    # maximum number of allowed bytes per SPI transfer
+    # maximum number of allowed bytes per I2C transfer
     MAX_PAYLOAD_WORDS = int((MAX_I2C_BYTES - HEADER_LENGTH) / 4)
 
     def __init__(self, bus_id: int = 1, device_address: int = 0x38):
         """Initialize the I2C hardware.
-
-        Bus will be 1 for RaspberryPi hardware.
 
         Args:
             bus_id (int, optional): Bus identifier. Defaults to 1.
