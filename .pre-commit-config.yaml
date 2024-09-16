@@ -12,7 +12,7 @@ repos:
       - id: check-yaml
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.6.4"
+    rev: "v0.6.5"
     hooks:
       - id: ruff-format
         args:
@@ -23,7 +23,7 @@ repos:
           - --fix
 
   - repo: https://github.com/crate-ci/typos
-    rev: v1.24.5
+    rev: v1.24.6
     hooks:
       - id: typos
         args: [] # Do not auto-fix
