@@ -64,7 +64,7 @@ class Packet:
         else:
             assert len(new_payload) == self.header["data_length"].value, (
                 f"Payload length {len(new_payload)} does not match "
-                f'the expected length {self.header["data_length"].value}.'
+                f"the expected length {self.header['data_length'].value}."
             )
 
             self._payload = new_payload
