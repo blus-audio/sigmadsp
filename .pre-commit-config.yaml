@@ -23,7 +23,7 @@ repos:
           - --fix
 
   - repo: https://github.com/crate-ci/typos
-    rev: typos-dict-v0.12.4
+    rev: typos-dict-v0.12.5
     hooks:
       - id: typos
         args: [] # Do not auto-fix
