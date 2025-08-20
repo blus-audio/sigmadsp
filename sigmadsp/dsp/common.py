@@ -6,7 +6,7 @@ import logging
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from math import nan
+from math import isnan
 from typing import Literal
 
 import gpiozero
@@ -212,7 +212,7 @@ class Dsp(ABC):
 
         current_volume_db = linear_to_db(current_volume_linear)
 
-        if volume_db is nan:
+        if isnan(volume_db):
             logger.info("Volume value is nan.")
             return current_volume_db
 
